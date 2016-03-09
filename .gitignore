@@ -25,7 +25,6 @@ src/main/conf/development/log4j.properties
 support/config/local*
 **/src/main/conf/development/*
 support/log
-monad-jni/src/main/java/monad/jni/services/gen
 support/gpg/gpg.sec
-monad-jni/src/main/resources/META-INF/native
 *.pexe
+project/project/target
