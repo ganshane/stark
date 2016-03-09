@@ -2,11 +2,22 @@ import sbt.Keys._
 import sbt._
 
 object BuildSettings {
-  val buildSettings = Seq (
+  val buildSettings = Seq(
   )
 }
+
 object Dependencies {
+  lazy val tapestryVersion = "5.3.8"
+  lazy val springVersion = "4.2.4.RELEASE"
   val scalaReflect = "org.scala-lang" % "scala-reflect" % _
+  val tapestryIoc = "org.apache.tapestry" % "tapestry-ioc" % tapestryVersion
+  val springOrm = "org.springframework" % "spring-orm" % springVersion
+  val springContextSupport = "org.springframework" % "spring-context-support" % springVersion
+  val aopalliance = "aopalliance" % "aopalliance" % "1.0"
+  val hibernateEntityManager = "org.hibernate" % "hibernate-entitymanager" % "4.3.5.Final"
+  val junit = "junit" % "junit" % "4.8.2" % "test"
+  val h2 = "com.h2database" % "h2" % "1.3.176" % "test"
+
   //   val logbackVer = "0.9.16"
   //   val grizzlyVer = "1.9.19"
 
@@ -30,29 +41,31 @@ object Dependencies {
 }
 
 object StarkBuild extends Build {
+
   import BuildSettings._
   import Dependencies._
 
-  val commonDeps = Seq (
-    //   logbackcore,
-    //   logbackclassic,
-    //   jacksonjson,
-    //   scalatest
+  lazy val ActiveRecordMacroDeps = (sv: String) => Seq(
+    scalaReflect(sv)
   )
-  val starkOrmMacroDeps =  Seq(
-    scalaReflect
+  lazy val ActiveRecordDeps = (sv: String) => Seq(
+    tapestryIoc, springOrm, springContextSupport, aopalliance, hibernateEntityManager,
+    junit,h2
   )
-
-
   lazy val root =
     Project("stark-project", file("."))
-      .aggregate(starkOrmMacro)
+      .aggregate(ActiveRecordMacroProject, ActiveRecordProject)
       .settings(publishArtifact := false)
-
-
-  lazy val starkOrmMacro= Project (
-    "stark-orm-macro",
-    file("stark-orm-macro"),
-    settings = buildSettings ++ Seq (libraryDependencies <++= scalaVersion {sv =>Seq(scalaReflect(sv))})
+  lazy val ActiveRecordMacroProject = Project(
+    "activerecord-macro",
+    file("activerecord-macro"),
+    settings = buildSettings ++ Seq(libraryDependencies <++= scalaVersion { sv => ActiveRecordMacroDeps(sv) })
   )
+  lazy val ActiveRecordProject = Project(
+    "activerecord",
+    file("activerecord"),
+    settings = buildSettings ++ Seq(libraryDependencies <++= scalaVersion { sv => ActiveRecordDeps(sv) })
+
+  ).dependsOn(ActiveRecordMacroProject)
+
 }
