@@ -2,7 +2,6 @@ package stark.activerecord.internal
 
 import javax.persistence.{EntityManager, Query}
 
-import nirvana.hall.orm.services._
 import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import stark.activerecord.services._
