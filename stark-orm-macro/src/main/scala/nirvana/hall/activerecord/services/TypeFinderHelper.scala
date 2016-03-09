@@ -1,4 +1,4 @@
-package nirvana.hall.orm.services
+package nirvana.hall.activerecord.services
 
 import scala.language.experimental.macros
 import scala.reflect.macros.whitebox

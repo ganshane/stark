@@ -1,6 +1,4 @@
-package nirvana.hall.orm.services
-
-
+package nirvana.hall.activerecord.services
 
 import scala.annotation.StaticAnnotation
 import scala.language.experimental.macros

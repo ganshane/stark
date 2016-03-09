@@ -1,5 +1,4 @@
-package nirvana.hall.orm.services
-
+package nirvana.hall.activerecord.services
 
 import scala.collection.mutable
 import scala.language.dynamics
