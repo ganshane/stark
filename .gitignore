@@ -28,3 +28,4 @@ support/log
 support/gpg/gpg.sec
 *.pexe
 project/project/target
+*/project/**
