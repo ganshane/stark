@@ -17,16 +17,21 @@ class DSLTest extends BaseActiveRecordTestCase{
     val modelA = new ModelA
     modelA.name = "cctv"
     modelA.save
+    val modelA2 = new ModelA
+    modelA2.name="asdf"
+    modelA2.save
 
     println(ModelA.name)
-    val streamQL = from(classOf[ModelA]) where ModelA.name === "cctv" or (
+    val q1 = from[ModelA]
+    Assert.assertEquals(2,q1.size)
+    val q2 = from[ModelA] limit 10
+    val q3 = from[ModelA] where ModelA.name === "cctv" or (
       ModelA.seq === 1 or ModelA.name === "cctv"
        or ModelA.seq === 1 or ModelA.name === "fdsa"
 
       ) limit 3 offset 0
-    val stream = streamQL.fetch
 
 
-    Assert.assertEquals(1,stream.size)
+    Assert.assertEquals(1,q3.size)
   }
 }
