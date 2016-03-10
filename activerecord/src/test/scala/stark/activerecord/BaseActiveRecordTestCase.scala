@@ -57,6 +57,7 @@ class ModelA extends ActiveRecord{
   @Column(name = "id")
   var id:Int = _
   var name:String = _
+  var seq:Int = _
   @Lob
   @Column(length=100000)
   var clob:String = _

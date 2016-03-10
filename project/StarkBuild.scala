@@ -15,8 +15,10 @@ object Dependencies {
   val springContextSupport = "org.springframework" % "spring-context-support" % springVersion
   val aopalliance = "aopalliance" % "aopalliance" % "1.0"
   val hibernateEntityManager = "org.hibernate" % "hibernate-entitymanager" % "4.3.5.Final"
+  val jooq = "org.jooq" % "jooq" % "3.7.3"
   val junit = "junit" % "junit" % "4.8.2" % "test"
   val h2 = "com.h2database" % "h2" % "1.3.176" % "test"
+
 
   //   val logbackVer = "0.9.16"
   //   val grizzlyVer = "1.9.19"
@@ -49,7 +51,7 @@ object StarkBuild extends Build {
     scalaReflect(sv)
   )
   lazy val ActiveRecordDeps = (sv: String) => Seq(
-    tapestryIoc, springOrm, springContextSupport, aopalliance, hibernateEntityManager,
+    tapestryIoc, springOrm, springContextSupport, aopalliance, hibernateEntityManager,jooq,
     junit,h2
   )
   lazy val root =
