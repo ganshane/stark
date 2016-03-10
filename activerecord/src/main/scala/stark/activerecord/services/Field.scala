@@ -5,12 +5,12 @@ package stark.activerecord.services
  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
-trait Field[T] {
+trait Field {
   val fieldName:String
-  def === (value:T): Condition
+  def === (value:Any): Condition
 }
-class JPAField[T](val fieldName:String)  extends Field[T]{
-  def === (value:T): Condition = {
+class JPAField(val fieldName:String)  extends Field{
+  def === (value:Any): Condition = {
     new FieldEqualsCondition(this,value)
   }
 }

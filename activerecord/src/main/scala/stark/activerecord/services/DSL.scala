@@ -25,8 +25,8 @@ object DSL {
 
     new FromStep[R,T](clazz)
   }
-  def column[T](name:String):Field[T]={
-    new JPAField[T](name)
+  def column(name:String):Field={
+    new JPAField(name)
   }
 }
 class ConditionBuilder(implicit context: QueryContext) extends Fetch with Limit{

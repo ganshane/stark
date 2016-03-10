@@ -16,8 +16,8 @@ object ActiveRecordMacroDefinition {
    * find method
    */
   def findByMethodImpl[E: c.WeakTypeTag,R](c: whitebox.Context)
-                                       (name: c.Expr[String])
-                                       (params:c.Expr[Any]*) : c.Expr[R] = {
+                                          (name: c.Expr[String])
+                                          (params:c.Expr[Any]*) : c.Expr[R] = {
     import c.universe._
     val Literal(Constant(findMethod)) = name.tree
     val paramsTree = params.map(_.tree).toList
@@ -49,6 +49,25 @@ object ActiveRecordMacroDefinition {
         c.Expr[R](Literal(Constant(Nil)))
     }
 
+  }
+  /**
+   * find method
+   */
+  def findField[E: c.WeakTypeTag,R](c: whitebox.Context)
+                                       (fieldName: c.Expr[String]): c.Expr[R] = {
+    import c.universe._
+    val Literal(Constant(field:String)) = fieldName.tree
+    //gather class field
+    val expectedNames =  c.weakTypeOf[E].members
+      .filter(_.isTerm)
+      .filter(_.asTerm.isVar).map(_.asTerm)
+
+    //validate field name
+//    c.error(c.enclosingPosition,s"field: $field")
+    if(!expectedNames.exists(_.name.decodedName.toString.trim == field)){
+      c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#$field not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+    }
+    c.Expr[R](q"new stark.activerecord.services.JPAField($field)")
   }
   private def executeInternalWhere[C <: whitebox.Context,R](c:C)(paramsTree:List[c.universe.Tree]): c.Expr[R]={
     import c.universe._

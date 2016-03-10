@@ -15,12 +15,12 @@ class DSLTest extends BaseActiveRecordTestCase{
   @Test
   def test_dsl: Unit ={
     val modelA = new ModelA
-    modelA.name = "asdf"
+    modelA.name = "cctv"
     modelA.save
 
-    val streamQL = from(classOf[ModelA]) where column("name") === "asdf" or (
-      column("seq") === 1 or column("name") === "asdf"
-       or column("seq") === 1 or column("name") === "fdsa"
+    val streamQL = from(classOf[ModelA]) where ModelA.name === "cctv" or (
+      ModelA.seq === 1 or ModelA.name === "cctv"
+       or ModelA.seq === 1 or ModelA.name === "fdsa"
       ) limit 3 offset 0
     val stream = streamQL.fetch
 
