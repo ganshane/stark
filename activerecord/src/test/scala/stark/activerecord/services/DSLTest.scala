@@ -21,15 +21,16 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelA2.name="asdf"
     modelA2.save
 
-    println(ModelA.name)
-    val q1 = from[ModelA]
+    val field = ModelA.name
+    val q1 = from[ModelA] asc ModelA.name
     Assert.assertEquals(2,q1.size)
-    val q2 = from[ModelA] limit 10
+    val q2 = from[ModelA] limit 10 offset 1
+    Assert.assertEquals(1,q2.size)
+
     val q3 = from[ModelA] where ModelA.name === "cctv" or (
       ModelA.seq === 1 or ModelA.name === "cctv"
        or ModelA.seq === 1 or ModelA.name === "fdsa"
-
-      ) limit 3 offset 0
+      ) limit 3 offset 0 desc ModelA.name
 
 
     Assert.assertEquals(1,q3.size)

@@ -33,7 +33,7 @@ object DSL {
     new JPAField[T](name)
   }
 }
-class ConditionBuilder[R](implicit context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter{
+class ConditionBuilder[R](implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy{
   private var conditions=List[Predicate]()
   def apply(fun: =>Condition):this.type={
     and(fun)
@@ -54,16 +54,24 @@ class ConditionBuilder[R](implicit context: QueryContext) extends Fetch[R] with 
     this
   }
 
-  override def getConditions: List[Predicate] = conditions
+  override private[activerecord] def getConditions: List[Predicate] = conditions
 }
-class FromStep[T](clazz:Class[T])(implicit context: QueryContext) extends Fetch[T] with Limit with ConditionsGetter{
-  private lazy val conditionBuilder = new ConditionBuilder[T]
-  def where:ConditionBuilder[T]={
-    conditionBuilder
+class FromStep[T](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[T] with Limit with ConditionsGetter with OrderBy{
+  def where:ConditionBuilder[T]=new ConditionBuilder[T]
+  override private[activerecord] def getConditions: List[Predicate] = Nil
+}
+private[activerecord] trait OrderBy {
+  val context:QueryContext
+  def asc(field: Field[_]): this.type ={
+    context.query.orderBy(context.builder.asc(context.root.get(field.fieldName)))
+    this
   }
-  override def getConditions: List[Predicate] = Nil
+  def desc(field: Field[_]): this.type ={
+    context.query.orderBy(context.builder.desc(context.root.get(field.fieldName)))
+    this
+  }
 }
-trait Limit{
+private[activerecord] trait Limit{
   private[services] var limitNum:Int = 0
   private[services] var offsetNum:Int = 0
   def limit(limit:Int):this.type={
@@ -75,8 +83,8 @@ trait Limit{
     this
   }
 }
-trait ConditionsGetter{
-  def getConditions:List[Predicate]
+private[activerecord]trait ConditionsGetter{
+  private[activerecord] def getConditions:List[Predicate]
 }
 abstract class Fetch[A](implicit context:QueryContext) {
   this:Limit with ConditionsGetter =>
@@ -89,6 +97,7 @@ abstract class Fetch[A](implicit context:QueryContext) {
       query.setMaxResults(limitNum)
     if(offsetNum > 0)
       query.setFirstResult(offsetNum)
+
     JavaConversions.asScalaBuffer(query.getResultList).toStream.asInstanceOf[Stream[A]]
   }
 

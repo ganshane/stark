@@ -1,7 +1,6 @@
 package stark.activerecord.services
 
 import scala.reflect.ClassTag
-import scala.reflect.classTag
 
 /**
  * ActiveRecord field
@@ -12,9 +11,8 @@ trait Field[T] {
   val fieldName:String
   def === (value:T): Condition
 }
-class JPAField[T:ClassTag](val fieldName:String)  extends Field[T]{
-  private lazy val dataType = classTag[T].runtimeClass
-  def === (value:T): Condition = {
-    new FieldEqualsCondition(this,value)
+class JPAField[T:ClassTag](val fieldName:String)  extends Field[T] {
+  def ===(value: T): Condition = {
+    new FieldEqualsCondition(this, value)
   }
 }
