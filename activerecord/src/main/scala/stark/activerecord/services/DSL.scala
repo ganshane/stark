@@ -39,12 +39,7 @@ class ConditionBuilder(implicit context: QueryContext) extends Fetch with Limit{
     DSL.dslContext.withValue(context){
       val condition = DSL.dslContext.value.builder.or(fun)
       conditions = condition :: conditions
-      /*
-      else
-        finalCondition = finalCondition.or(condition)
-        */
     }
-
     this
   }
   def and(fun: =>Condition):ConditionBuilder={
@@ -52,7 +47,6 @@ class ConditionBuilder(implicit context: QueryContext) extends Fetch with Limit{
       val condition = context.builder.and(fun)
       conditions = condition :: conditions
     }
-
     this
   }
   def fetch=fetchAsStream(context,conditions.reverse)
@@ -66,11 +60,11 @@ class FromStep[R,T](clazz:Class[T])(implicit context: QueryContext){
 trait Limit{
   private[services] var limitNum:Int = 0
   private[services] var offsetNum:Int = 0
-  def limit(limit:Int)(implicit context: QueryContext):this.type={
+  def limit(limit:Int):this.type={
     this.limitNum = limit
     this
   }
-  def offset(offset:Int)(implicit context: QueryContext):this.type={
+  def offset(offset:Int):this.type={
     this.offsetNum = offset
     this
   }
@@ -82,9 +76,9 @@ trait Fetch {
     context.query.where(conditions :_ *)
     val query = entityManager.createQuery(context.query)
     if(limitNum >0 )
-      query.setFirstResult(limitNum)
+      query.setMaxResults(limitNum)
     if(offsetNum > 0)
-      query.setMaxResults(offsetNum)
+      query.setFirstResult(offsetNum)
     JavaConversions.asScalaBuffer(query.getResultList).toStream.asInstanceOf[Stream[R]]
   }
 }
