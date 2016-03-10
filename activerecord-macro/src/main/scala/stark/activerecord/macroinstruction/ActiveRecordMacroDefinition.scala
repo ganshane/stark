@@ -64,10 +64,15 @@ object ActiveRecordMacroDefinition {
 
     //validate field name
 //    c.error(c.enclosingPosition,s"field: $field")
-    if(!expectedNames.exists(_.name.decodedName.toString.trim == field)){
-      c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#$field not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+    val termOpt =  expectedNames.find(_.name.decodedName.toString.trim == field)
+    termOpt match{
+      case Some(term) =>
+        val termType = term.typeSignature
+        c.Expr[R](q"new stark.activerecord.services.JPAField[$termType]($field)")
+      case None=>
+        c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#$field not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+        c.Expr[R](Literal(Constant(Nil)))
     }
-    c.Expr[R](q"new stark.activerecord.services.JPAField($field)")
   }
   private def executeInternalWhere[C <: whitebox.Context,R](c:C)(paramsTree:List[c.universe.Tree]): c.Expr[R]={
     import c.universe._

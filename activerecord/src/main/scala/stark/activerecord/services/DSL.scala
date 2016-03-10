@@ -6,6 +6,7 @@ import javax.persistence.criteria.{Predicate, CriteriaBuilder, CriteriaQuery, Ro
 import stark.activerecord.services.DSL.QueryContext
 
 import scala.collection.JavaConversions
+import scala.reflect.ClassTag
 
 
 /**
@@ -25,8 +26,8 @@ object DSL {
 
     new FromStep[R,T](clazz)
   }
-  def column(name:String):Field={
-    new JPAField(name)
+  def column[T : ClassTag](name:String):Field[T]={
+    new JPAField[T](name)
   }
 }
 class ConditionBuilder(implicit context: QueryContext) extends Fetch with Limit{

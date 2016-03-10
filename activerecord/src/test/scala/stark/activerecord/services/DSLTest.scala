@@ -18,9 +18,11 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelA.name = "cctv"
     modelA.save
 
+    println(ModelA.name)
     val streamQL = from(classOf[ModelA]) where ModelA.name === "cctv" or (
       ModelA.seq === 1 or ModelA.name === "cctv"
        or ModelA.seq === 1 or ModelA.name === "fdsa"
+
       ) limit 3 offset 0
     val stream = streamQL.fetch
 

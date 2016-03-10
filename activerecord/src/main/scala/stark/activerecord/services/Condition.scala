@@ -18,7 +18,7 @@ trait Condition{
   def or(condition: Condition):Condition
   def toPredicate:Predicate
 }
-class FieldEqualsCondition(field:Field,value:Any) extends Condition{
+class FieldEqualsCondition[T](field:Field[T],value:Any) extends Condition{
   private val expression:Predicate =  DSL.dslContext.value.builder.equal(DSL.dslContext.value.root.get(field.fieldName),value)
   override def and(condition: Condition): Condition =
     DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)
