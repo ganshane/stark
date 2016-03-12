@@ -1,15 +1,12 @@
 package stark.activerecord.services
 
-import javax.persistence.EntityManager
 import javax.persistence.criteria._
 
 import stark.activerecord.services.DSL.QueryContext
 
-import scala.collection.{GenTraversableOnce, JavaConversions}
 import scala.collection.generic.CanBuildFrom
-import scala.reflect.ClassTag
-import scala.reflect.classTag
-
+import scala.collection.{GenTraversableOnce, JavaConversions}
+import scala.reflect.{ClassTag, classTag}
 import scala.reflect.runtime.universe._
 
 /**
@@ -29,7 +26,7 @@ object DSL {
 
   def from[T:ClassTag]: SelectStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
-    lazy val queryBuilder = ActiveRecord.getService[EntityManager].getCriteriaBuilder
+    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
     lazy val query  = queryBuilder.createQuery(clazz)
     lazy val root = query.from(clazz)
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
@@ -38,51 +35,63 @@ object DSL {
   }
   def delete[T:ClassTag]: DeleteStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
-    lazy val queryBuilder = ActiveRecord.getService[EntityManager].getCriteriaBuilder
+    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
     lazy val query  = queryBuilder.createCriteriaDelete(clazz)
     lazy val root = query.from(clazz)
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
 
     new DeleteStep[T](clazz)
   }
+  def update[T:ClassTag]:UpdateStep[T]={
+    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
+    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
+    lazy val query  = queryBuilder.createCriteriaUpdate(clazz)
+    lazy val root = query.from(clazz)
+    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
+
+    new UpdateStep[T](clazz)
+  }
   def column[T : TypeTag](name:String):Field[T]={
     new JPAField[T](name)
   }
 }
 class ConditionBuilder[R](implicit val context: QueryContext) extends ConditionsGetter {
-  private var conditions=List[Predicate]()
+  private var condition:Option[Predicate] = None
   def apply(fun: =>Condition):this.type={
     and(fun)
     this
   }
   def or(fun: =>Condition):this.type={
     DSL.dslContext.withValue(context){
-      val condition = DSL.dslContext.value.builder.or(fun)
-      conditions = condition :: conditions
+      val currentCondition = fun
+      condition =Some(condition.fold(currentCondition){p=>context.builder.or(Array[Predicate](p,currentCondition):_*)})
     }
     this
   }
   def and(fun: =>Condition):this.type={
     DSL.dslContext.withValue(context){
-      val condition = context.builder.and(fun)
-      conditions = condition :: conditions
+      val currentCondition = fun
+      condition =Some(condition.fold(currentCondition){p=>context.builder.and(Array[Predicate](p,currentCondition):_*)})
     }
     this
   }
 
-  override private[activerecord] def getConditions: List[Predicate] = conditions
+  override private[activerecord] def getConditions: Option[Predicate] = condition
 }
 class SelectStep[T](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[T] with Limit with ConditionsGetter with OrderBy{
   def where=new ConditionBuilder[T] with Limit with Fetch[T] with OrderBy
-  override private[activerecord] def getConditions: List[Predicate] = Nil
 }
-class UpdateStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ConditionsGetter{
-  def where=new ConditionBuilder[T] with Execute[T] with Limit
-  override private[activerecord] def getConditions: List[Predicate] = Nil
+class UpdateStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ExecuteStep[T]{
+  private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
+  def set[F](field:Field[F],value:F):this.type={
+    criteriaUpdate.set(field.fieldName,value)
+    this
+  }
 }
-class DeleteStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ConditionsGetter{
+class DeleteStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ExecuteStep[T]{
+}
+abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter {
   def where=new ConditionBuilder[T] with Execute[T] with Limit
-  override private[activerecord] def getConditions: List[Predicate] = Nil
 }
 private[activerecord] trait OrderBy {
   val context:QueryContext
@@ -108,21 +117,21 @@ private[activerecord] trait Limit{
   }
 }
 private[activerecord]trait ConditionsGetter{
-  private[activerecord] def getConditions:List[Predicate]
+  private[activerecord] def getConditions:Option[Predicate]=None
 }
 trait Execute[A]{
   this:Limit with ConditionsGetter =>
   val context:QueryContext
   def execute: Int ={
-    val entityManager = ActiveRecord.getService[EntityManager]
+    val entityManager = ActiveRecord.entityManager
     val query = context.query match{
       case q:CriteriaUpdate[A] =>
         val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[A]]
-        criteriaUpdate.where(getConditions:_ *)
+        getConditions.foreach(criteriaUpdate.where)
         entityManager.createQuery(criteriaUpdate)
       case q:CriteriaDelete[A] =>
         val criteriaDelete = context.query.asInstanceOf[CriteriaDelete[A]]
-        criteriaDelete.where(getConditions:_ *)
+        getConditions.foreach(criteriaDelete.where)
         entityManager.createQuery(criteriaDelete)
 
     }
@@ -131,7 +140,7 @@ trait Execute[A]{
     if(offsetNum > 0)
       query.setFirstResult(offsetNum)
 
-    val entityService = ActiveRecord.getService[EntityService]
+    val entityService = ActiveRecord.entityService
     entityService.execute(query)
   }
 }
@@ -140,9 +149,9 @@ trait Fetch[A] {
   val context:QueryContext
   private lazy val executeQuery:Stream[A]= fetchAsStream
   private def fetchAsStream: Stream[A]={
-    val entityManager = ActiveRecord.getService[EntityManager]
+    val entityManager = ActiveRecord.entityManager
     val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
-    criteriaQuery.where(getConditions:_ *)
+    getConditions.foreach(criteriaQuery.where)
     val query = entityManager.createQuery(criteriaQuery)
     if(limitNum >0 )
       query.setMaxResults(limitNum)

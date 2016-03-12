@@ -22,6 +22,8 @@ object ActiveRecord {
   private val logger = LoggerFactory getLogger getClass
   @volatile
   private[activerecord] var objectLocator:ObjectLocator= _
+  private[activerecord] lazy val entityManager = getService[EntityManager]
+  private[activerecord] lazy val entityService = getService[EntityService]
 
   /**
    * Saves the model.
@@ -29,7 +31,7 @@ object ActiveRecord {
    * the existing record gets updated.
    */
   def save[T](record:T):T={
-    getService[EntityService].save(record)
+    entityService.save(record)
   }
 
   /**
@@ -38,13 +40,13 @@ object ActiveRecord {
    * record's primary key.
    */
   def delete[T](record:T): Unit ={
-    getService[EntityService].delete(record)
+    entityService.delete(record)
   }
   def updateRelation[T](relation: DynamicUpdateSupport[T]):Int={
-    getService[EntityService].updateRelation(relation)
+    entityService.updateRelation(relation)
   }
   def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int={
-    getService[EntityService].deleteRelation(relation)
+    entityService.deleteRelation(relation)
   }
 
   /**
@@ -54,13 +56,13 @@ object ActiveRecord {
    * @return record stream
    */
   private[services] def find[T](relation:Relation[T]):Stream[T]={
-    getService[EntityService].find(relation)
+    entityService.find(relation)
   }
 
   /**
    * find some service using ObjectLocator
    */
-  private[activerecord] def getService[T:ClassTag]:T={
+  private def getService[T:ClassTag]:T={
     if(objectLocator == null)
       throw new IllegalStateException("object locator is null")
     objectLocator.getService(classTag[T].runtimeClass.asInstanceOf[Class[T]])
