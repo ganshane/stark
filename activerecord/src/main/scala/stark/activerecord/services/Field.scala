@@ -1,6 +1,8 @@
 package stark.activerecord.services
 
 
+import javax.persistence.criteria.Selection
+
 import scala.reflect.runtime.universe._
 
 /**
@@ -9,7 +11,7 @@ import scala.reflect.runtime.universe._
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
-trait Field[T] {
+trait Field[T] extends SelectionField{
   val fieldName:String
   def === (value:T): Condition
   def !==(value : T)                                 : Condition
@@ -29,7 +31,15 @@ trait Field[T] {
   def isNull:Condition
   def notNull:Condition
 
+  def desc:SortField[T]
+  def asc:SortField[T]
+
 }
+trait SelectionField{
+  def toSelection[X]:Selection[X]
+}
+case class SortField[T](field: Field[T],isAsc:Boolean=true)
+
 class JPAField[T : TypeTag](val fieldName:String)  extends Field[T] {
   def ===(value: T): Condition = {
     Condition.eq(this,value)
@@ -50,5 +60,11 @@ class JPAField[T : TypeTag](val fieldName:String)  extends Field[T] {
   override def like(value: String): Condition = Condition.like(this,value)
   override def notLike(value: String): Condition = Condition.notLike(this,value)
 
+  override def desc: SortField[T] = SortField(this,false)
+  override def asc: SortField[T] = SortField(this,isAsc = true)
+
+  override def toSelection[X]: Selection[X]= {
+    DSL.dslContext.value.root.get[X](fieldName)
+  }
 }
 

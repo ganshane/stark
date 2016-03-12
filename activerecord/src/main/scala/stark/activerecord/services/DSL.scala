@@ -22,16 +22,26 @@ object DSL {
 
   }
 
-  case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_])
+  case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_]){
+    var isMultiSelection = false
+  }
 
-  def from[T:ClassTag]: SelectStep[T]={
+  def select[T:ClassTag]: SelectStep[T,T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
     lazy val query  = queryBuilder.createQuery(clazz)
     lazy val root = query.from(clazz)
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
 
-    new SelectStep[T](clazz)
+    new SelectStep[T,T](clazz)
+  }
+  def select[T:ClassTag](fields:SelectionField*): SelectStep[T,Array[Any]]={
+    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
+    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
+    lazy val query  = queryBuilder.createQuery(clazz)
+    lazy val root = query.from(clazz)
+    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
+    new SelectStep[T,Array[Any]](clazz).apply(fields:_*)
   }
   def delete[T:ClassTag]: DeleteStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
@@ -78,8 +88,20 @@ class ConditionBuilder[R](implicit val context: QueryContext) extends Conditions
 
   override private[activerecord] def getConditions: Option[Predicate] = condition
 }
-class SelectStep[T](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[T] with Limit with ConditionsGetter with OrderBy{
+class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy{
+  private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
   def where=new ConditionBuilder[T] with Limit with Fetch[T] with OrderBy
+  def apply(f:SelectionField*):this.type={
+    DSL.dslContext.withValue(context){
+      if(f.nonEmpty) {
+        val selection = context.builder.array(f.map(_.toSelection): _*)
+        criteriaQuery.select(selection.asInstanceOf[Selection[T]])
+
+        context.isMultiSelection = true
+      }
+    }
+    this
+  }
 }
 class UpdateStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ExecuteStep[T]{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
@@ -95,12 +117,15 @@ abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsG
 }
 private[activerecord] trait OrderBy {
   val context:QueryContext
-  def asc(field: Field[_]): this.type ={
-    context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(context.root.get(field.fieldName)))
+  def orderBy[T](field: Field[T]): this.type ={
+    orderBy(field.asc)
     this
   }
-  def desc(field: Field[_]): this.type ={
-    context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.desc(context.root.get(field.fieldName)))
+  def orderBy[T](field: SortField[T]): this.type ={
+    if(field.isAsc)
+      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(context.root.get(field.field.fieldName)))
+    else
+      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.desc(context.root.get(field.field.fieldName)))
     this
   }
 }
