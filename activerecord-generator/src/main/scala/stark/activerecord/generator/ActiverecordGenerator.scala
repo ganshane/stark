@@ -14,7 +14,7 @@ import org.hibernate.tool.hbm2x.pojo.ImportContext
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 
 /**
- * hall orm generator
+ * activerecord generator
  *
  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-05
@@ -22,7 +22,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource
 object ActiverecordGenerator {
   val configTimeDataSourceHolder  = new ThreadLocal[DataSource]
   def main(args:Array[String]): Unit ={
-    val ds = new DriverManagerDataSource("jdbc:h2:file:target/db","sa","")
+    val Array(url,user,password,packageName)=args
+
+    val ds = new DriverManagerDataSource(url,user,password)
     configTimeDataSourceHolder.set(ds)
 
     val task = new HibernateToolTask
@@ -46,7 +48,7 @@ object ActiverecordGenerator {
     exporter.setFilePattern("{package-name}/{class-name}.scala")
 
     val config = task.createJDBCConfiguration()
-    config.setPackageName("nirvana.hall.api.jpa")
+    config.setPackageName(packageName)
     //config.setPropertyFile(new File("hall-orm-generator/src/test/resources/hibernate.properties"))
 
 
