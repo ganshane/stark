@@ -54,7 +54,7 @@ object ActiveRecordMacroDefinition {
    * find method
    */
   def findField[E: c.WeakTypeTag,R](c: whitebox.Context)
-                                       (fieldName: c.Expr[String]): c.Expr[R] = {
+                                       (fieldName: c.Expr[String]):c.Expr[R]  = {
     import c.universe._
     val Literal(Constant(field:String)) = fieldName.tree
     //gather class field

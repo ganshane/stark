@@ -8,7 +8,8 @@ import scala.language.postfixOps
 
 /**
  * dsl test
- * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
+  *
+  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
@@ -21,7 +22,6 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelA2.name="asdf"
     modelA2.save
 
-    val field = ModelA.name
     val q1 = from[ModelA] asc ModelA.name
     Assert.assertEquals(2,q1.size)
     val q2 = from[ModelA] limit 10 offset 1
@@ -29,10 +29,20 @@ class DSLTest extends BaseActiveRecordTestCase{
 
     val q3 = from[ModelA] where ModelA.name === "cctv" or (
       ModelA.seq === 1 or ModelA.name === "cctv"
-       or ModelA.seq === 1 or ModelA.name === "fdsa"
+       or ModelA.seq > 1 or ModelA.name === "asdf"
       ) limit 3 offset 0 desc ModelA.name
 
 
     Assert.assertEquals(1,q3.size)
+
+
+    //delete
+    {
+      delete[ModelA] where ModelA.name === "cctv" execute
+
+      Assert.assertEquals(1, from[ModelA].size)
+    }
+    //update
+
   }
 }

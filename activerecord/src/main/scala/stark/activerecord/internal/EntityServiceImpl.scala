@@ -34,6 +34,12 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     entityManager.remove(entity)
   }
 
+
+  @Transactional
+  override def execute[T](query: Query): Int={
+    query.executeUpdate()
+  }
+
   @Transactional
   override def deleteRelation[T](updateSupport: DynamicUpdateSupport[T]): Int = {
     updateSupport match {
@@ -95,6 +101,7 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
 
   /**
    * find some records by Relation
+ *
    * @param queryObj relation object
    * @tparam T type parameter
    * @return record stream
