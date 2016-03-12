@@ -49,6 +49,7 @@ class DSLTest extends BaseActiveRecordTestCase{
     }
     //delete
     {
+      Assert.assertEquals(2, from[ModelA].size)
       delete[ModelA] where ModelA.name === "fdsa" execute;
       Assert.assertEquals(1, from[ModelA].size)
     }

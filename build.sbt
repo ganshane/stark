@@ -23,7 +23,13 @@ scmInfo in ThisBuild               := Some(ScmInfo(url("https://github.com/gansh
 
 pomExtra in ThisBuild              :=  Developers.toXml
 
+/*
 resolvers  in ThisBuild           ++= Seq(
-  "snapshots"     at "https://oss.sonatype.org/content/repositories/snapshots",
-  "releases"      at "https://oss.sonatype.org/content/repositories/releases"
+  "Local Maven Repository" at Path.userHome.asFile.toURI.toURL + "/.m2/repository",
+  "releases"      at "http://central.maven.org/maven2",
+  "snapshots"     at "https://oss.sonatype.org/content/repositories/snapshots"
 )
+*/
+resolvers in ThisBuild += Resolver.mavenLocal
+
+
