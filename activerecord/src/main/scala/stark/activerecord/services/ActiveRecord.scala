@@ -5,7 +5,7 @@ import javax.persistence.{EntityManager, Id, Transient}
 import org.apache.tapestry5.ioc.ObjectLocator
 import org.slf4j.LoggerFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
-import stark.activerecord.services.DSL.DSLQueryBuilder
+import stark.activerecord.services.DSL.DSLSelectionQuery
 
 import scala.collection.immutable.Stream
 import scala.language.experimental.macros
@@ -79,7 +79,7 @@ object ActiveRecord {
   def internalWhere[A](clazz:Class[A],primaryKey:String,ql:String)(params:Any*): QlRelation[A]={
     new QlRelation[A](clazz,primaryKey,ql,params.toSeq)
   }
-  def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLQueryBuilder[A,A]={
+  def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLSelectionQuery[A,A]={
     val where = DSL.select[A].where
     params.foreach(p=>where.apply(p))
 
@@ -120,7 +120,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param params method parameter
    * @return relation query object
    */
-  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLQueryBuilder[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,CriteriaRelation[A]]
+  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLSelectionQuery[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,CriteriaRelation[A]]
   def selectDynamic[T](fieldName:String):Field[T] = macro ActiveRecordMacroDefinition.findField[A,Field[T]]
   /*{
     field match{
@@ -148,7 +148,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param params parameter list
    * @return Relation query instance
    */
-  def applyDynamic(name:String)(params:Any*):DSLQueryBuilder[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,CriteriaRelation[A]]
+  def applyDynamic(name:String)(params:Any*):DSLSelectionQuery[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,CriteriaRelation[A]]
 
   /**
    * where(ql,parameters)

@@ -44,7 +44,7 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     modelB.save
     Assert.assertEquals(1,ModelB.all.size)
 
-    ModelB.update.set(ModelB.name,"asdf").where(ModelB.name === "fdsa").execute
+    ModelB.update.set(name="asdf").where(ModelB.name === "fdsa").execute
     Assert.assertEquals(1,ModelB.find_by_name("asdf").size)
 
   }

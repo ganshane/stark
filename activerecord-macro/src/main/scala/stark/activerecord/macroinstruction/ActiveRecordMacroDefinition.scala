@@ -115,7 +115,7 @@ object ActiveRecordMacroDefinition {
     //c.error(c.enclosingPosition,"asdf")
 
     methodName match{
-      case "update"=>
+      case "update" | "set"=>
         c.Expr[R](Apply(Select(c.prefix.tree, TermName("internalUpdate")), trees))
       case other=>
         c.error(c.enclosingPosition, s"${other} unsupported.")

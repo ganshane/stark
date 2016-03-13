@@ -2,10 +2,13 @@ package stark.activerecord.services
 
 import javax.persistence.criteria._
 
-import stark.activerecord.services.DSL.QueryContext
+import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
+import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, QueryContext}
 
 import scala.collection.generic.CanBuildFrom
 import scala.collection.{GenTraversableOnce, JavaConversions}
+import scala.language.experimental.macros
+import scala.language.dynamics
 import scala.reflect.{ClassTag, classTag}
 import scala.reflect.runtime.universe._
 
@@ -18,10 +21,9 @@ import scala.reflect.runtime.universe._
 object DSL {
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
 
-  type DSLQueryBuilder[T,R] = ConditionBuilder[T] with Limit with Fetch[R] with OrderBy
-  type DSLQuery={
-
-  }
+  type DSLExecuteQuery[T] = ConditionBuilder[T] with Execute[T] with Limit
+  type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy
+  type DSLQuery={ }
 
   case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_]){
     var isMultiSelection = false
@@ -91,7 +93,7 @@ class ConditionBuilder[R](implicit val context: QueryContext) extends Conditions
 }
 class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
-  def where=new ConditionBuilder[T] with Limit with Fetch[T] with OrderBy
+  def where:DSLSelectionQuery[T,R]=new ConditionBuilder[T] with Limit with Fetch[R] with OrderBy
   def apply(f:SelectionField*):this.type={
     DSL.dslContext.withValue(context){
       if(f.nonEmpty) {
@@ -104,17 +106,27 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
     this
   }
 }
-class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
+class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T] with Dynamic{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
+  def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
+  /*
   def set[F](field:Field[F],value:F):this.type={
     criteriaUpdate.set(field.fieldName,value)
+    this
+  }
+  */
+  def internalUpdate(params: (String, Any)*):this.type = {
+    params.foreach{
+      case (field,value) =>
+        criteriaUpdate.set(field,value)
+    }
     this
   }
 }
 class DeleteStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
 }
 abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter {
-  def where=new ConditionBuilder[T] with Execute[T] with Limit
+  def where:DSLExecuteQuery[T]=new ConditionBuilder[T] with Execute[T] with Limit
 }
 private[activerecord] trait OrderBy {
   val context:QueryContext

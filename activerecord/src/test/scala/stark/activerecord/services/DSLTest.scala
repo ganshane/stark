@@ -57,7 +57,7 @@ class DSLTest extends BaseActiveRecordTestCase{
     //update
     {
       Assert.assertEquals(0, select[ModelA] where ModelA.name === "fdsa" size)
-      val num = update[ModelA] set (ModelA.name , "fdsa") where ModelA.name === "cctv" or ModelA.seq === 1  execute;
+      val num = update[ModelA] set (name = "fdsa") where ModelA.name === "cctv" or ModelA.seq === 1  execute;
       Assert.assertEquals(1,num)
       Assert.assertEquals(1, select[ModelA] where ModelA.name === "fdsa" size)
     }
