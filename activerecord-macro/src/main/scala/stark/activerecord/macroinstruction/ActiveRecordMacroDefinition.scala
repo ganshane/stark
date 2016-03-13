@@ -39,7 +39,8 @@ object ActiveRecordMacroDefinition {
         }
         val tupleParameters = attrs.zip(paramsTree).map{
           case (attr,parameterTree) =>
-            q"($attr,$parameterTree)"
+            val field = findField(c)(c.Expr[String](Literal(Constant(attr))))
+            q"($field === $parameterTree)"
         }.toList
 
 
@@ -138,19 +139,23 @@ object ActiveRecordMacroDefinition {
 
     //validate params
     val trees = params.map(_.tree).toList
-    trees.foreach {
+    val finalTrees = trees.map{
       case Apply(_,Literal(Constant(_name: String))::value::Nil) =>
         if(_name.isEmpty)
           c.error(c.enclosingPosition, s"name parameter is empty.")
         else if(!expectedNames.contains(_name))
           c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+
+        val field = findField(c)(c.Expr[String](Literal(Constant(_name))))
+        q"($field === $value)"
       case other =>
           c.error(c.enclosingPosition, s"$other unsupported.")
-    }
+
+    }.asInstanceOf[List[c.universe.Tree]]
 
     methodName match{
       case "find_by" =>
-        executeInternalWhere[c.type,R](c)(trees)
+        executeInternalWhere[c.type,R](c)(finalTrees.toList)
       case other=>
         c.error(c.enclosingPosition, s"$other unsupported.")
         c.Expr[R](Literal(Constant(Nil)))

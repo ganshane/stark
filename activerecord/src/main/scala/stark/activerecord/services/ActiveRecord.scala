@@ -1,11 +1,11 @@
 package stark.activerecord.services
 
-import javax.persistence.criteria.CriteriaBuilder
 import javax.persistence.{EntityManager, Id, Transient}
 
 import org.apache.tapestry5.ioc.ObjectLocator
 import org.slf4j.LoggerFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
+import stark.activerecord.services.DSL.DSLQueryBuilder
 
 import scala.collection.immutable.Stream
 import scala.language.experimental.macros
@@ -14,7 +14,8 @@ import scala.reflect.{ClassTag, classTag}
 
 /**
  * active record
- * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
+  *
+  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-03
  */
 object ActiveRecord {
@@ -51,7 +52,8 @@ object ActiveRecord {
 
   /**
    * find some records by Relation
-   * @param relation relation object
+    *
+    * @param relation relation object
    * @tparam T type parameter
    * @return record stream
    */
@@ -69,21 +71,19 @@ object ActiveRecord {
   }
   /**
    * find_by and where function
-   * @param ql query
+    *
+    * @param ql query
    * @param params parameter values
    * @return Relation object
    */
   def internalWhere[A](clazz:Class[A],primaryKey:String,ql:String)(params:Any*): QlRelation[A]={
     new QlRelation[A](clazz,primaryKey,ql,params.toSeq)
   }
-  def createCriteriaRelation[A](clazz:Class[A],primaryKey:String,params:(String,Any)*):CriteriaRelation[A]={
-    val queryBuilder = getService[EntityManager].getCriteriaBuilder
-    val relation = new CriteriaRelation[A](clazz,primaryKey) {
-      override private[services] val builder: CriteriaBuilder = queryBuilder
-    }
-    params.foreach(relation.eq _ tupled)
+  def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLQueryBuilder[A,A]={
+    val where = DSL.select[A].where
+    params.foreach(p=>where.apply(p))
 
-    relation
+    where
   }
 }
 
@@ -115,11 +115,12 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * sucha as:
    *
    * find_by(name="jcai",code="1232")
-   * @param name method name
+    *
+    * @param name method name
    * @param params method parameter
    * @return relation query object
    */
-  def applyDynamicNamed(name:String)(params:(String,Any)*):CriteriaRelation[A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,CriteriaRelation[A]]
+  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLQueryBuilder[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,CriteriaRelation[A]]
   def selectDynamic[T](fieldName:String):Field[T] = macro ActiveRecordMacroDefinition.findField[A,Field[T]]
   /*{
     field match{
@@ -130,6 +131,12 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
     }
   }
   */
+  def update:UpdateStep[A]={
+    DSL.update[A]
+  }
+  def delete:DeleteStep[A]={
+    DSL.delete[A]
+  }
 
   /**
    * find_by_xx_and_yy method
@@ -141,12 +148,13 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param params parameter list
    * @return Relation query instance
    */
-  def applyDynamic(name:String)(params:Any*):CriteriaRelation[A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,CriteriaRelation[A]]
+  def applyDynamic(name:String)(params:Any*):DSLQueryBuilder[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,CriteriaRelation[A]]
 
   /**
    * where(ql,parameters)
    * ModelA.where("name=?1 and code=?2","jcai","1232")
-   * @param ql query language
+    *
+    * @param ql query language
    * @param parameters parameters
    * @return Realtion Object
    */
@@ -157,7 +165,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
 
   /**
    * retrieving single object，must exist
-   * @param key primary key
+    *
+    * @param key primary key
    * @return entity object
    */
   def find(key:Any):A={
@@ -166,7 +175,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
 
   /**
    * retrieving single object，may not exist
-   * @param key primary key
+    *
+    * @param key primary key
    * @return entity object
    */
   def findOption(key:Any):Option[A]={
@@ -175,7 +185,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
 
   /**
    * find some records by primary key
-   * @param keys key array
+    *
+    * @param keys key array
    * @return query object
    */
   def find(keys:Array[Any]):QlRelation[A]={

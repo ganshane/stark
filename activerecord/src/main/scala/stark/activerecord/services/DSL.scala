@@ -18,6 +18,7 @@ import scala.reflect.runtime.universe._
 object DSL {
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
 
+  type DSLQueryBuilder[T,R] = ConditionBuilder[T] with Limit with Fetch[R] with OrderBy
   type DSLQuery={
 
   }
@@ -50,7 +51,7 @@ object DSL {
     lazy val root = query.from(clazz)
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
 
-    new DeleteStep[T](clazz)
+    new DeleteStep[T]()
   }
   def update[T:ClassTag]:UpdateStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
@@ -59,7 +60,7 @@ object DSL {
     lazy val root = query.from(clazz)
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
 
-    new UpdateStep[T](clazz)
+    new UpdateStep[T]()
   }
   def column[T : TypeTag](name:String):Field[T]={
     new JPAField[T](name)
@@ -103,14 +104,14 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
     this
   }
 }
-class UpdateStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ExecuteStep[T]{
+class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
   def set[F](field:Field[F],value:F):this.type={
     criteriaUpdate.set(field.fieldName,value)
     this
   }
 }
-class DeleteStep[T](clazz:Class[T])(implicit val context: QueryContext) extends ExecuteStep[T]{
+class DeleteStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
 }
 abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter {
   def where=new ConditionBuilder[T] with Execute[T] with Limit
@@ -187,6 +188,7 @@ trait Fetch[A] {
   }
 
   @inline final def size = executeQuery.size
+  @inline final def exists= executeQuery.nonEmpty
   @inline final def foreach[U](f: A => U) = executeQuery.foreach(f)
   @inline final def filter[U](f: A => Boolean) = executeQuery.filter(f)
   @inline final def head = executeQuery.head

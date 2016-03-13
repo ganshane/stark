@@ -3,7 +3,6 @@ package stark.activerecord.services
 import java.util.Date
 
 import org.junit.{Assert, Test}
-import stark.activerecord.services.QueryExpression.{Between, Gt, Like, NotNull}
 import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
 
 /**
@@ -18,19 +17,12 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     modelA.name = "asdf"
     modelA.save
     Array(1).sum
-    var size = ModelA.find_by(name="asdf",id=Gt(0),name=NotNull,name=Like("a%"),id=Between(0,10000)).size
+    var size = ModelA.find_by(name="asdf").size
     Assert.assertEquals(1,size)
-    //size = ModelA.find_by.eq("name","asdf").gt("id",0).notNull("name").like("name","a%").between("id",0,10000).size
+    size = ModelA.find_by_name("asdf").size
     Assert.assertEquals(1,size)
 
-    ModelA.find_by(name="asdf").update(name="fdsa")
-    size = ModelA.find_by(name="asdf",id=Gt(0)).size
-    Assert.assertEquals(0,size)
 
-    Assert.assertEquals(1,ModelA.all.size)
-
-    Assert.assertEquals(0,ModelA.find_by(name="asdf").delete)
-    Assert.assertEquals(1,ModelA.find_by(name="fdsa").delete)
   }
   @Test
   def test_update: Unit = {
@@ -52,6 +44,9 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     modelB.save
     Assert.assertEquals(1,ModelB.all.size)
 
+    ModelB.update.set(ModelB.name,"asdf").where(ModelB.name === "fdsa").execute
+    Assert.assertEquals(1,ModelB.find_by_name("asdf").size)
+
   }
 
   @Test
@@ -59,6 +54,7 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     val modelA = new ModelA
     modelA.name = "asdf"
     modelA.save()
+    /*
 
     val dsl = ModelA.find_by_name_and_id("adsf1",1).asc("name").desc("name")
     //Assert.assertEquals("name asc,name desc",dsl.orderBy.get)
@@ -70,6 +66,7 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
 
     modelA.delete()
     Assert.assertEquals(0, ModelA.find_by_name("asdf").size)
+    */
   }
   @Test
   def test_find: Unit ={
@@ -87,8 +84,8 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     val result = ModelA.find(modelA.id)
     Assert.assertEquals("asdf",result.name)
 
-    Assert.assertTrue(ModelA.find_by(name="asdf").exists())
-    Assert.assertFalse(ModelA.find_by(name="fdsa").exists())
+    Assert.assertTrue(ModelA.find_by(name="asdf").exists)
+    Assert.assertFalse(ModelA.find_by(name="fdsa").exists)
 
     var size = ModelA.find_by(name="asdf").size
     Assert.assertEquals(1,size)
@@ -104,7 +101,7 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(1,size)
 
     ModelA.where("name=?1","asdf").update(name="asdf")
-    ModelA.find_by(name="asdf").update(name="asdf")
+//    ModelA.find_by(name="asdf").update(name="asdf")
     ModelA.where("name=?1","asdf").delete
   }
   @Test
