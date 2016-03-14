@@ -120,7 +120,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param params method parameter
    * @return relation query object
    */
-  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLSelectionQuery[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,CriteriaRelation[A]]
+  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLSelectionQuery[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,DSLSelectionQuery[A,A]]
   def selectDynamic[T](fieldName:String):Field[T] = macro ActiveRecordMacroDefinition.findField[A,Field[T]]
   /*{
     field match{
@@ -148,7 +148,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param params parameter list
    * @return Relation query instance
    */
-  def applyDynamic(name:String)(params:Any*):DSLSelectionQuery[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,CriteriaRelation[A]]
+  def applyDynamic(name:String)(params:Any*):DSLSelectionQuery[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,DSLSelectionQuery[A,A]]
 
   /**
    * where(ql,parameters)

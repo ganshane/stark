@@ -53,9 +53,6 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
         setQueryParameter (query, relation)
 
         query.executeUpdate()
-      case relation:CriteriaRelation[T] =>
-        val query = entityManager.createQuery(relation.deletedQuery)
-        query.executeUpdate()
       case other =>
         throw new UnsupportedOperationException
     }
@@ -81,9 +78,6 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
           query.setParameter(index, value)
           index += 1
         }
-        query.executeUpdate()
-      case relation:CriteriaRelation[T] =>
-        val query = entityManager.createQuery(relation.updatedQuery)
         query.executeUpdate()
       case other =>
         throw new UnsupportedOperationException
@@ -123,8 +117,6 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
         setQueryParameter(query, relation)
 
         query
-      case relation: CriteriaRelation[T] =>
-        entityManager.createQuery(relation.query)
       case other=>
         throw new UnsupportedOperationException("%s unspported".format(other))
     }

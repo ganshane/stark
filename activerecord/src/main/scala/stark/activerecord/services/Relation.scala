@@ -1,12 +1,9 @@
 package stark.activerecord.services
 
-import javax.persistence.criteria.{Path, Predicate, CriteriaBuilder}
-
-import QueryExpression._
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 
-import scala.collection.{mutable, GenTraversableOnce}
 import scala.collection.generic.CanBuildFrom
+import scala.collection.{GenTraversableOnce, mutable}
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
 
@@ -67,126 +64,6 @@ trait Relation[A] {
   @inline final def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Stream[A], B, That]): That = executeQuery.flatMap(f)
 }
 
-abstract class CriteriaRelation[A](val entityClass:Class[A],val primaryKey:String)
-  extends Relation[A]
-  with DynamicUpdateSupport[A]{
-  case class WrappedExpress(field:String,expr:BaseExpression)
-  private[services] val builder:CriteriaBuilder
-
-  private[activerecord] lazy val query = builder.createQuery(entityClass)
-  private[activerecord] lazy val queryRoot = query.from(entityClass)
-
-  private[activerecord] lazy val updatedQuery = builder.createCriteriaUpdate(entityClass)
-  private[activerecord] lazy val updatedRoot = updatedQuery.from(entityClass)
-
-  private[activerecord] lazy val deletedQuery = builder.createCriteriaDelete(entityClass)
-  private[activerecord] lazy val deletedRoot = deletedQuery.from(entityClass)
-
-  private[activerecord] lazy val expressions = mutable.Buffer[WrappedExpress]()
-
-  private sealed trait WhereSupportObject {
-    def where (restrictions: Predicate *):Unit
-    def criteriaBuilder:CriteriaBuilder
-    def path[X](field:String):Path[X]
-  }
-  private val querySupport = new WhereSupportObject {
-    override def criteriaBuilder: CriteriaBuilder = builder
-    override def where(restrictions: Predicate*):Unit = query.where(restrictions:_*)
-    override def path[X](field: String): Path[X] =  queryRoot.get(field)
-  }
-  private val updatedSupport = new WhereSupportObject {
-    override def criteriaBuilder: CriteriaBuilder = builder
-    override def where(restrictions: Predicate*):Unit = updatedQuery.where(restrictions:_*)
-    override def path[X](field: String): Path[X] =  updatedRoot.get(field)
-  }
-  private val deletedSupport = new WhereSupportObject {
-    override def criteriaBuilder: CriteriaBuilder = builder
-    override def where(restrictions: Predicate*):Unit = deletedQuery.where(restrictions:_*)
-    override def path[X](field: String): Path[X] =  deletedRoot.get(field)
-  }
-  def eq(field:String,value:Any): this.type ={
-    value match{
-      case expr:BaseExpression =>
-        expressions += WrappedExpress(field,expr)
-      case other=>
-        expressions += WrappedExpress(field,Equal(value))
-    }
-
-    this
-  }
-  override def order(params: (String, Any)*): CriteriaRelation.this.type = {
-    params.foreach{
-      case (field,value)=>
-        String.valueOf(value).toLowerCase match{
-          case "asc"=>
-            query.orderBy(builder.asc(queryRoot.get(field)))
-          case "desc"=>
-            query.orderBy(builder.desc(queryRoot.get(field)))
-        }
-    }
-    this
-  }
-  def notNull(field:String):this.type= eq(field,NotNull)
-  def isNull(field:String):this.type= eq(field,IsNull)
-  def gt(field:String,value:Number):this.type= eq(field,Gt(value))
-  def ge(field:String,value:Number):this.type= eq(field,Ge(value))
-  def lt(field:String,value:Number):this.type= eq(field,Lt(value))
-  def le(field:String,value:Number):this.type= eq(field,Le(value))
-  def between[T](field:String,x:T,y:T):this.type= eq(field,Between(x,y))
-  def like(field:String,value:String):this.type= eq(field,Like(value))
-  def notLike(field:String,value:String):this.type= eq(field,NotLike(value))
-
-
-  override protected def executeQuery: scala.Stream[A] = {
-    rewindExpressions(querySupport)
-    super.executeQuery
-  }
-  private def rewindExpressions(ws:WhereSupportObject): Unit ={
-    val criteriaExpressions = expressions.map{
-      case WrappedExpress(field,Equal(value:Any)) =>
-        ws.criteriaBuilder.equal(ws.path(field),value)
-      case WrappedExpress(field,NotNull) =>
-        ws.criteriaBuilder.isNotNull(ws.path(field))
-      case WrappedExpress(field,IsNull) =>
-        ws.criteriaBuilder.isNull(ws.path(field))
-      case WrappedExpress(field,Gt(value:Number)) =>
-        ws.criteriaBuilder.gt(ws.path[Number](field),value)
-      case WrappedExpress(field,Ge(value:Number)) =>
-        ws.criteriaBuilder.ge(ws.path[Number](field),value)
-      case WrappedExpress(field,Lt(value)) =>
-        ws.criteriaBuilder.lt(ws.path[Number](field),value)
-      case WrappedExpress(field,Le(value)) =>
-        ws.criteriaBuilder.le(ws.path[Number](field),value)
-      case WrappedExpress(field,Between(x:java.lang.Long,y:java.lang.Long)) =>
-        ws.criteriaBuilder.between(ws.path[java.lang.Long](field),x,y)
-      case WrappedExpress(field,Between(x:Integer,y:Integer)) =>
-        ws.criteriaBuilder.between(ws.path[Integer](field),x,y)
-      //addBetween(ws,field,x,y)
-      case WrappedExpress(field,Like(value)) =>
-        ws.criteriaBuilder.like(ws.path[String](field),value)
-      case WrappedExpress(field,NotLike(value)) =>
-        ws.criteriaBuilder.notLike(ws.path[String](field),value)
-      case other=>
-        throw new UnsupportedOperationException
-    }
-
-    ws.where(criteriaExpressions:_*)
-  }
-
-  override def internalUpdate(params: (String, Any)*): Int = {
-    rewindExpressions(updatedSupport)
-
-    params.foreach{
-      case (field,value) =>
-        updatedQuery.set(field,value)
-    }
-    ActiveRecord.updateRelation(this)
-  }
-  def delete:Int = {
-    rewindExpressions(deletedSupport)
-    ActiveRecord.deleteRelation(this)
-  }
-}
 trait DynamicUpdateSupport[A] extends Dynamic{
   /**
    * update method
