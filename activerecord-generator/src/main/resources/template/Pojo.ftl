@@ -1,5 +1,5 @@
 ${pojo.getPackageDeclaration()}
-// Generated ${date} by hall orm generator ${version}
+// Generated ${date} by Stark Activerecord generator ${version}
 
 <#assign classbody>
 <#include "PojoTypeDeclaration.ftl"/> {

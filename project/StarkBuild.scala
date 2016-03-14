@@ -20,6 +20,8 @@ object Dependencies {
 //  val jooq = "org.jooq" % "jooq" % "3.7.3"
   val junit = "junit" % "junit" % "4.8.2" % "test"
   val h2 = "com.h2database" % "h2" % "1.3.176" % "test"
+  val h2Runtime = "com.h2database" % "h2" % "1.3.176" % "runtime"
+  val slf4jApi = "org.slf4j" % "slf4j-api" % "1.7.5"
 
 
   //   val logbackVer = "0.9.16"
@@ -57,7 +59,7 @@ object StarkBuild extends Build {
     scalaReflect(sv)
   )
   lazy val ActiveRecordGeneratorDeps = (sv: String) => Seq(
-    hibernateTools,springJdbc
+    hibernateTools,springJdbc,slf4jApi,h2Runtime
   )
   lazy val root =
     Project("stark-project", file("."))

@@ -54,19 +54,15 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     val modelA = new ModelA
     modelA.name = "asdf"
     modelA.save()
-    /*
 
-    val dsl = ModelA.find_by_name_and_id("adsf1",1).asc("name").desc("name")
-    //Assert.assertEquals("name asc,name desc",dsl.orderBy.get)
-    val dsl2 = ModelA.find_by_name_and_id("adsf1",1).order("name"->"asc","name"->"desc")
-    //Assert.assertEquals(1,list.size)
+    val dsl = ModelA.find_by_name_and_id("asdf",modelA.id).orderBy(ModelA.name).orderBy(ModelA.name[String].desc)
+    Assert.assertEquals(1,dsl.size)
     val size= ModelA.find_by_name_and_id("asdf",modelA.id).size
     Assert.assertEquals(1,size)
     Assert.assertEquals(0, ModelA.find_by_name("fdsa").size)
 
     modelA.delete()
     Assert.assertEquals(0, ModelA.find_by_name("asdf").size)
-    */
   }
   @Test
   def test_find: Unit ={
@@ -84,8 +80,8 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     val result = ModelA.find(modelA.id)
     Assert.assertEquals("asdf",result.name)
 
-    Assert.assertTrue(ModelA.find_by(name="asdf").exists)
-    Assert.assertFalse(ModelA.find_by(name="fdsa").exists)
+    Assert.assertTrue(ModelA.find_by(name="asdf").nonEmpty)
+    Assert.assertFalse(ModelA.find_by(name="fdsa").nonEmpty)
 
     var size = ModelA.find_by(name="asdf").size
     Assert.assertEquals(1,size)

@@ -5,12 +5,11 @@ import javax.persistence.criteria._
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, QueryContext}
 
-import scala.collection.generic.CanBuildFrom
-import scala.collection.{GenTraversableOnce, JavaConversions}
-import scala.language.experimental.macros
+import scala.collection.JavaConversions
 import scala.language.dynamics
-import scala.reflect.{ClassTag, classTag}
+import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
+import scala.reflect.{ClassTag, classTag}
 
 /**
  * ActiveRecord DSL
@@ -35,6 +34,7 @@ object DSL {
 
   /**
     *  select method
+    *
     * @tparam T entity type
     * @return Selection step
     */
@@ -50,6 +50,7 @@ object DSL {
 
   /**
     * selection field
+    *
     * @param fields selection field
     * @tparam T entity type
     * @return selection step
@@ -65,6 +66,7 @@ object DSL {
 
   /**
     * delete entity
+    *
     * @tparam T entity type
     * @return delete step
     */
@@ -80,6 +82,7 @@ object DSL {
 
   /**
     * update entity
+    *
     * @tparam T entity type
     * @return update step
     */
@@ -95,6 +98,7 @@ object DSL {
 
   /**
     * create field
+    *
     * @param name field name
     * @tparam T field type
     * @return
@@ -219,7 +223,7 @@ private[activerecord] trait Execute[A]{
     entityService.execute(query)
   }
 }
-private[activerecord] trait Fetch[A] {
+private[activerecord] trait Fetch[A] extends Iterable[A]{
   this:Limit with ConditionsGetter =>
   val context:QueryContext
   private lazy val executeQuery:Stream[A]= fetchAsStream
@@ -236,13 +240,5 @@ private[activerecord] trait Fetch[A] {
     JavaConversions.asScalaBuffer(query.getResultList).toStream
   }
 
-  @inline final def size = executeQuery.size
-  @inline final def exists= executeQuery.nonEmpty
-  @inline final def foreach[U](f: A => U) = executeQuery.foreach(f)
-  @inline final def filter[U](f: A => Boolean) = executeQuery.filter(f)
-  @inline final def head = executeQuery.head
-  @inline final def headOption = executeQuery.headOption
-  @inline final def tail = executeQuery.tail
-  @inline final def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Stream[A], B, That]): That =  executeQuery.map(f)
-  @inline final def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Stream[A], B, That]): That = executeQuery.flatMap(f)
+  override def iterator: Iterator[A] = executeQuery.toIterator
 }
