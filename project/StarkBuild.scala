@@ -17,7 +17,7 @@ object Dependencies {
   val aopalliance = "aopalliance" % "aopalliance" % "1.0"
   val hibernateEntityManager = "org.hibernate" % "hibernate-entitymanager" % "4.3.5.Final"
   val hibernateTools= "org.hibernate" % "hibernate-tools" % "4.3.1.Final"
-  val jooq = "org.jooq" % "jooq" % "3.7.3"
+//  val jooq = "org.jooq" % "jooq" % "3.7.3"
   val junit = "junit" % "junit" % "4.8.2" % "test"
   val h2 = "com.h2database" % "h2" % "1.3.176" % "test"
 
@@ -50,7 +50,7 @@ object StarkBuild extends Build {
   import Dependencies._
 
   lazy val ActiveRecordDeps = (sv: String) => Seq(
-    tapestryIoc, springOrm, springContextSupport, aopalliance, hibernateEntityManager,jooq,
+    tapestryIoc, springOrm, springContextSupport, aopalliance, hibernateEntityManager,
     junit,h2
   )
   lazy val ActiveRecordMacroDeps = (sv: String) => Seq(
