@@ -40,7 +40,7 @@ trait SelectionField{
 }
 case class SortField[T](field: Field[T],isAsc:Boolean=true)
 
-class JPAField[T : TypeTag](val fieldName:String)  extends Field[T] {
+private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends Field[T] {
   def ===(value: T): Condition = {
     Condition.eq(this,value)
   }

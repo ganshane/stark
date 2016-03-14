@@ -1,17 +1,14 @@
-package stark.activerecord.services
+package com.example
 
 import org.junit.{Assert, Test}
 import stark.activerecord.services.DSL._
-import stark.activerecord.{BaseActiveRecordTestCase, ModelA}
-
-import scala.language.postfixOps
+import stark.activerecord.{ModelA, BaseActiveRecordTestCase}
 
 /**
- * dsl test
   *
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
- * @since 2016-03-09
- */
+  * @since 2016-03-14
+  */
 class DSLTest extends BaseActiveRecordTestCase{
   @Test
   def test_select: Unit = {

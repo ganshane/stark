@@ -19,16 +19,25 @@ import scala.reflect.runtime.universe._
  * @since 2016-03-09
  */
 object DSL {
+  //DSL Context using DynamicVariable method
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
-
+  //Execute Query type
   type DSLExecuteQuery[T] = ConditionBuilder[T] with Execute[T] with Limit
+  //Selection Query
   type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy
+  //DSLQuery
   type DSLQuery={ }
 
-  case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_]){
+  //Query Context
+  private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_]){
     var isMultiSelection = false
   }
 
+  /**
+    *  select method
+    * @tparam T entity type
+    * @return Selection step
+    */
   def select[T:ClassTag]: SelectStep[T,T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
@@ -38,6 +47,13 @@ object DSL {
 
     new SelectStep[T,T](clazz)
   }
+
+  /**
+    * selection field
+    * @param fields selection field
+    * @tparam T entity type
+    * @return selection step
+    */
   def select[T:ClassTag](fields:SelectionField*): SelectStep[T,Array[Any]]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
@@ -46,6 +62,12 @@ object DSL {
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
     new SelectStep[T,Array[Any]](clazz).apply(fields:_*)
   }
+
+  /**
+    * delete entity
+    * @tparam T entity type
+    * @return delete step
+    */
   def delete[T:ClassTag]: DeleteStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
@@ -55,6 +77,12 @@ object DSL {
 
     new DeleteStep[T]()
   }
+
+  /**
+    * update entity
+    * @tparam T entity type
+    * @return update step
+    */
   def update[T:ClassTag]:UpdateStep[T]={
     lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
     lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
@@ -64,6 +92,13 @@ object DSL {
 
     new UpdateStep[T]()
   }
+
+  /**
+    * create field
+    * @param name field name
+    * @tparam T field type
+    * @return
+    */
   def column[T : TypeTag](name:String):Field[T]={
     new JPAField[T](name)
   }
@@ -109,12 +144,14 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
 class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T] with Dynamic{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
   def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
-  /*
-  def set[F](field:Field[F],value:F):this.type={
+  def setWithType[F](field:String,value:F):this.type={
+    criteriaUpdate.set(field,value)
+    this
+  }
+  def setWithType[F](field:Field[F],value:F):this.type={
     criteriaUpdate.set(field.fieldName,value)
     this
   }
-  */
   def internalUpdate(params: (String, Any)*):this.type = {
     params.foreach{
       case (field,value) =>
@@ -157,7 +194,7 @@ private[activerecord] trait Limit{
 private[activerecord]trait ConditionsGetter{
   private[activerecord] def getConditions:Option[Predicate]=None
 }
-trait Execute[A]{
+private[activerecord] trait Execute[A]{
   this:Limit with ConditionsGetter =>
   val context:QueryContext
   def execute: Int ={
@@ -182,7 +219,7 @@ trait Execute[A]{
     entityService.execute(query)
   }
 }
-trait Fetch[A] {
+private[activerecord] trait Fetch[A] {
   this:Limit with ConditionsGetter =>
   val context:QueryContext
   private lazy val executeQuery:Stream[A]= fetchAsStream

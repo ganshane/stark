@@ -69,7 +69,7 @@ object ActiveRecordMacroDefinition {
     termOpt match{
       case Some(term) =>
         val termType = term.typeSignature
-        c.Expr[R](q"new stark.activerecord.services.JPAField[$termType]($field)")
+        c.Expr[R](q"stark.activerecord.services.DSL.column[$termType]($field)")
       case None=>
         c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#$field not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
         c.Expr[R](Literal(Constant(Nil)))
