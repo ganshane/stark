@@ -97,21 +97,29 @@ object ActiveRecordMacroDefinition {
     //find class field
     val expectedNames =  c.weakTypeOf[E].members
       .filter(_.isTerm)
-      .filter(_.asTerm.isVar).map(_.name.toString.trim).toSeq
+      .filter(_.asTerm.isVar).map(_.asTerm).toSeq
 
     val trees = params.map(_.tree).toList
-    println(params.size)
     trees.foreach{
-      case Apply(_,Literal(Constant(_name: String))::_) =>
+      case Apply(_,Literal(Constant(_name: String))::value::_) =>
         if(_name.isEmpty)
           c.error(c.enclosingPosition, s"name parameter is empty.")
-        else if(!expectedNames.contains(_name))
-          c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
-      case Typed(expr,tpt)=>
-        c.error(c.enclosingPosition, s"expr:${expr.getClass} tpt:${tpt} unsupported.")
+        val termOpt = expectedNames.find(_.name.decodedName.toString.trim == _name)
+        termOpt match{
+          case Some(term) =>
+            val termName = _name
+            val termType = term.typeSignature
+            val valueType = value.tpe
+            //if(!(termType weak_<:< valueType))
+            if(!(valueType <:< termType))
+              c.error(value.pos, s"$termType expected,but $valueType occur.")
+            q"($termName,$value.asInstanceOf[$termType])"
+          case None =>
+            c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")
+        }
       case other =>
-        c.error(c.enclosingPosition, s"${other}  unsupported.")
-    }
+        c.error(c.enclosingPosition, s"$other unsupported.")
+     }
     //c.error(c.enclosingPosition,"asdf")
 
     methodName match{
