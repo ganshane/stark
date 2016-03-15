@@ -11,6 +11,14 @@ import scala.reflect.runtime.universe._
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
+object Field {
+  def countField= new SelectionField {
+    override def toSelection[X]: Selection[X] = {
+      val context =DSL.dslContext.value
+      context.builder.count(context.root).asInstanceOf[Selection[X]]
+    }
+  }
+}
 trait Field[T] extends SelectionField{
   val fieldName:String
   def === (value:T): Condition
@@ -33,6 +41,7 @@ trait Field[T] extends SelectionField{
 
   def desc:SortField[T]
   def asc:SortField[T]
+  def count:SelectionField
 
 }
 trait SelectionField{
@@ -65,6 +74,17 @@ private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends
 
   override def toSelection[X]: Selection[X]= {
     DSL.dslContext.value.root.get[X](fieldName)
+  }
+  private def expression[X]={
+    DSL.dslContext.value.root.get[X](fieldName)
+  }
+
+  override def count: SelectionField ={
+    new SelectionField {
+      override def toSelection[X]: Selection[X] = {
+        DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]
+      }
+    }
   }
 }
 

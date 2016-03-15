@@ -31,6 +31,10 @@ object StarkActiveRecordModule {
   def buildEntityManagerFactory(dataSource: DataSource,
                                 configuration: util.Collection[String],
                                 ormConfig:ActiveRecordConfigSupport,
+                               @Local
+                                entityManager:EntityManager,
+                               @Local
+                                entityService: EntityService,
                                 objectLocator: ObjectLocator):EntityManagerFactory= {
     val entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean
     val adapter = new HibernateJpaVendorAdapter
@@ -49,6 +53,8 @@ object StarkActiveRecordModule {
     }
 
     ActiveRecord.objectLocator = objectLocator
+    ActiveRecord.entityManager = entityManager
+    ActiveRecord.entityService = entityService
     entityManagerFactoryBean.setJpaProperties(properties)
     entityManagerFactoryBean.afterPropertiesSet()
     entityManagerFactoryBean.getObject

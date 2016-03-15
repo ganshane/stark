@@ -26,6 +26,15 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(2, q1.size)
     val head = q1.head
     val first = q1.head
+    val q2 = select[ModelA](ModelA.name[String].count,ModelA.name) groupBy ModelA.name
+    Assert.assertEquals(2, q2.size)
+    Assert.assertEquals(1L, q2.head.head)
+
+    val q3 = select[ModelA] groupBy ModelA.name
+    Assert.assertEquals(2, q3.size)
+
+    Assert.assertEquals(2L, ModelA.count.head)
+
   }
   @Test
   def test_dsl: Unit ={

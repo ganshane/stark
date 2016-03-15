@@ -23,7 +23,7 @@ object DSL {
   //Execute Query type
   type DSLExecuteQuery[T] = ConditionBuilder[T] with Execute[T] with Limit
   //Selection Query
-  type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy
+  type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy with GroupBy
   //DSLQuery
   type DSLQuery={ }
 
@@ -130,9 +130,9 @@ class ConditionBuilder[R](implicit val context: QueryContext) extends Conditions
 
   override private[activerecord] def getConditions: Option[Predicate] = condition
 }
-class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy{
+class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy with GroupBy{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
-  def where:DSLSelectionQuery[T,R]=new ConditionBuilder[T] with Limit with Fetch[R] with OrderBy
+  def where:DSLSelectionQuery[T,R]=new ConditionBuilder[T] with Limit with Fetch[R] with OrderBy with GroupBy
   def apply(f:SelectionField*):this.type={
     DSL.dslContext.withValue(context){
       if(f.nonEmpty) {
@@ -166,8 +166,15 @@ class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T] w
 }
 class DeleteStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
 }
-abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter {
+abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter with Execute[T] with Limit{
   def where:DSLExecuteQuery[T]=new ConditionBuilder[T] with Execute[T] with Limit
+}
+private[activerecord] trait GroupBy{
+  val context:QueryContext
+  def groupBy[T](field: Field[T]): this.type ={
+      context.query.asInstanceOf[CriteriaQuery[_]].groupBy(context.root.get(field.fieldName))
+    this
+  }
 }
 private[activerecord] trait OrderBy {
   val context:QueryContext

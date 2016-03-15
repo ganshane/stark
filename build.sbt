@@ -1,6 +1,6 @@
 organization in ThisBuild          := "com.ganshane.stark"
 
-version in ThisBuild               := "0.1"
+version in ThisBuild               := "0.2-SNAPSHOT"
 
 homepage in ThisBuild              := Some(url("http://www.ganshane.com"))
 
@@ -17,7 +17,7 @@ crossScalaVersions in ThisBuild    := Seq("2.11.7")
 // Settings for Sonatype compliance
 pomIncludeRepository in ThisBuild  := { _ => false }
 
-publishTo in ThisBuild            <<= isSnapshot(if (_) Some(Opts.resolver.sonatypeSnapshots) else Some(Opts.resolver.sonatypeStaging))
+publishTo in ThisBuild            <<= isSnapshot(if (_) Some(Opts.resolver.mavenLocalFile) else Some(Opts.resolver.sonatypeStaging))
 
 scmInfo in ThisBuild               := Some(ScmInfo(url("https://github.com/ganshane/stark"), "scm:git:https://github.com/ganshane/stark.git"))
 

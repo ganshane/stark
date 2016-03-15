@@ -23,8 +23,8 @@ object ActiveRecord {
   private val logger = LoggerFactory getLogger getClass
   @volatile
   private[activerecord] var objectLocator:ObjectLocator= _
-  private[activerecord] lazy val entityManager = getService[EntityManager]
-  private[activerecord] lazy val entityService = getService[EntityService]
+  private[activerecord] var entityManager:EntityManager =  _ //getService[EntityManager]
+  private[activerecord] var entityService:EntityService = _ //getService[EntityService]
 
   /**
    * Saves the model.
@@ -79,6 +79,23 @@ object ActiveRecord {
   def internalWhere[A](clazz:Class[A],primaryKey:String,ql:String)(params:Any*): QlRelation[A]={
     new QlRelation[A](clazz,primaryKey,ql,params.toSeq)
   }
+
+  /**
+    * delete data by ql
+ *
+    * @param ql query clause
+    * @param parameters parameters
+    * @return result
+    */
+  def deleteByQL(ql:String,parameters:Any*): Int={
+    val query = entityManager.createQuery(ql)
+    var i = 1
+    parameters.foreach{value=>
+      query.setParameter(i,value)
+      i += 1
+    }
+    query.executeUpdate()
+  }
   def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLSelectionQuery[A,A]={
     val where = DSL.select[A].where
     params.foreach(p=>where.apply(p))
@@ -131,6 +148,9 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
     }
   }
   */
+  def count ={
+    DSL.select[A](Field.countField)
+  }
   def update:UpdateStep[A]={
     DSL.update[A]
   }

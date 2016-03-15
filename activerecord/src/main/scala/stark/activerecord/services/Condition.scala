@@ -78,6 +78,7 @@ object Condition{
 trait Condition{
   def and(condition: Condition):Condition
   def or(condition: Condition):Condition
+  def or(conditionFun: ()=>Condition):Condition
   def toPredicate:Predicate
 }
 class PredicateCondition(predicateFun: => Predicate) extends Condition{
@@ -86,5 +87,9 @@ class PredicateCondition(predicateFun: => Predicate) extends Condition{
     DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)
   override def or(condition: Condition): Condition =
     DSL.dslContext.value.builder.or(Seq[Predicate](expression,condition):_*)
+
+
+  override def or(conditionFun: () => Condition): Condition = ???
+
   override def toPredicate: Predicate = expression
 }
