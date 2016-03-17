@@ -3,7 +3,6 @@ package stark.activerecord.services
 import org.junit.{Assert, Test}
 import stark.activerecord.services.DSL._
 import stark.activerecord.{BaseActiveRecordTestCase, ModelA}
-
 import scala.language.postfixOps
 
 /**
@@ -52,7 +51,7 @@ class DSLTest extends BaseActiveRecordTestCase{
 
       val q3 = select[ModelA] where ModelA.name === "cctv" and (
         ModelA.seq === 1 or ModelA.name === "cctv" or ModelA.name[String].isNull
-          or ModelA.seq > 1 or ModelA.name === "asdf"
+          or ModelA.seq[Int] > 1 or ModelA.name[String] === "asdf"
         ) limit 3 offset 0 orderBy ModelA.name[String].desc
 
 
