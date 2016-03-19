@@ -1,6 +1,6 @@
 organization in ThisBuild          := "com.ganshane.stark"
 
-version in ThisBuild               := "0.2-SNAPSHOT"
+version in ThisBuild               := "0.1.1"
 
 homepage in ThisBuild              := Some(url("http://www.ganshane.com"))
 
