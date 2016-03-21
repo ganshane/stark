@@ -23,6 +23,11 @@ object Dependencies {
   val h2Runtime = "com.h2database" % "h2" % "1.3.176" % "runtime"
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.7.5"
 
+  val log4jdbc = "com.googlecode.log4jdbc" % "log4jdbc" % "1.2"
+  val jmock = "org.jmock" %"jmock-junit4"% "2.5.1" % "test"
+  val hamcrest="org.hamcrest" % "hamcrest-core" % "1.3" %"test"
+
+
 
   //   val logbackVer = "0.9.16"
   //   val grizzlyVer = "1.9.19"
@@ -61,9 +66,12 @@ object StarkBuild extends Build {
   lazy val ActiveRecordGeneratorDeps = (sv: String) => Seq(
     hibernateTools,springJdbc,slf4jApi,h2Runtime
   )
+  lazy val MigrationDeps=(sv:String)=>Seq(
+    log4jdbc,h2,jmock,hamcrest
+  )
   lazy val root =
     Project("stark-project", file("."))
-      .aggregate(ActiveRecordMacroProject, ActiveRecordProject,ActiveRecordGeneratorProject)
+      .aggregate(ActiveRecordMacroProject, ActiveRecordProject,ActiveRecordGeneratorProject,MigrationProject)
       .settings(publishArtifact := false)
   lazy val ActiveRecordProject = Project(
     "activerecord",
@@ -82,6 +90,11 @@ object StarkBuild extends Build {
     "activerecord-generator",
     file("activerecord-generator"),
     settings = buildSettings ++ Seq(libraryDependencies <++= scalaVersion { sv => ActiveRecordGeneratorDeps(sv) })
+  )
+  lazy val MigrationProject= Project(
+    "migration",
+    file("migration"),
+    settings = buildSettings ++ Seq(libraryDependencies <++= scalaVersion { sv => MigrationDeps(sv) })
   )
 
 }
