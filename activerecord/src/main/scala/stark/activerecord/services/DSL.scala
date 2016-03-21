@@ -24,13 +24,9 @@ object DSL {
   type DSLExecuteQuery[T] = ConditionBuilder[T] with Execute[T] with Limit
   //Selection Query
   type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy with GroupBy
-  //DSLQuery
-  type DSLQuery={ }
 
   //Query Context
-  private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:DSLQuery,root:Root[_]){
-    var isMultiSelection = false
-  }
+  private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:Any,root:Root[_])
 
   /**
     *  select method
@@ -138,8 +134,6 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
       if(f.nonEmpty) {
         val selection = context.builder.array(f.map(_.toSelection): _*)
         criteriaQuery.select(selection.asInstanceOf[Selection[T]])
-
-        context.isMultiSelection = true
       }
     }
     this
