@@ -21,9 +21,9 @@ object DSL {
   //DSL Context using DynamicVariable method
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
   //Execute Query type
-  type DSLExecuteQuery[T] = ConditionBuilder[T] with Execute[T] with Limit
+  type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause
   //Selection Query
-  type DSLSelectionQuery[T,R] = ConditionBuilder[T]  with Limit with Fetch[R] with OrderBy with GroupBy
+  type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause
 
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:Any,root:Root[_])
@@ -103,7 +103,7 @@ object DSL {
     new JPAField[T](name)
   }
 }
-class ConditionBuilder[R](implicit val context: QueryContext) extends ConditionsGetter {
+class ConditionClause[R](implicit val context: QueryContext) extends ConditionsGetter {
   private var condition:Option[Predicate] = None
   def apply(fun: =>Condition):this.type={
     and(fun)
@@ -124,11 +124,11 @@ class ConditionBuilder[R](implicit val context: QueryContext) extends Conditions
     this
   }
 
-  override private[activerecord] def getConditions: Option[Predicate] = condition
+  override private[activerecord] def conditionOpt: Option[Predicate] = condition
 }
-class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with Limit with ConditionsGetter with OrderBy with GroupBy{
+class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with GroupByClause{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
-  def where:DSLSelectionQuery[T,R]=new ConditionBuilder[T] with Limit with Fetch[R] with OrderBy with GroupBy
+  def where:DSLSelectionQuery[T,R]=new ConditionClause[T] with LimitClause with Fetch[R] with OrderByClause with GroupByClause
   def apply(f:SelectionField*):this.type={
     DSL.dslContext.withValue(context){
       if(f.nonEmpty) {
@@ -139,7 +139,7 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
     this
   }
 }
-class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T] with Dynamic{
+class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T] with Dynamic{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
   def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
   def setWithType[F](field:String,value:F):this.type={
@@ -158,19 +158,19 @@ class UpdateStep[T](implicit val context: QueryContext) extends ExecuteStep[T] w
     this
   }
 }
-class DeleteStep[T](implicit val context: QueryContext) extends ExecuteStep[T]{
+class DeleteStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T]{}
+
+sealed abstract class AbstractExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter with Execute[T] with LimitClause{
+  def where:DSLExecuteQuery[T]=new ConditionClause[T] with Execute[T] with LimitClause
 }
-abstract class ExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter with Execute[T] with Limit{
-  def where:DSLExecuteQuery[T]=new ConditionBuilder[T] with Execute[T] with Limit
-}
-private[activerecord] trait GroupBy{
+private[activerecord] trait GroupByClause{
   val context:QueryContext
   def groupBy[T](field: Field[T]): this.type ={
       context.query.asInstanceOf[CriteriaQuery[_]].groupBy(context.root.get(field.fieldName))
     this
   }
 }
-private[activerecord] trait OrderBy {
+private[activerecord] trait OrderByClause {
   val context:QueryContext
   def orderBy[T](field: Field[T]): this.type ={
     orderBy(field.asc)
@@ -184,7 +184,7 @@ private[activerecord] trait OrderBy {
     this
   }
 }
-private[activerecord] trait Limit{
+private[activerecord] trait LimitClause{
   private[services] var limitNum:Int = 0
   private[services] var offsetNum:Int = 0
   def limit(limit:Int):this.type={
@@ -197,21 +197,21 @@ private[activerecord] trait Limit{
   }
 }
 private[activerecord]trait ConditionsGetter{
-  private[activerecord] def getConditions:Option[Predicate]=None
+  private[activerecord] def conditionOpt:Option[Predicate]=None
 }
 private[activerecord] trait Execute[A]{
-  this:Limit with ConditionsGetter =>
+  this:LimitClause with ConditionsGetter =>
   val context:QueryContext
   def execute: Int ={
     val entityManager = ActiveRecord.entityManager
     val query = context.query match{
       case q:CriteriaUpdate[A] =>
         val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[A]]
-        getConditions.foreach(criteriaUpdate.where)
+        conditionOpt.foreach(criteriaUpdate.where)
         entityManager.createQuery(criteriaUpdate)
       case q:CriteriaDelete[A] =>
         val criteriaDelete = context.query.asInstanceOf[CriteriaDelete[A]]
-        getConditions.foreach(criteriaDelete.where)
+        conditionOpt.foreach(criteriaDelete.where)
         entityManager.createQuery(criteriaDelete)
 
     }
@@ -225,13 +225,13 @@ private[activerecord] trait Execute[A]{
   }
 }
 private[activerecord] trait Fetch[A] extends Iterable[A]{
-  this:Limit with ConditionsGetter =>
+  this:LimitClause with ConditionsGetter =>
   val context:QueryContext
   private lazy val executeQuery:Stream[A]= fetchAsStream
   private def fetchAsStream: Stream[A]={
     val entityManager = ActiveRecord.entityManager
     val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
-    getConditions.foreach(criteriaQuery.where)
+    conditionOpt.foreach(criteriaQuery.where)
     val query = entityManager.createQuery(criteriaQuery)
     if(limitNum >0 )
       query.setMaxResults(limitNum)
