@@ -3,6 +3,7 @@ package stark.activerecord.services
 
 import javax.persistence.criteria.Selection
 
+import scala.language.implicitConversions
 import scala.reflect.runtime.universe._
 
 /**

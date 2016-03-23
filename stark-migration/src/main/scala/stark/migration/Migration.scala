@@ -40,6 +40,7 @@ import java.sql.{Connection, PreparedStatement, ResultSet}
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
+import scala.language.implicitConversions
 
 /**
  * Due to the JVM erasure, the scala.Predef.ArrowAssoc.->

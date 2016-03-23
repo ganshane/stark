@@ -34,10 +34,9 @@
  */
 package stark.migration
 
-import java.sql.{
-  Connection,
-  PreparedStatement
-}
+import java.sql.{ Connection, PreparedStatement }
+
+import scala.language.implicitConversions
 
 object RichConnection {
   implicit def connectionToRichConnection(c: Connection): RichConnection = {
