@@ -429,7 +429,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.1</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -442,6 +442,7 @@
           </plugin>
         </plugins>
       </build>
+      <!--
       <properties>
         <gpg.defaultKeyring>false</gpg.defaultKeyring>
         <gpg.homedir>${session.executionRootDirectory}/support/gpg</gpg.homedir>
@@ -449,6 +450,7 @@
         <gpg.secretKeyring>secring.gpg</gpg.secretKeyring>
         <resource-conf>src/main/conf/production</resource-conf>
       </properties>
+      -->
     </profile>
   </profiles>
   <url>https://github.com/ganshane/stark</url>
