@@ -7,11 +7,11 @@
 
   <parent>
     <groupId>com.ganshane.stark</groupId>
-    <artifactId>stark-project_${scala-binary-version}</artifactId>
+    <artifactId>stark-project_2.11</artifactId>
     <version>dev-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>stark-rpc_${scala-binary-version}</artifactId>
+  <artifactId>stark-rpc_2.11</artifactId>
   <packaging>jar</packaging>
   <name>Stark RPC Framework</name>
   <dependencies>

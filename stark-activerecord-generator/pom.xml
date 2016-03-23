@@ -8,10 +8,10 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.ganshane.stark</groupId>
-    <artifactId>stark-project_${scala-binary-version}</artifactId>
+    <artifactId>stark-project_2.11</artifactId>
     <version>dev-SNAPSHOT</version>
   </parent>
-  <artifactId>stark-activerecord-generator_${scala-binary-version}</artifactId>
+  <artifactId>stark-activerecord-generator_2.11</artifactId>
   <name>Stark Object Relative Geneator Tools</name>
   <dependencies>
     <dependency>

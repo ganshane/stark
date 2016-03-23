@@ -6,7 +6,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ganshane.stark</groupId>
-  <artifactId>stark-project_${scala-binary-version}</artifactId>
+  <artifactId>stark-project_2.11</artifactId>
   <packaging>pom</packaging>
   <version>dev-SNAPSHOT</version>
   <name>Stark Project</name>
