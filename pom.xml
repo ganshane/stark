@@ -34,11 +34,13 @@
         <artifactId>activerecord</artifactId>
         <version>${project.version}</version>
       </dependency>
+      -->
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>activerecord-macro</artifactId>
         <version>${project.version}</version>
       </dependency>
+      <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>activerecord-generator</artifactId>
