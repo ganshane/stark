@@ -15,6 +15,10 @@
   <name>Stark Object Relative Geneator Tools</name>
   <dependencies>
     <dependency>
+      <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.hibernate</groupId>
       <artifactId>hibernate-tools</artifactId>
       <version>4.3.1.Final</version>
