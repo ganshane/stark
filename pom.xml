@@ -1,5 +1,4 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 <!-- 
    Copyright 2012,2013,2014,2015,2016 the original author or authors. All rights reserved.
    site: http://www.ganshane.com
@@ -9,7 +8,7 @@
   <groupId>com.ganshane.stark</groupId>
   <artifactId>stark-project</artifactId>
   <packaging>pom</packaging>
-  <version>dev-SNAPSHOT</version>
+  <version>0.1.2</version>
   <name>Stark Project</name>
   <description>Application Framework</description>
   <modules>
@@ -22,7 +21,7 @@
     <url>https://github.com/ganshane/stark</url>
     <connection>scm:git:https://github.com/ganshane/stark.git</connection>
     <developerConnection>scm:git:git@github.com:ganshane/stark.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>stark-project-0.1.2</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
