@@ -13,11 +13,9 @@
   <name>Stark Project</name>
   <description>Application Framework</description>
   <modules>
-    <!--
     <module>activerecord</module>
     <module>activerecord-macro</module>
     <module>activerecord-generator</module>
-    -->
     <module>migration</module>
   </modules>
   <scm>
@@ -28,25 +26,21 @@
   </scm>
   <dependencyManagement>
     <dependencies>
-      <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>activerecord</artifactId>
+        <artifactId>stark-activerecord</artifactId>
         <version>${project.version}</version>
       </dependency>
-      -->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>activerecord-macro</artifactId>
+        <artifactId>stark-activerecord-macro</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!--
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>activerecord-generator</artifactId>
+        <artifactId>stark-activerecord-generator</artifactId>
         <version>${project.version}</version>
       </dependency>
-      -->
       <dependency>
         <groupId>org.apache.tapestry</groupId>
         <artifactId>tapestry-core</artifactId>
@@ -79,6 +73,33 @@
         <groupId>org.scala-lang</groupId>
         <artifactId>scala-reflect</artifactId>
         <version>${scala-release-version}</version>
+      </dependency>
+      <!-- spring framework -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-orm</artifactId>
+        <version>${spring-release-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context-support</artifactId>
+        <version>${spring-release-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>${spring-release-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-tx</artifactId>
+        <version>${spring-release-version}</version>
+      </dependency>
+      <!-- hibernate entitymanager -->
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>4.3.5.Final</version>
       </dependency>
 
       <!-- h2database -->
@@ -130,6 +151,12 @@
         <groupId>org.apache.httpcomponents</groupId>
         <artifactId>httpclient</artifactId>
         <version>4.3.5</version>
+      </dependency>
+      <!-- aop -->
+      <dependency>
+        <groupId>aopalliance</groupId>
+        <artifactId>aopalliance</artifactId>
+        <version>1.0</version>
       </dependency>
       <!-- test -->
       <dependency>
@@ -452,6 +479,6 @@
     <hawtio-release-version>1.4.19</hawtio-release-version>
     <lucene-release-version>5.2.1</lucene-release-version>
     <proguard-release-version>5.1</proguard-release-version>
-    <lichen-release-version>0.5.10.1</lichen-release-version>
+    <spring-release-version>4.2.4.RELEASE</spring-release-version>
   </properties>
 </project>

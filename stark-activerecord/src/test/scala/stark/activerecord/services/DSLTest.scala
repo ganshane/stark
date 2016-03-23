@@ -32,7 +32,7 @@ class DSLTest extends BaseActiveRecordTestCase{
     val q3 = select[ModelA] groupBy ModelA.name
     Assert.assertEquals(2, q3.size)
 
-    Assert.assertEquals(3L, ModelA.count.head)
+    Assert.assertEquals(2L, ModelA.count.head)
 
   }
   @Test
