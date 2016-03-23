@@ -5,13 +5,14 @@ cache:
     - $HOME/protobuf
 before_cache:
     - rm -rf $HOME/.m2/repository/com/ganshane/stark
+    - find $HOME/.m2 -name "resolver-status.properties" | xargs rm
 
 language: java
 
 env: MAVEN_OPTS="-XX:MaxPermSize=128m"
 
 before_install:
-  - bash support/scripts/install-protobuf.sh
+  - bash support/scripts/install-rotobuf.sh
   - export PATH=$PATH:$HOME/protobuf/bin
 jdk:
   - oraclejdk7
