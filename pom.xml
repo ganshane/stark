@@ -15,6 +15,7 @@
     <module>stark-activerecord</module>
     <module>stark-activerecord-macro</module>
     <module>stark-activerecord-generator</module>
+    <module>stark-rpc</module>
     <module>stark-migration</module>
     <module>stark-utils</module>
   </modules>
@@ -39,6 +40,11 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>stark-activerecord-generator_${scala-binary-version}</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>stark-rpc_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -106,7 +112,18 @@
         <artifactId>hibernate-entitymanager</artifactId>
         <version>4.3.5.Final</version>
       </dependency>
-
+      <!-- netty -->
+      <dependency>
+        <groupId>io.netty</groupId>
+        <artifactId>netty</artifactId>
+        <version>3.10.3.Final</version>
+      </dependency>
+      <!-- proto -->
+      <dependency>
+        <groupId>com.google.protobuf</groupId>
+        <artifactId>protobuf-java</artifactId>
+        <version>2.6.1</version>
+      </dependency>
       <!-- h2database -->
       <dependency>
         <groupId>com.h2database</groupId>

@@ -4,8 +4,11 @@ import javax.persistence.criteria.Predicate
 
 import stark.activerecord.services.Condition._
 
+import scala.language.implicitConversions
+
 /**
  * condition
+ *
  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
