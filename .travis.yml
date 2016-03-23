@@ -3,6 +3,8 @@ cache:
   directories:
     - $HOME/.m2/repository
     - $HOME/protobuf
+before_cache:
+    - rm -rf $HOME/.m2/repository/com/ganshane/stark
 
 language: java
 
