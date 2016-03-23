@@ -6,7 +6,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ganshane.stark</groupId>
-  <artifactId>stark-project</artifactId>
+  <artifactId>stark-project_${scala-binary-version}</artifactId>
   <packaging>pom</packaging>
   <version>dev-SNAPSHOT</version>
   <name>Stark Project</name>
@@ -27,17 +27,17 @@
     <dependencies>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>stark-activerecord</artifactId>
+        <artifactId>stark-activerecord_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>stark-activerecord-macro</artifactId>
+        <artifactId>stark-activerecord-macro_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>stark-activerecord-generator</artifactId>
+        <artifactId>stark-activerecord-generator_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -499,6 +499,7 @@
     <tapestry-release-version>5.3.8</tapestry-release-version>
     <jetty-release-version>8.1.16.v20140903</jetty-release-version>
     <scala-release-version>2.11.7</scala-release-version>
+    <scala-binary-version>2.11</scala-binary-version>
     <metrics-release-version>3.1.0</metrics-release-version>
     <hawtio-release-version>1.4.19</hawtio-release-version>
     <lucene-release-version>5.2.1</lucene-release-version>
