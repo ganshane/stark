@@ -9,7 +9,7 @@ before_cache:
 
 language: java
 
-env: MAVEN_OPTS="-XX:MaxPermSize=128m"
+env: MAVEN_OPTS="-XX:MaxPermSize=128m -Xmx1g -Xms1g"
 
 before_install:
   - bash support/scripts/install-protobuf.sh
