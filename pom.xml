@@ -13,10 +13,10 @@
   <name>Stark Project</name>
   <description>Application Framework</description>
   <modules>
-    <module>activerecord</module>
-    <module>activerecord-macro</module>
-    <module>activerecord-generator</module>
-    <module>migration</module>
+    <module>stark-activerecord</module>
+    <module>stark-activerecord-macro</module>
+    <module>stark-activerecord-generator</module>
+    <module>stark-migration</module>
   </modules>
   <scm>
     <url>https://github.com/ganshane/stark</url>
@@ -429,7 +429,7 @@
       </properties>
     </profile>
   </profiles>
-  <url>https://github.com/ganshane/monad</url>
+  <url>https://github.com/ganshane/stark</url>
   <inceptionYear>2015</inceptionYear>
   <organization>
     <name>Ganshane Developer Team</name>
@@ -444,11 +444,11 @@
   </licenses>
   <issueManagement>
     <system>github</system>
-    <url>https://github.com/ganshane/monad/issues</url>
+    <url>https://github.com/ganshane/stark/issues</url>
   </issueManagement>
   <ciManagement>
     <system>travis</system>
-    <url>https://travis-ci.org/ganshane/monad</url>
+    <url>https://travis-ci.org/ganshane/stark</url>
   </ciManagement>
   <developers>
     <developer>
