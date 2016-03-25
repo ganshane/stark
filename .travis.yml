@@ -21,6 +21,7 @@ before_install:
 - export PATH=$PATH:$HOME/protobuf/bin
 jdk:
 - oraclejdk7
+install: true
 script:
 - protoc --version
 - mvn test
