@@ -493,7 +493,7 @@
         <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
         <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
         <gpg.defaultKeyring>false</gpg.defaultKeyring>
-        <gpg.homedir>${session.executionRootDirectory}/support/gpg</gpg.homedir>
+        <gpg.homedir>${session.executionRootDirectory}/support/deploy</gpg.homedir>
         <gpg.publicKeyring>pubring.gpg</gpg.publicKeyring>
         <gpg.secretKeyring>secring.gpg</gpg.secretKeyring>
         <resource-conf>src/main/conf/production</resource-conf>
