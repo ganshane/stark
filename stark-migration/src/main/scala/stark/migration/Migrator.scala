@@ -797,6 +797,14 @@ class Migrator(connectionBuilder: ConnectionBuilder,
           }
         }
       }
+
+
+      //explicitly unlock schemaMigration table,because commit will not release the lock.
+      adapter.unlockTableSql(schemaMigrationsTableName).foreach{sql=>
+        schemaConnection.withPreparedStatement(sql) { statement =>
+          statement.execute()
+        }
+      }
     }
   }
 

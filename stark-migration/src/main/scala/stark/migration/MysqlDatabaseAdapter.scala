@@ -251,6 +251,11 @@ class MysqlDatabaseAdapter(override val schemaNameOpt: Option[String])
       .toString
   }
 
+
+  override def unlockTableSql(schemaNameOpt: Option[String], tableName: String): Option[String] = {
+    Some("UNLOCK TABLES")
+  }
+
   override protected def alterColumnSql(schemaNameOpt: Option[String],
                                         columnDefinition: ColumnDefinition): String = {
     new java.lang.StringBuilder(512)
@@ -275,6 +280,7 @@ class MysqlDatabaseAdapter(override val schemaNameOpt: Option[String])
 
   /**
    * 对某一列增加注释
+ *
    * @param tableName 表名
    * @param columnName  列名
    * @param comment 注释
@@ -288,6 +294,7 @@ class MysqlDatabaseAdapter(override val schemaNameOpt: Option[String])
 
   /**
    * 对表添加注释
+ *
    * @param tableName 表名
    * @param comment 注释
    * @return 注释的sql
