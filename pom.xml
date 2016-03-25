@@ -475,17 +475,29 @@
               </execution>
             </executions>
           </plugin>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.2</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>sonatype</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
         </plugins>
       </build>
-      <!--
       <properties>
+        <gpg.executable>gpg</gpg.executable>
+        <gpg.keyname>${env.GPG_KEYNAME}</gpg.keyname>
+        <gpg.passphrase>${env.GPG_PASSPHRASE}</gpg.passphrase>
         <gpg.defaultKeyring>false</gpg.defaultKeyring>
         <gpg.homedir>${session.executionRootDirectory}/support/gpg</gpg.homedir>
         <gpg.publicKeyring>pubring.gpg</gpg.publicKeyring>
         <gpg.secretKeyring>secring.gpg</gpg.secretKeyring>
         <resource-conf>src/main/conf/production</resource-conf>
       </properties>
-      -->
     </profile>
   </profiles>
   <url>https://github.com/ganshane/stark</url>
@@ -518,12 +530,12 @@
   </developers>
   <distributionManagement>
     <snapshotRepository>
-      <id>sonatype-snapshots</id>
+      <id>sonatype</id>
       <name>Sonatype Nexus snapshot repository</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>sonatype-releases</id>
+      <id>sonatype</id>
       <name>Sonatype Nexus release repository</name>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
