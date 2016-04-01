@@ -22,6 +22,9 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     entityManager.persist(entity)
     entity
   }
+  override def refresh[T](entity: T):Unit = {
+    entityManager.refresh(entity)
+  }
 
   @Transactional
   override def deleteById[T: ClassTag](id: Any): Unit = {

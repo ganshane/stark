@@ -15,6 +15,7 @@ import scala.reflect.ClassTag
 trait EntityService {
   @Transactional
   def save[T](entity:T):T
+  def refresh[T](entity:T):Unit
   @Transactional
   def deleteById[T:ClassTag](id:Any)
   @Transactional

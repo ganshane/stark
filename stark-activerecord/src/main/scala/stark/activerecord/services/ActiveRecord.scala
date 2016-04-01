@@ -34,6 +34,9 @@ object ActiveRecord {
   def save[T](record:T):T={
     entityService.save(record)
   }
+  def refresh[T](record:T)={
+    entityService.refresh(record)
+  }
 
   /**
    * Deletes the record in the database
@@ -115,6 +118,10 @@ trait ActiveRecord {
   @Transient
   def delete(): Unit ={
     ActiveRecord.delete(this)
+  }
+  @Transient
+  def refresh(): Unit ={
+    ActiveRecord.refresh(this)
   }
 }
 
