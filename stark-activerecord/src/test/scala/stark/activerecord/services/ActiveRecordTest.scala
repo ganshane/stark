@@ -12,11 +12,18 @@ import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
  */
 class ActiveRecordTest extends BaseActiveRecordTestCase{
   @Test
+  def test_count_by_ql: Unit = {
+    val modelA = new ModelA
+    modelA.name = "asdf"
+    modelA.save
+
+    Assert.assertEquals(1L,ModelA.countByJPQL(null))
+  }
+  @Test
   def test_find_by: Unit = {
     val modelA = new ModelA
     modelA.name = "asdf"
     modelA.save
-    Array(1).sum
     var size = ModelA.find_by(name="asdf").size
     Assert.assertEquals(1,size)
     size = ModelA.find_by_name("asdf").size
@@ -92,13 +99,13 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     size = ModelA.find_by(name="asdf",id=modelA.id).size
     Assert.assertEquals(1,size)
 
-    size = ModelA.where("name=?1","asdf")
+    size = ModelA.whereByJPQL("name=?1","asdf")
       .offset(0).limit(10).asc("name").size
     Assert.assertEquals(1,size)
 
-    ModelA.where("name=?1","asdf").update(name="asdf")
+    ModelA.whereByJPQL("name=?1","asdf").update(name="asdf")
 //    ModelA.find_by(name="asdf").update(name="asdf")
-    ModelA.where("name=?1","asdf").delete
+    ModelA.whereByJPQL("name=?1","asdf").delete
   }
   @Test
   def test_lob: Unit ={

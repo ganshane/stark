@@ -63,6 +63,9 @@ object ActiveRecord {
   private[services] def find[T](relation:Relation[T]):Stream[T]={
     entityService.find(relation)
   }
+  private[services] def count[T](relation:Relation[T]):Long={
+    entityService.count(relation)
+  }
 
   /**
    * find some service using ObjectLocator
@@ -185,8 +188,12 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @param parameters parameters
    * @return Realtion Object
    */
-  def where(ql:String,parameters:Any*): QlRelation[A]={
+  def whereByJPQL(ql:String, parameters:Any*): QlRelation[A]={
     ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)
+  }
+  def countByJPQL(ql:String,parameters:Any*): Long ={
+    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)
+    qlRelation.count
   }
 
 

@@ -24,6 +24,10 @@ trait Relation[A] {
     underlying_result
   }
 
+  private[activerecord] def count:Long={
+    ActiveRecord.count(this)
+  }
+
   def order(params:(String,Any)*):this.type
   def asc(fields:String*):this.type={
     order(fields.map((_,"asc")):_*)
@@ -82,6 +86,7 @@ trait DynamicUpdateSupport[A] extends Dynamic{
  * @tparam A type parameter
  */
 class QlRelation[A](val entityClazz:Class[A],val primaryKey:String) extends Relation[A] with DynamicUpdateSupport[A]{
+
   def this(entityClazz:Class[A],primaryKey:String,query:String,queryParams:Seq[Any]){
     this(entityClazz,primaryKey)
     if(query != null)
@@ -96,7 +101,6 @@ class QlRelation[A](val entityClazz:Class[A],val primaryKey:String) extends Rela
 
   private[activerecord] var updateQl:Option[String] = None
   private[activerecord] var updateParams:Seq[Any] = Nil
-
 
 
   def order(params:(String,Any)*):this.type= {

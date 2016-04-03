@@ -13,6 +13,8 @@ import scala.reflect.ClassTag
  * @since 2016-01-03
  */
 trait EntityService {
+  def count[T](relation: Relation[T]): Long
+
   @Transactional
   def save[T](entity:T):T
   def refresh[T](entity:T):Unit

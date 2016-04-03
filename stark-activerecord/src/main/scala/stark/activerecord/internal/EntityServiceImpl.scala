@@ -130,4 +130,24 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     //convert as scala stream
     JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream
   }
+
+  override def count[T](queryObj: Relation[T]): Long = {
+    val query = queryObj match {
+      case relation: QlRelation[T] =>
+        var fullQl = "select count(*) from %s".format(relation.entityClazz.getSimpleName)
+
+        relation.queryClause.foreach {
+          fullQl += " where %s".format(_)
+        }
+        logger.debug("ql:{}", fullQl)
+        val query = entityManager.createQuery(fullQl)
+
+        setQueryParameter(query, relation)
+
+        query
+      case other=>
+        throw new UnsupportedOperationException("%s unspported".format(other))
+    }
+    query.getResultList.get(0).asInstanceOf[Long]
+  }
 }
