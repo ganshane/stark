@@ -51,12 +51,11 @@ object ModelA extends ActiveRecordInstance[ModelA]{
 @Entity
 @Table(name = "model_a")
 @javax.persistence.SequenceGenerator(name = "entity_a_seq", sequenceName = "entity_a_seq")
-class ModelA extends ActiveRecord{
+class ModelA extends ActiveRecord with BaseModeA{
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_a_seq")
   @Column(name = "id")
   var id:Int = _
-  var name:String = _
   var seq:Int = _
   @Lob
   @Column(length=100000)
@@ -67,6 +66,11 @@ class ModelA extends ActiveRecord{
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CASE_OCCUR_DATE", length = 23)
   var date:java.util.Date = _
+}
+@MappedSuperclass
+trait BaseModeA{
+  @Column(length=100)
+  var name:String = _
 }
 object ModelB extends ActiveRecordInstance[ModelB]{
 }

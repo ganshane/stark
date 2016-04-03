@@ -6,7 +6,8 @@ import scala.reflect.macros.whitebox
 
 /**
  * hall orm macro definition
- * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
+  *
+  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-01
  */
 object ActiveRecordMacroDefinition {
@@ -24,9 +25,7 @@ object ActiveRecordMacroDefinition {
     findMethod.toString.trim match{
       case find_by_pattern(attributes) =>
         //gather class field
-        val expectedNames =  c.weakTypeOf[E].members
-          .filter(_.isTerm)
-          .filter(_.asTerm.isVar).map(_.name.toString.trim).toSeq
+        val expectedNames =  findMembers[E](c).map(_.name.toString.trim)
         val attrs =  attributes.split("_and_")
         if(attrs.length != params.length){
           c.error(c.enclosingPosition, s"name's length ${attrs.length} !=  parameter's length ${params.length}.")
@@ -51,6 +50,13 @@ object ActiveRecordMacroDefinition {
     }
 
   }
+  private def findMembers[E:c.WeakTypeTag](c:whitebox.Context):Seq[c.universe.TermSymbol]={
+    /**
+      * find all members included inherited members
+      *
+      */
+    c.weakTypeOf[E].members.filter(_.isTerm).filter(_.asTerm.isAccessor).map(_.asTerm.accessed.asTerm).toStream.distinct.toSeq
+  }
   /**
    * find method
    */
@@ -59,9 +65,8 @@ object ActiveRecordMacroDefinition {
     import c.universe._
     val Literal(Constant(field:String)) = fieldName.tree
     //gather class field
-    val expectedNames =  c.weakTypeOf[E].members
-      .filter(_.isTerm)
-      .filter(_.asTerm.isVar).map(_.asTerm)
+
+    val expectedNames =  findMembers[E](c)
 
     //validate field name
 //    c.error(c.enclosingPosition,s"field: $field")
@@ -95,9 +100,7 @@ object ActiveRecordMacroDefinition {
     import c.universe._
     val Literal(Constant(methodName:String)) = name.tree
     //find class field
-    val expectedNames =  c.weakTypeOf[E].members
-      .filter(_.isTerm)
-      .filter(_.asTerm.isVar).map(_.asTerm).toSeq
+    val expectedNames =  findMembers[E](c)
 
     val trees = params.map(_.tree).toList
     trees.foreach{
@@ -141,9 +144,7 @@ object ActiveRecordMacroDefinition {
 
     val Literal(Constant(methodName:String)) = name.tree
     //find class field
-    val expectedNames =  c.weakTypeOf[E].members
-      .filter(_.isTerm)
-      .filter(_.asTerm.isVar).map(_.name.toString.trim).toSeq
+    val expectedNames =  findMembers[E](c).map(_.name.toString.trim)
 
     //validate params
     val trees = params.map(_.tree).toList
