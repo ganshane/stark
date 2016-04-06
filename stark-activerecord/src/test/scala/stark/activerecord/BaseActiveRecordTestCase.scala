@@ -66,6 +66,7 @@ class ModelA extends ActiveRecord with BaseModeA{
   @Temporal(TemporalType.TIMESTAMP)
   @Column(name = "CASE_OCCUR_DATE", length = 23)
   var date:java.util.Date = _
+  var i:java.lang.Integer = _
 }
 @MappedSuperclass
 trait BaseModeA{

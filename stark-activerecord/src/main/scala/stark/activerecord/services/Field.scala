@@ -19,6 +19,7 @@ object Field {
       context.builder.count(context.root).asInstanceOf[Selection[X]]
     }
   }
+  implicit def wrapNumericField[T<:Number](field: Field[T]):NumericField[T]= new NumericField(field)
   implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)
   implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)
 }
@@ -70,7 +71,7 @@ private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends
     }
   }
 }
-class NumericField[T](field:Field[T])(implicit num:Numeric[T]){
+class NumericField[T](field:Field[T]){
   def >(value:T):Condition={
     Condition.gt(field,value)
   }
