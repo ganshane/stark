@@ -52,6 +52,9 @@ object ActiveRecord {
   def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int={
     entityService.deleteRelation(relation)
   }
+  def find[T:ClassTag](key:Any):T={
+    entityManager.find(classTag[T].runtimeClass,key).asInstanceOf[T]
+  }
 
   /**
    * find some records by Relation
@@ -204,7 +207,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @return entity object
    */
   def find(key:Any):A={
-    internalFind(key).head
+    ActiveRecord.find[A](key)
   }
 
   /**
