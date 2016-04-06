@@ -7,7 +7,7 @@
   <parent>
     <groupId>com.ganshane.stark</groupId>
     <artifactId>stark-project_2.11</artifactId>
-    <version>0.1.6</version>
+    <version>dev-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>stark-activerecord_2.11</artifactId>

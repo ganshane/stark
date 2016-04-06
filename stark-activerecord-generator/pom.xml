@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.ganshane.stark</groupId>
     <artifactId>stark-project_2.11</artifactId>
-    <version>0.1.6</version>
+    <version>dev-SNAPSHOT</version>
   </parent>
   <artifactId>stark-activerecord-generator_2.11</artifactId>
   <name>Stark Object Relative Geneator Tools</name>
