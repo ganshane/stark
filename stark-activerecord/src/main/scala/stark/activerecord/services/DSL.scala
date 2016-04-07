@@ -124,7 +124,7 @@ class ConditionClause[R](implicit val context: QueryContext) extends ConditionsG
     this
   }
 
-  override private[activerecord] def conditionOpt: Option[Predicate] = condition
+  override def conditionOpt: Option[Predicate] = condition
 }
 class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with GroupByClause{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
@@ -197,7 +197,7 @@ private[activerecord] trait LimitClause{
   }
 }
 private[activerecord]trait ConditionsGetter{
-  private[activerecord] def conditionOpt:Option[Predicate]=None
+  def conditionOpt:Option[Predicate]=None
 }
 private[activerecord] trait Execute[A]{
   this:LimitClause with ConditionsGetter =>
@@ -228,6 +228,7 @@ private[activerecord] trait Fetch[A] extends Iterable[A]{
   this:LimitClause with ConditionsGetter =>
   val context:QueryContext
   private lazy val executeQuery:Stream[A]= fetchAsStream
+  private lazy val totalNum:Long = executeCount
   private def fetchAsStream: Stream[A]={
     val entityManager = ActiveRecord.entityManager
     val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
@@ -242,4 +243,15 @@ private[activerecord] trait Fetch[A] extends Iterable[A]{
   }
 
   override def iterator: Iterator[A] = executeQuery.toIterator
+  def count:Long=totalNum
+  private def executeCount:Long={
+    val entityManager = ActiveRecord.entityManager
+    val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
+    val countSelection = context.builder.count(context.root)
+    criteriaQuery.select(countSelection.asInstanceOf[Selection[A]])
+    conditionOpt.foreach(criteriaQuery.where)
+    val query = entityManager.createQuery(criteriaQuery)
+
+    query.getSingleResult.asInstanceOf[Long]
+  }
 }

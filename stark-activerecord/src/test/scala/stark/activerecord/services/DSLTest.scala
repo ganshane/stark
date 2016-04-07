@@ -33,6 +33,7 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(2, q3.size)
 
     Assert.assertEquals(2L, ModelA.count.head)
+    Assert.assertEquals(2L, select[ModelA].count)
 
   }
   @Test
