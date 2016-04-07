@@ -124,7 +124,7 @@ class ConditionClause[R](implicit val context: QueryContext) extends ConditionsG
     this
   }
 
-  override def conditionOpt: Option[Predicate] = condition
+  override private[activerecord] def conditionOpt: Option[Predicate] = condition
 }
 class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with GroupByClause{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
@@ -197,7 +197,7 @@ private[activerecord] trait LimitClause{
   }
 }
 private[activerecord]trait ConditionsGetter{
-  def conditionOpt:Option[Predicate]=None
+  private[activerecord] def conditionOpt:Option[Predicate]=None
 }
 private[activerecord] trait Execute[A]{
   this:LimitClause with ConditionsGetter =>
