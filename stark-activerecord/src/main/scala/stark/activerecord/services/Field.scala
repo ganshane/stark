@@ -81,7 +81,7 @@ class NumericField[T](field:Field[T]){
   def avg:SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
-        val expression = DSL.dslContext.value.root.get[X](field.fieldName).as(classOf[Number])
+        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
         DSL.dslContext.value.builder.avg(expression).asInstanceOf[Selection[X]]
       }
     }
@@ -89,7 +89,7 @@ class NumericField[T](field:Field[T]){
   def max:SelectionField={
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
-        val expression = DSL.dslContext.value.root.get[X](field.fieldName).as(classOf[Number])
+        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
         DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]
       }
     }
@@ -97,7 +97,7 @@ class NumericField[T](field:Field[T]){
   def min:SelectionField={
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
-        val expression = DSL.dslContext.value.root.get[X](field.fieldName).as(classOf[Number])
+        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
         DSL.dslContext.value.builder.min(expression).asInstanceOf[Selection[X]]
       }
     }
@@ -105,7 +105,7 @@ class NumericField[T](field:Field[T]){
   def sum:SelectionField={
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
-        val expression = DSL.dslContext.value.root.get[X](field.fieldName).as(classOf[Number])
+        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
         DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]
       }
     }

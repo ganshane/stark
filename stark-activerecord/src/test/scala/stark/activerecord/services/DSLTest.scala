@@ -13,6 +13,18 @@ import scala.language.postfixOps
  */
 class DSLTest extends BaseActiveRecordTestCase{
   @Test
+  def test_sum: Unit = {
+    val modelA = new ModelA
+    modelA.name = "cctv"
+    modelA.i = 1234
+    modelA.save
+
+    Assert.assertEquals(1234L,select[ModelA](ModelA.i[Integer].sum) head)
+    Assert.assertEquals(1234,select[ModelA](ModelA.i[Integer].max) head)
+    Assert.assertEquals(1234,select[ModelA](ModelA.i[Integer].min) head)
+    Assert.assertEquals(1234.0,select[ModelA](ModelA.i[Integer].avg) head)
+  }
+  @Test
   def test_select: Unit = {
     val modelA = new ModelA
     modelA.name = "cctv"
@@ -34,6 +46,8 @@ class DSLTest extends BaseActiveRecordTestCase{
 
     Assert.assertEquals(2L, ModelA.count.head)
     Assert.assertEquals(2L, select[ModelA].count)
+
+
 
   }
   @Test
