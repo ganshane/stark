@@ -183,8 +183,25 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    */
   def applyDynamic(name:String)(params:Any*):DSLSelectionQuery[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,DSLSelectionQuery[A,A]]
 
+
   /**
-   * where(ql,parameters)
+    * select some fields
+    * @param fields fields
+    * @return Select step
+    */
+  def select(fields:SelectionField):SelectStep[A,Array[Any]]={
+    DSL.select(fields)
+  }
+
+  /**
+    * where by DSL
+    * @return select step
+    */
+  def where:SelectStep[A,A] ={
+    DSL.select[A]
+  }
+  /**
+   * whereByJPQL(ql,parameters)
    * ModelA.where("name=?1 and code=?2","jcai","1232")
     *
     * @param ql query language
