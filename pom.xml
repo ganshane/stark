@@ -8,7 +8,7 @@
   <groupId>com.ganshane.stark</groupId>
   <artifactId>stark-project_2.11</artifactId>
   <packaging>pom</packaging>
-  <version>dev-SNAPSHOT</version>
+  <version>0.1.9</version>
   <name>Stark Project</name>
   <description>Application Framework</description>
   <modules>
@@ -23,7 +23,7 @@
     <url>https://github.com/ganshane/stark</url>
     <connection>scm:git:https://github.com/ganshane/stark.git</connection>
     <developerConnection>scm:git:git@github.com:ganshane/stark.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>stark-project_2.11-0.1.9</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
