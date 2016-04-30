@@ -11,6 +11,10 @@ import stark.activerecord.{ModelA, BaseActiveRecordTestCase}
   */
 class DSLTest extends BaseActiveRecordTestCase{
   @Test
+  def test_delete: Unit = {
+    ModelA.delete.execute
+  }
+  @Test
   def test_select: Unit = {
     val modelA = new ModelA
     modelA.name = "cctv"

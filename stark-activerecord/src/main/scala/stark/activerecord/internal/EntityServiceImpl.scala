@@ -39,8 +39,8 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
 
 
   @Transactional
-  override def execute[T](query: Query): Int={
-    query.executeUpdate()
+  override def execute[T](func: EntityManager=>Int): Int={
+    func(entityManager)
   }
 
   @Transactional

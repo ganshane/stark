@@ -203,7 +203,7 @@ private[activerecord] trait Execute[A]{
   this:LimitClause with ConditionsGetter =>
   val context:QueryContext
   def execute: Int ={
-    val entityManager = ActiveRecord.entityManager
+    ActiveRecord.executeInTransaction{entityManager=>
     val query = context.query match{
       case q:CriteriaUpdate[A] =>
         val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[A]]
@@ -220,8 +220,8 @@ private[activerecord] trait Execute[A]{
     if(offsetNum > 0)
       query.setFirstResult(offsetNum)
 
-    val entityService = ActiveRecord.entityService
-    entityService.execute(query)
+      query.executeUpdate()
+    }
   }
 }
 private[activerecord] trait Fetch[A] extends Iterable[A]{

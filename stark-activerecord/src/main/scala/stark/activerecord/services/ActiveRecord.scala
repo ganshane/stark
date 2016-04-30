@@ -19,6 +19,7 @@ import scala.reflect.{ClassTag, classTag}
  * @since 2016-01-03
  */
 object ActiveRecord {
+
   //logger
   private val logger = LoggerFactory getLogger getClass
   @volatile
@@ -69,6 +70,9 @@ object ActiveRecord {
   }
   private[services] def count[T](relation:Relation[T]):Long={
     entityService.count(relation)
+  }
+  def executeInTransaction(function: (EntityManager) => Int): Int ={
+    entityService.execute(function)
   }
 
   /**

@@ -4,12 +4,13 @@ import java.util
 import java.util.Properties
 import javax.persistence.{EntityManager, EntityManagerFactory}
 import javax.sql.DataSource
+
 import org.apache.tapestry5.ioc.annotations._
 import org.apache.tapestry5.ioc.{MethodAdviceReceiver, ObjectLocator, ServiceBinder}
 import org.slf4j.Logger
 import org.springframework.orm.jpa.support.SharedEntityManagerBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
-import org.springframework.orm.jpa.{JpaTransactionManager, LocalContainerEntityManagerFactoryBean}
+import org.springframework.orm.jpa.{JpaTransactionManager, JpaVendorAdapter, LocalContainerEntityManagerFactoryBean}
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.{AnnotationTransactionAttributeSource, Transactional}
 import org.springframework.transaction.interceptor.TransactionInterceptor
@@ -18,11 +19,14 @@ import stark.activerecord.internal.{EntityManagerTransactionAdvice, EntityServic
 import stark.activerecord.services.{ActiveRecord, EntityService}
 
 /**
- * hall orm module
- * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
+  * 实现了简单方便的ORM模块
+  * 利用了Spring-orm和JPA相关东西
+  *
+  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-02
  */
 object StarkActiveRecordModule {
+  private var springBeanFactoryOpt:Option[LocalContainerEntityManagerFactoryBean] =  None
   def bind(binder:ServiceBinder): Unit ={
     binder.bind(classOf[EntityService],classOf[EntityServiceImpl])
   }
@@ -31,15 +35,9 @@ object StarkActiveRecordModule {
   def buildEntityManagerFactory(dataSource: DataSource,
                                 configuration: util.Collection[String],
                                 ormConfig:ActiveRecordConfigSupport,
-                               @Local
-                                entityManager:EntityManager,
-                               @Local
-                                entityService: EntityService,
                                 objectLocator: ObjectLocator):EntityManagerFactory= {
     val entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean
-    val adapter = new HibernateJpaVendorAdapter
 
-    entityManagerFactoryBean.setJpaVendorAdapter(adapter)
     entityManagerFactoryBean.setDataSource(dataSource)
 
     val packages = configuration.toArray(new Array[String](configuration.size()))
@@ -51,14 +49,22 @@ object StarkActiveRecordModule {
       val jpaProperty = it.next()
       properties.put(jpaProperty.name,jpaProperty.value)
     }
+    entityManagerFactoryBean.setJpaProperties(properties)
+
+    val vendorClassName = properties.getProperty(StarkActiveRecordConstants.JPA_VENDOR_KEY)
+    if( vendorClassName != null)
+      entityManagerFactoryBean.setJpaVendorAdapter(Thread.currentThread().getContextClassLoader.loadClass(vendorClassName).newInstance().asInstanceOf[JpaVendorAdapter])
+    else
+      entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter)
+
 
     ActiveRecord.objectLocator = objectLocator
     /*
     ActiveRecord.entityManager = entityManager
     ActiveRecord.entityService = entityService
     */
-    entityManagerFactoryBean.setJpaProperties(properties)
     entityManagerFactoryBean.afterPropertiesSet()
+    springBeanFactoryOpt = Some(entityManagerFactoryBean)
     entityManagerFactoryBean.getObject
   }
 
@@ -71,10 +77,14 @@ object StarkActiveRecordModule {
 
     shared.getObject
   }
-  def buildJpaTransactionManager(entityManagerFactory:EntityManagerFactory,@Local entityManager: EntityManager):PlatformTransactionManager={
+  def buildJpaTransactionManager(entityManagerFactory:EntityManagerFactory,
+                                 dataSource: DataSource
+                                 ):PlatformTransactionManager={
     val transactionManager = new JpaTransactionManager()
+    //保证全局事务使用的key都是自身申明的对象
     transactionManager.setEntityManagerFactory(entityManagerFactory)
-    transactionManager.afterPropertiesSet()
+    //设置JPA厂商
+    springBeanFactoryOpt.foreach(x=>transactionManager.setJpaDialect(x.getJpaDialect))
 
     transactionManager
   }

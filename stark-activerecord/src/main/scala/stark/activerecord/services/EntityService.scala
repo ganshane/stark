@@ -1,6 +1,6 @@
 package stark.activerecord.services
 
-import javax.persistence.Query
+import javax.persistence.EntityManager
 
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,7 +23,7 @@ trait EntityService {
   @Transactional
   def delete[T](entity:T)
   @Transactional
-  def execute[T](query:Query):Int
+  def execute[T](function :EntityManager=>Int):Int
   @Transactional
   def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int
   @Transactional

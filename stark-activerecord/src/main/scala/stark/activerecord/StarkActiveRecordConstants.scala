@@ -6,4 +6,5 @@ package stark.activerecord
  * @since 2016-01-04
  */
 object StarkActiveRecordConstants {
+  final val JPA_VENDOR_KEY="vendor"
 }
