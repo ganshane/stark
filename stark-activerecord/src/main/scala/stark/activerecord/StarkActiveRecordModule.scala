@@ -53,8 +53,10 @@ object StarkActiveRecordModule {
     }
 
     ActiveRecord.objectLocator = objectLocator
+    /*
     ActiveRecord.entityManager = entityManager
     ActiveRecord.entityService = entityService
+    */
     entityManagerFactoryBean.setJpaProperties(properties)
     entityManagerFactoryBean.afterPropertiesSet()
     entityManagerFactoryBean.getObject

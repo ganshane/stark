@@ -23,8 +23,9 @@ object ActiveRecord {
   private val logger = LoggerFactory getLogger getClass
   @volatile
   private[activerecord] var objectLocator:ObjectLocator= _
-  private[activerecord] var entityManager:EntityManager =  _ //getService[EntityManager]
-  private[activerecord] var entityService:EntityService = _ //getService[EntityService]
+
+  private[activerecord] def entityManager:EntityManager =  getService[EntityManager]
+  private[activerecord] def entityService:EntityService = getService[EntityService]
 
   /**
    * Saves the model.
