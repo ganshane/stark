@@ -1,6 +1,6 @@
 package stark.webservice.services
 
-import javax.jws.{WebParam, WebMethod, WebService}
+import javax.jws.{WebMethod, WebParam, WebService}
 
 /**
   *
