@@ -23,6 +23,7 @@ import java.util
 class StarkWebServiceRequestFilter(applicationGlobals: ApplicationGlobals, @Symbol(StarkWebServiceSymbols.WEB_SERVICE_PATH) webservicePath: String)
   extends HttpServletRequestFilter {
   private lazy val _axisServlet = new AxisServlet() {
+    init(config)
     @throws(classOf[ServletException])
     override def init(config: ServletConfig) {
       super.init(config)
@@ -52,7 +53,6 @@ class StarkWebServiceRequestFilter(applicationGlobals: ApplicationGlobals, @Symb
     def getInitParameterNames: util.Enumeration[String] = null
   }
 
-  _axisServlet.init(config)
 
   @throws(classOf[IOException])
   def service(request: HttpServletRequest, response: HttpServletResponse, handler: HttpServletRequestHandler): Boolean = {

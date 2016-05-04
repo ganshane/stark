@@ -7,4 +7,5 @@ package stark.webservice
   */
 object StarkWebServiceSymbols {
   final val WEB_SERVICE_PATH = "stark.webservice.path"
+  final val WEB_SERVICE_AXIS1_PATH = "stark.webservice.axis1.path"
 }

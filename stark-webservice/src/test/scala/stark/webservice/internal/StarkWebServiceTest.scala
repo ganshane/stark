@@ -30,4 +30,14 @@ class StarkWebServiceTest {
     Assert.assertEquals("xiaoming", hiService.echoString("xiaoming"))
     server.stop
   }
+  @Test
+  def testAxis1 {
+    val server: Server = JettyServerCreator.createTapestryWebapp("localhost", 12345, "stark.webservice.StarkWebServiceModule", "axis1", new WsFilter)
+    server.start
+
+    Thread.currentThread().join()
+    val hiService: EchoService = StarkWebServiceClient.createClient(classOf[EchoService], "http://localhost:12345/axis1/EchoService?wsdl", "http://www.egfit.com/")
+    Assert.assertEquals("xiaoming", hiService.echoString("xiaoming"))
+    server.stop
+  }
 }
