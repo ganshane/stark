@@ -18,10 +18,11 @@ import stark.webservice.StarkWebServiceSymbols
   * @since 2016-05-04
   */
 class Axis1WebServiceRequestFilter (applicationGlobals: ApplicationGlobals, @Symbol(StarkWebServiceSymbols.WEB_SERVICE_AXIS1_PATH) webservicePath: String) extends HttpServletRequestFilter{
-  //config axis engine factory
-  System.setProperty(EngineConfigurationFactory.SYSTEM_PROPERTY_NAME,Class.forName("stark.webservice.internal.axis1.EngineConfigurationFactoryStark").getName)
 
-  private val _axisServlet = new AxisServlet{
+  private lazy val _axisServlet = new AxisServlet{
+    //config axis engine factory
+    System.setProperty(EngineConfigurationFactory.SYSTEM_PROPERTY_NAME,Class.forName("stark.webservice.internal.axis1.EngineConfigurationFactoryStark").getName)
+    init(config)
   }
   private lazy val config = new ServletConfig() {
     def getServletName: String =  "axis"
@@ -43,9 +44,7 @@ class Axis1WebServiceRequestFilter (applicationGlobals: ApplicationGlobals, @Sym
     def getInitParameterNames: util.Enumeration[String] = null
   }
 
-  _axisServlet.init(config)
-
-  private val regPattern=("/"+webservicePath+"/([a-z0-9A-Z]+)[^$]*").r
+  private lazy val regPattern=("/"+webservicePath+"/([a-z0-9A-Z]+)[^$]*").r
   override def service(request: HttpServletRequest, response: HttpServletResponse, handler: HttpServletRequestHandler): Boolean = {
     if (request.getServletPath.startsWith("/" + webservicePath)) {
       try {
