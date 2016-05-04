@@ -1,10 +1,10 @@
-package lichen.ws;
+package stark.webservice;
 
-import lichen.ws.internal.EchoServiceImpl;
-import lichen.ws.internal.WebServicePublisherImpl;
-import lichen.ws.internal.WebserviceRequestFilter;
-import lichen.ws.services.EchoService;
-import lichen.ws.services.WebServicePublisher;
+import stark.webservice.internal.EchoServiceImpl;
+import stark.webservice.internal.WebServicePublisherImpl;
+import stark.webservice.internal.WebserviceRequestFilter;
+import stark.webservice.services.EchoService;
+import stark.webservice.services.WebServicePublisher;
 import org.apache.tapestry5.ioc.MappedConfiguration;
 import org.apache.tapestry5.ioc.OrderedConfiguration;
 import org.apache.tapestry5.ioc.ServiceBinder;

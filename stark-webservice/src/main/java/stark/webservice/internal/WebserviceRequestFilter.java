@@ -1,7 +1,7 @@
-package lichen.ws.internal;
+package stark.webservice.internal;
 
-import lichen.ws.LichenWsSymbols;
-import lichen.ws.services.WebServicePublisher;
+import stark.webservice.LichenWsSymbols;
+import stark.webservice.services.WebServicePublisher;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.transport.http.AxisServlet;

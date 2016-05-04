@@ -1,4 +1,4 @@
-package lichen.ws;
+package stark.webservice;
 
 /**
  * lichen webservice symbols

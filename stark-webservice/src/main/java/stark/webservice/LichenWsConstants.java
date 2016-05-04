@@ -1,4 +1,4 @@
-package lichen.ws;
+package stark.webservice;
 
 /**
  * webservice 模块的常量类

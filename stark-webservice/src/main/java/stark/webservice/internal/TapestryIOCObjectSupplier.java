@@ -4,9 +4,9 @@
  * file: $Id: TapestryIOCObjectSupplier.java 685 2010-03-17 08:04:57Z jcai $
  * created at:2010-3-5
  */
-package lichen.ws.internal;
+package stark.webservice.internal;
 
-import lichen.ws.LichenWsConstants;
+import stark.webservice.LichenWsConstants;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.ServiceObjectSupplier;
 import org.apache.axis2.description.AxisService;

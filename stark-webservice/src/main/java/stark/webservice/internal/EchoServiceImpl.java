@@ -4,10 +4,10 @@
  * file: $Id: EchoServiceImpl.java 685 2010-03-17 08:04:57Z jcai $
  * created at:2010-3-4
  */
-package lichen.ws.internal;
+package stark.webservice.internal;
 
 
-import lichen.ws.services.EchoService;
+import stark.webservice.services.EchoService;
 
 /**
  * only for test

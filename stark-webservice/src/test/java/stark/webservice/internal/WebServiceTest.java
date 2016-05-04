@@ -1,9 +1,9 @@
-package lichen.ws.internal;
+package stark.webservice.internal;
 
 
-import lichen.ws.LichenWsModule;
-import lichen.ws.services.EchoService;
-import lichen.ws.services.WebserviceClient;
+import stark.webservice.LichenWsModule;
+import stark.webservice.services.EchoService;
+import stark.webservice.services.WebserviceClient;
 import org.apache.tapestry5.TapestryFilter;
 import org.eclipse.jetty.server.Server;
 import org.junit.Assert;

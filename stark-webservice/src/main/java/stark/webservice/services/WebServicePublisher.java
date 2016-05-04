@@ -4,7 +4,7 @@
  * file: $Id: WebServicePublisher.java 283 2010-03-11 07:41:26Z jcai $
  * created at:2010-3-2
  */
-package lichen.ws.services;
+package stark.webservice.services;
 
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.engine.AxisConfiguration;

@@ -1,4 +1,4 @@
-package lichen.ws.services;
+package stark.webservice.services;
 
 
 import stark.utils.services.StarkException;

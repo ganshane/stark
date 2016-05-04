@@ -4,7 +4,7 @@
  * file: $Id: EchoService.java 283 2010-03-11 07:41:26Z jcai $
  * created at:2010-3-5
  */
-package lichen.ws.services;
+package stark.webservice.services;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;

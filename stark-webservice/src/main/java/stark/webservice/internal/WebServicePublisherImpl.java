@@ -4,10 +4,10 @@
  * file: $Id: WebServicePublisherImpl.java 283 2010-03-11 07:41:26Z jcai $
  * created at:2010-3-2
  */
-package lichen.ws.internal;
+package stark.webservice.internal;
 
-import lichen.ws.LichenWsConstants;
-import lichen.ws.services.WebServicePublisher;
+import stark.webservice.LichenWsConstants;
+import stark.webservice.services.WebServicePublisher;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.engine.AxisConfiguration;
