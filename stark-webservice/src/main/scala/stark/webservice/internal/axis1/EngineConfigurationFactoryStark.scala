@@ -22,16 +22,15 @@ object EngineConfigurationFactoryStark {
 class EngineConfigurationFactoryStarkWithIOC extends EngineConfigurationFactory{
   override def getServerEngineConfig: EngineConfiguration = {
     val stream = getClass.getResourceAsStream("/stark/webservice/internal/axis1/server-config.wsdd")
-    val content = IOUtils.toString(stream)
+    val content = IOUtils.toByteArray(stream)
     IOUtils.closeQuietly(stream)
-    println(content)
 
-    val provider = new FileProvider(new ByteArrayInputStream(content.getBytes())){
+    val provider = new FileProvider(new ByteArrayInputStream(content)){
       override def getService(qname: QName): SOAPService = {
+        //TODO 此处进行拦截
         super.getService(qname)
       }
     }
-
     provider
   }
   override def getClientEngineConfig: EngineConfiguration = throw new UnsupportedOperationException
