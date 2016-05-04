@@ -6,6 +6,7 @@ import org.apache.tapestry5.TapestryFilter
 import org.eclipse.jetty.server.Server
 import org.junit.{Test, Assert}
 import stark.utils.services.JettyServerCreator
+import stark.webservice.internal.axis1.Axis1Client
 import stark.webservice.services.{StarkWebServiceClient, EchoService}
 
 /**
@@ -35,9 +36,8 @@ class StarkWebServiceTest {
     val server: Server = JettyServerCreator.createTapestryWebapp("localhost", 12345, "stark.webservice.StarkWebServiceModule", "axis1", new WsFilter)
     server.start
 
-    Thread.currentThread().join()
-    val hiService: EchoService = StarkWebServiceClient.createClient(classOf[EchoService], "http://localhost:12345/axis1/EchoService?wsdl", "http://www.egfit.com/")
-    Assert.assertEquals("xiaoming", hiService.echoString("xiaoming"))
+    val version = Axis1Client.callRemote[String]("http://localhost:12345/services/Version","getVersion")
+    Assert.assertTrue(version.indexOf("Apache Axis version: 1.4")==0)
     server.stop
   }
 }
