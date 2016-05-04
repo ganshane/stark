@@ -7,22 +7,22 @@
 package stark.webservice.internal;
 
 
+import javax.jws.WebMethod
+
 import stark.webservice.services.EchoService;
 
 /**
  * only for test
+ *
  * @author <a href="mailto:jun.tsai@gmail.com">Jun Tsai</a>
  * @version $Revision: 685 $
  * @since 0.1
  */
-public class EchoServiceImpl implements EchoService
+class EchoServiceImpl extends EchoService
 {
-    public String echoString(String text)
-    {
-        return text;
-    }
+  @WebMethod
+  override def echoString(text: String): String = text
 
-    public String[] Query(String text) {
-        return new String[]{"1","2","3","4"};
-    }
+  @WebMethod
+  override def Query(text: String): Array[String] = Array[String]("1","2","3","4")
 }

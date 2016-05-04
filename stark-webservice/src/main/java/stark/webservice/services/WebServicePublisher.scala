@@ -15,12 +15,12 @@ import org.apache.axis2.engine.AxisConfiguration;
  * @version $Revision: 283 $
  * @since 0.1
  */
-public interface WebServicePublisher {
+trait WebServicePublisher {
     /**
      * registry web service object to axis2
      * @param axisConfiguration axis configuration
      * @throws AxisFault fail to add service
      * @since 0.1
      */
-    public void registryWebServiceObject(AxisConfiguration axisConfiguration) throws AxisFault;
+    def registryWebServiceObject(axisConfiguration:AxisConfiguration)
 }
