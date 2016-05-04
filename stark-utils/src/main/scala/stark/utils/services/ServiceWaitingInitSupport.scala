@@ -26,7 +26,7 @@ trait ServiceWaitingInitSupport {
    */
   protected def awaitServiceInit() {
     if (!latch.await(1, TimeUnit.MINUTES)) {
-      throw new MonadException("timeout to wating service init", StarkUtilsErrorCode.WAITING_SERVER_INIT_TIMEOUT)
+      throw new StarkException("timeout to wating service init", StarkUtilsErrorCode.WAITING_SERVER_INIT_TIMEOUT)
     }
   }
 
@@ -35,7 +35,7 @@ trait ServiceWaitingInitSupport {
    */
   protected def throwExceptionIfServiceInitialized() = {
     if (latch.getCount == 0) {
-      throw new MonadException("service already initialized", StarkUtilsErrorCode.SERVICE_HAS_INITIALIZED)
+      throw new StarkException("service already initialized", StarkUtilsErrorCode.SERVICE_HAS_INITIALIZED)
     }
   }
 

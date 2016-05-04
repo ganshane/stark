@@ -27,7 +27,7 @@ trait ZkClientSupport extends ServiceWaitingInitSupport {
   def zkClient: CuratorFramework = {
     awaitServiceInit()
     client.getOrElse {
-      throw new MonadException("zk client not be initialized", StarkUtilsErrorCode.ZK_NOT_BE_INITIALIZED)
+      throw new StarkException("zk client not be initialized", StarkUtilsErrorCode.ZK_NOT_BE_INITIALIZED)
     }
   }
 

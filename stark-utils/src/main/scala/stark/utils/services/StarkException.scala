@@ -10,29 +10,30 @@ import java.io.{PrintStream, PrintWriter}
  * 异常消息编号有:
  * monad-support             1000
  * monad-jni                 4000
+ *
  * @author jcai
  */
-object MonadException {
-  def wrap(exception: Throwable): MonadException = wrap(exception, null)
+object StarkException {
+  def wrap(exception: Throwable): StarkException = wrap(exception, null)
 
-  def wrap(exception: Throwable, errorCode: ErrorCode): MonadException = {
+  def wrap(exception: Throwable, errorCode: ErrorCode): StarkException = {
     wrap(exception, errorCode, exception.getMessage)
   }
 
-  def wrap(exception: Throwable, errorCode: ErrorCode, message: String): MonadException = {
+  def wrap(exception: Throwable, errorCode: ErrorCode, message: String): StarkException = {
     exception match {
-      case me: MonadException =>
+      case me: StarkException =>
         if (errorCode != null && errorCode != me.errorCode) {
-          return new MonadException(message, exception, errorCode)
+          return new StarkException(message, exception, errorCode)
         }
         me
       case _ =>
-        new MonadException(message, exception, errorCode)
+        new StarkException(message, exception, errorCode)
     }
   }
 }
 
-class MonadException(message: String, cause: Throwable, val errorCode: ErrorCode) extends RuntimeException(message, cause) {
+class StarkException(message: String, cause: Throwable, val errorCode: ErrorCode) extends RuntimeException(message, cause) {
   def this(errorCode: ErrorCode) = this(null, null, errorCode)
 
   def this(message: String, errorCode: ErrorCode) = this(message, null, errorCode)

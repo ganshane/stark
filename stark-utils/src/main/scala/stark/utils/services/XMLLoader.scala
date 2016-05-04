@@ -73,7 +73,7 @@ object XmlLoader {
       unmarshaller.unmarshal(reader).asInstanceOf[T]
     } catch {
       case NonFatal(e) =>
-        throw MonadException.wrap(e, StarkUtilsErrorCode.FAIL_PARSE_XML)
+        throw StarkException.wrap(e, StarkUtilsErrorCode.FAIL_PARSE_XML)
     } finally {
       close(is)
       if (xsd.isDefined)
@@ -83,7 +83,7 @@ object XmlLoader {
         if (veOption.isDefined) {
           val ve = veOption.get
           val vel = ve.getLocator
-          throw new MonadException(
+          throw new StarkException(
             "line %s column %s :%s".format(vel.getLineNumber, vel.getColumnNumber, ve.getMessage),
             StarkUtilsErrorCode.FAIL_PARSE_XML)
         }

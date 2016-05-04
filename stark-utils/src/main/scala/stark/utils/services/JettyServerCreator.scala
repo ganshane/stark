@@ -29,7 +29,7 @@ trait JettyServerSupport {
       server
     } catch {
       case e: BindException =>
-        throw new MonadException(e.getMessage, StarkUtilsErrorCode.SERVER_FAIL_BIND)
+        throw new StarkException(e.getMessage, StarkUtilsErrorCode.SERVER_FAIL_BIND)
     }
   }
 

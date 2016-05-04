@@ -11,7 +11,7 @@ import com.google.protobuf.GeneratedMessage.GeneratedExtension
 import stark.rpc.config.RpcBindSupport
 import stark.rpc.protocol.CommandProto.{BaseCommand, CommandStatus}
 import stark.rpc.services._
-import stark.utils.services.{LoggerSupport, MonadException, StarkUtils}
+import stark.utils.services.{LoggerSupport, StarkException, StarkUtils}
 import org.apache.tapestry5.ioc.annotations.EagerLoad
 import org.apache.tapestry5.ioc.services.RegistryShutdownHub
 import org.jboss.netty.bootstrap.ServerBootstrap
@@ -87,7 +87,7 @@ class NettyRpcServerImpl(rpcBindSupport: RpcBindSupport,
     } catch {
       case NonFatal(e) =>
         shutdown()
-        throw MonadException.wrap(e)
+        throw StarkException.wrap(e)
     }
   }
 
@@ -123,7 +123,7 @@ class NettyRpcServerImpl(rpcBindSupport: RpcBindSupport,
 
     override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent): Unit = {
       e.getCause match {
-        case me: MonadException =>
+        case me: StarkException =>
           error("server exception,client:{} msg:{}", e.getChannel.getRemoteAddress, me.toString)
         case other =>
           error("server exception,client:" + e.getChannel.getRemoteAddress, other)

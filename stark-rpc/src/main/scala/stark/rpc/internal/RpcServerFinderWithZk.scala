@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock
 
 import stark.rpc.model.RpcServerLocation
 import stark.rpc.services.{MonadRpcErrorCode, RpcServerFinder}
-import stark.utils.services.{ChildrenDataWatcher, LoggerSupport, MonadException, ZookeeperTemplate}
+import stark.utils.services.{ChildrenDataWatcher, LoggerSupport, StarkException, ZookeeperTemplate}
 import org.apache.tapestry5.json.JSONObject
 
 /**
@@ -50,7 +50,7 @@ class RpcServerFinderWithZk(zk: ZookeeperTemplate) extends RpcServerFinder with 
     }
 
     if (seq.isEmpty) {
-      throw new MonadException("server not found :%s".format(pathPrefix), MonadRpcErrorCode.SERVER_NOT_FOUND)
+      throw new StarkException("server not found :%s".format(pathPrefix), MonadRpcErrorCode.SERVER_NOT_FOUND)
     }
 
     seq.toArray

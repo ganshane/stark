@@ -35,6 +35,6 @@ object ServiceUtils {
 
             LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(BETWEEN_SECONDS))
         }
-        throw new MonadException("经过%s s还未能获取[%s]实例".format(NUM_RETRY * BETWEEN_SECONDS,objName),StarkUtilsErrorCode.TIMEOUT_TO_GET_OBJECT)
+        throw new StarkException("经过%s s还未能获取[%s]实例".format(NUM_RETRY * BETWEEN_SECONDS,objName),StarkUtilsErrorCode.TIMEOUT_TO_GET_OBJECT)
     }
 }
