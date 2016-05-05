@@ -88,6 +88,10 @@ class StarkWSDDJavaRPCProvider(objectLocator: ObjectLocator) extends WSDDJavaRPC
     new StarkRpcProvider(objectLocator)
   }
 }
+
+/**
+  * 暴露IOC中的服务类供rpc调用
+  */
 class StarkRpcProvider(objectLocator:ObjectLocator) extends RPCProvider{
   override def makeNewServiceObject(msgContext: MessageContext, clsName: String): AnyRef = {
     clsName match{
