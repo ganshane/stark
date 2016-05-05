@@ -33,6 +33,13 @@
   <parameter name="allowedMethods" value="getVersion"/>
   <parameter name="className" value="org.apache.axis.Version"/>
  </service>
+ ###
+ <!--
+ <service name="EchoService" provider="java:RPC">
+  <parameter name="allowedMethods" value="*"/>
+  <parameter name="className" value="stark.webservice.services.EchoService"/>
+ </service>
+ -->
  <transport name="http">
   <requestFlow>
    <handler type="URLMapper"/>

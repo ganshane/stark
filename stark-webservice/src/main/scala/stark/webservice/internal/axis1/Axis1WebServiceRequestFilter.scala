@@ -1,12 +1,17 @@
 package stark.webservice.internal.axis1
 
 import java.util
-import javax.servlet.http.{HttpServletRequestWrapper, HttpServletRequest, HttpServletResponse}
+import javax.servlet.http.{HttpServletRequest, HttpServletRequestWrapper, HttpServletResponse}
 import javax.servlet.{ServletConfig, ServletContext, ServletException}
 
-import org.apache.axis.EngineConfigurationFactory
+import org.apache.axis.deployment.wsdd.providers.WSDDJavaRPCProvider
+import org.apache.axis.deployment.wsdd.{WSDDConstants, WSDDProvider, WSDDService}
+import org.apache.axis.providers.java.RPCProvider
 import org.apache.axis.transport.http.AxisServlet
+import org.apache.axis.{EngineConfiguration, EngineConfigurationFactory, Handler, MessageContext}
+import org.apache.tapestry5.ioc.ObjectLocator
 import org.apache.tapestry5.ioc.annotations.Symbol
+import org.apache.tapestry5.ioc.services.ServiceActivityScoreboard
 import org.apache.tapestry5.services.{ApplicationGlobals, HttpServletRequestFilter, HttpServletRequestHandler}
 import stark.utils.services.StarkException
 import stark.webservice.StarkWebServiceSymbols
@@ -17,9 +22,15 @@ import stark.webservice.StarkWebServiceSymbols
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
   * @since 2016-05-04
   */
-class Axis1WebServiceRequestFilter (applicationGlobals: ApplicationGlobals, @Symbol(StarkWebServiceSymbols.WEB_SERVICE_AXIS1_PATH) webservicePath: String) extends HttpServletRequestFilter{
+class Axis1WebServiceRequestFilter (objectLocator:ObjectLocator,
+                                    applicationGlobals: ApplicationGlobals,
+                                    scoreboard: ServiceActivityScoreboard,
+                                    @Symbol(StarkWebServiceSymbols.WEB_SERVICE_AXIS1_PATH) webservicePath: String) extends HttpServletRequestFilter{
 
   private lazy val _axisServlet = new AxisServlet{
+    //register scoreboard
+    EngineConfigurationFactoryStark.scoreboard = scoreboard
+    WSDDProvider.registerProvider(WSDDConstants.QNAME_JAVARPC_PROVIDER, new StarkWSDDJavaRPCProvider(objectLocator))
     //config axis engine factory
     System.setProperty(EngineConfigurationFactory.SYSTEM_PROPERTY_NAME,Class.forName("stark.webservice.internal.axis1.EngineConfigurationFactoryStark").getName)
     init(config)
@@ -55,7 +66,7 @@ class Axis1WebServiceRequestFilter (applicationGlobals: ApplicationGlobals, @Sym
               case regPattern(f)=>
                 f
               case other=>
-                other
+                null
             }
           }
         }
@@ -69,5 +80,21 @@ class Axis1WebServiceRequestFilter (applicationGlobals: ApplicationGlobals, @Sym
       return true
     }
     handler.service(request, response)
+  }
+}
+
+class StarkWSDDJavaRPCProvider(objectLocator: ObjectLocator) extends WSDDJavaRPCProvider{
+  override def newProviderInstance(service: WSDDService, registry: EngineConfiguration): Handler = {
+    new StarkRpcProvider(objectLocator)
+  }
+}
+class StarkRpcProvider(objectLocator:ObjectLocator) extends RPCProvider{
+  override def makeNewServiceObject(msgContext: MessageContext, clsName: String): AnyRef = {
+    clsName match{
+      case "org.apache.axis.Version" | "org.apache.axis.utils.Admin" =>
+        super.makeNewServiceObject(msgContext,clsName)
+      case other=>
+        objectLocator.getService(Class.forName(clsName)).asInstanceOf[AnyRef]
+    }
   }
 }

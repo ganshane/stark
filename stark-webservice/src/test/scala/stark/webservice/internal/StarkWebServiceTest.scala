@@ -38,6 +38,10 @@ class StarkWebServiceTest {
 
     val version = Axis1Client.callRemote[String]("http://localhost:12345/services/Version","getVersion")
     Assert.assertTrue(version.indexOf("Apache Axis version: 1.4")==0)
+
+    val text = Axis1Client.callRemote[String]("http://localhost:12345/services/EchoService","echoString","asdf")
+    Assert.assertEquals("asdf",text)
+
     server.stop
   }
 }
