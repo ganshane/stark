@@ -1,5 +1,6 @@
 package stark.webservice.services
 
+import javax.activation.DataHandler
 import javax.jws.{WebMethod, WebParam, WebService}
 
 /**
@@ -13,4 +14,6 @@ trait EchoService {
   @WebMethod def echoString(@WebParam(name = "myName") text: String): String
 
   @WebMethod def Query(text: String): Array[String]
+
+  @WebMethod def TestAttachment(file: DataHandler): DataHandler
 }

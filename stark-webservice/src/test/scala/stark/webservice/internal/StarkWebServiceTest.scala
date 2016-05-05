@@ -1,7 +1,10 @@
 package stark.webservice.internal
 
+import javax.activation.DataHandler
 import javax.servlet.ServletContext
 
+import org.apache.axiom.attachments.ByteArrayDataSource
+import org.apache.commons.io.IOUtils
 import org.apache.tapestry5.TapestryFilter
 import org.eclipse.jetty.server.Server
 import org.junit.{Test, Assert}
@@ -41,6 +44,11 @@ class StarkWebServiceTest {
 
     val text = Axis1Client.callRemote[String]("http://localhost:12345/services/EchoService","echoString","asdf")
     Assert.assertEquals("asdf",text)
+
+    val file = new DataHandler(new ByteArrayDataSource("asdf".getBytes))
+    val result = Axis1Client.callRemote[DataHandler]("http://localhost:12345/services/EchoService","TestAttachment",file)
+    val resultText = IOUtils.toString(result.getInputStream)
+    Assert.assertEquals("asdf",resultText)
 
     server.stop
   }

@@ -7,6 +7,7 @@
 package stark.webservice.internal;
 
 
+import javax.activation.DataHandler
 import javax.jws.WebMethod
 
 import stark.webservice.services.EchoService;
@@ -25,4 +26,7 @@ class EchoServiceImpl extends EchoService
 
   @WebMethod
   override def Query(text: String): Array[String] = Array[String]("1","2","3","4")
+
+  @WebMethod
+  override def TestAttachment(file: DataHandler): DataHandler = file
 }
