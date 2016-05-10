@@ -66,7 +66,7 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     modelA.name = "asdf"
     modelA.save()
 
-    val dsl = ModelA.find_by_name_and_id("asdf",modelA.id).orderBy(ModelA.name).orderBy(ModelA.name[String].desc)
+    val dsl = ModelA.find_by_name_and_id("asdf",modelA.id).orderBy(ModelA.l).orderBy(ModelA.name[String].desc)
     Assert.assertEquals(1,dsl.size)
     val size= ModelA.find_by_name_and_id("asdf",modelA.id).size
     Assert.assertEquals(1,size)

@@ -2,7 +2,7 @@ package stark.activerecord.services
 
 import org.junit.{Assert, Test}
 import stark.activerecord.services.DSL._
-import stark.activerecord.{BaseActiveRecordTestCase, ModelA}
+import stark.activerecord.{ModelB, BaseActiveRecordTestCase, ModelA}
 import scala.language.postfixOps
 
 /**
@@ -12,6 +12,21 @@ import scala.language.postfixOps
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
+  @Test
+  def test_simpleJoin: Unit = {
+    val query = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 123)
+    query.size
+    val modelA = new ModelA
+    modelA.name = "cctv"
+    modelA.i = 1234
+    modelA.save
+    val modelB = new ModelB
+    modelB.modelA = modelA
+    modelB.save
+
+    val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 1234)
+    Assert.assertEquals(1,query2.size)
+  }
   @Test
   def test_sum: Unit = {
     val modelA = new ModelA

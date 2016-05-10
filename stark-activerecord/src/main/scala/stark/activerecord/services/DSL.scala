@@ -3,7 +3,7 @@ package stark.activerecord.services
 import javax.persistence.criteria._
 
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
-import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, QueryContext}
+import stark.activerecord.services.DSL.{JoinQueryContext, DSLExecuteQuery, DSLSelectionQuery, QueryContext}
 
 import scala.collection.JavaConversions
 import scala.language.dynamics
@@ -20,6 +20,7 @@ import scala.reflect.{ClassTag, classTag}
 object DSL {
   //DSL Context using DynamicVariable method
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
+  private[activerecord] val joinContext = new scala.util.DynamicVariable[JoinQueryContext](null)
   //Execute Query type
   type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause
   //Selection Query
@@ -27,6 +28,8 @@ object DSL {
 
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:Any,root:Root[_])
+  //Join Query Context
+  private[activerecord] case class JoinQueryContext(joinRoot:Path[_])
 
   /**
     *  select method
@@ -123,7 +126,16 @@ class ConditionClause[R](implicit val context: QueryContext) extends ConditionsG
     }
     this
   }
-
+  def join[F](field:Field[F])(fun: =>Condition):this.type={
+    DSL.dslContext.withValue(context){
+      val joinContext = JoinQueryContext(context.root.get(field.fieldName))
+      DSL.joinContext.withValue(joinContext) {
+        val currentCondition = fun
+        condition = Some(condition.fold(currentCondition) { p => context.builder.and(Array[Predicate](p, currentCondition): _*) })
+      }
+    }
+    this
+  }
   override private[activerecord] def conditionOpt: Option[Predicate] = condition
 }
 class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with GroupByClause{

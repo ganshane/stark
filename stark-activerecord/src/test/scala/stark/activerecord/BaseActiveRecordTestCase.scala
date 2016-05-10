@@ -57,6 +57,7 @@ class ModelA extends ActiveRecord with BaseModeA{
   @Column(name = "id")
   var id:Int = _
   var seq:Int = _
+  var l:Long = _
   @Lob
   @Column(length=100000)
   var clob:String = _
@@ -83,6 +84,10 @@ class ModelB extends ActiveRecord{
   @Column(name = "id")
   var id:Int = _
   var name:String = _
+
+  @ManyToOne
+  @JoinColumn(name="model_a_id")
+  var modelA:ModelA = _
 }
 object TestDataModule{
   def buildDataSource: DataSource ={
