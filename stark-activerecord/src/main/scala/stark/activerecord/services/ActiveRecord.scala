@@ -194,8 +194,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
     * @param fields fields
     * @return Select step
     */
-  def select(fields:SelectionField):SelectStep[A,Array[Any]]={
-    DSL.select(fields)
+  def select(fields:SelectionField*):SelectStep[A,Array[Any]]={
+    DSL.select(fields:_*)
   }
 
   /**
