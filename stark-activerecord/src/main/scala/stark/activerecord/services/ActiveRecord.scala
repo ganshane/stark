@@ -202,8 +202,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
     * where by DSL
     * @return select step
     */
-  def where:SelectStep[A,A] ={
-    DSL.select[A]
+  def where:DSLSelectionQuery[A,A] ={
+    DSL.select[A].where
   }
   /**
    * whereByJPQL(ql,parameters)

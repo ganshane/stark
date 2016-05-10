@@ -54,6 +54,10 @@ class ActiveRecordTest extends BaseActiveRecordTestCase{
     ModelB.update.set(name="asdf").where(ModelB.name === "fdsa").execute
     Assert.assertEquals(1,ModelB.find_by_name("asdf").size)
 
+    ModelB where ModelB.name ==="asdf"
+
+    ModelB.find_by(name ="asdf")
+
   }
 
   @Test
