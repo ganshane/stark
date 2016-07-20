@@ -22,11 +22,22 @@ class DSLTest extends BaseActiveRecordTestCase{
     val modelA2 = new ModelA
     modelA2.name = "asdf"
     modelA2.save;
+    val modelA3 = new ModelA
+    modelA3.name = "asdf"
+    modelA3.save;
 
+    /*
     val q1 = select[ModelA](ModelA.name,ModelA.seq) orderBy  ModelA.name
-    Assert.assertEquals(2, q1.size)
-    val head = q1.head
-    val first = q1.head
+    Assert.assertEquals(3, q1.size)
+    */
+
+    val q = select[ModelA](ModelA.name[String].distinct) where ModelA.name === "asdf";
+    val r = q.toList
+    Assert.assertEquals(1,q.size)
+    Assert.assertEquals(1,q.count)
+    val count = select[ModelA](ModelA.name[String].count) ;
+    Assert.assertEquals(3, count.head.asInstanceOf[Long])
+
   }
   @Test
   def test_dsl: Unit ={

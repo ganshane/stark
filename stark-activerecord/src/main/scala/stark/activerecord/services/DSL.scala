@@ -27,7 +27,7 @@ object DSL {
   type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause
 
   //Query Context
-  private[activerecord] case class QueryContext(builder:CriteriaBuilder,query:Any,root:Root[_])
+  private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])
   //Join Query Context
   private[activerecord] case class JoinQueryContext(joinRoot:Path[_])
 
@@ -144,9 +144,23 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
   def apply(f:SelectionField*):this.type={
     DSL.dslContext.withValue(context){
       if(f.nonEmpty) {
-        val selection = context.builder.array(f.map(_.toSelection): _*)
-        criteriaQuery.select(selection.asInstanceOf[Selection[T]])
+        val index = f.indexWhere(_.isInstanceOf[DistinctSelectionField])
+        if(index > 0)
+          throw new RuntimeException("distinct field must in first field")
+        val selection = context.builder.array(f.map(_.toSelection): _*).asInstanceOf[Selection[T]]
+        criteriaQuery.select(selection).distinct(index == 0)
+
+        /*
+        f.foreach{
+          case dsf:DistinctSelectionField =>
+             criteriaQuery = criteriaQuery.select(dsf.toSelection).distinct(true)
+          case sf:SelectionField =>
+//          val selection = context.builder.array(f.map(_.toSelection): _*)
+            criteriaQuery = criteriaQuery.select(sf.toSelection)
+        }
+        */
       }
+      context.query = criteriaQuery
     }
     this
   }
@@ -255,12 +269,32 @@ private[activerecord] trait Fetch[A] extends Iterable[A]{
   }
 
   override def iterator: Iterator[A] = executeQuery.toIterator
+
+  /**
+    * count all records
+    * @return
+    */
   def count:Long=totalNum
+  private def findFirstExpression(selection:Selection[_]): Expression[_] ={
+    selection match{
+      case e:Expression[_]=> e
+      case s:CompoundSelection[_] => findFirstExpression(s.getCompoundSelectionItems.get(0))
+    }
+  }
   private def executeCount:Long={
     val entityManager = ActiveRecord.entityManager
     val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
-    val countSelection = context.builder.count(context.root)
-    criteriaQuery.select(countSelection.asInstanceOf[Selection[A]])
+
+    val countSelection =
+      if(criteriaQuery.isDistinct){
+        val querySelection = criteriaQuery.getSelection
+        val expression = findFirstExpression(querySelection)
+        context.builder.countDistinct(expression)
+      }
+      else
+        context.builder.count(context.root)
+    //remove distinct expression
+    criteriaQuery.select(countSelection.asInstanceOf[Selection[A]]).distinct(false)
     conditionOpt.foreach(criteriaQuery.where)
     val query = entityManager.createQuery(criteriaQuery)
 

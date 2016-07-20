@@ -37,9 +37,12 @@ trait Field[T] extends SelectionField{
   def desc:SortField[T]
   def asc:SortField[T]
   def count:SelectionField
+  def distinct:SelectionField
 }
 trait SelectionField{
   def toSelection[X]:Selection[X]
+}
+trait DistinctSelectionField extends SelectionField{
 }
 case class SortField[T](field: Field[T],isAsc:Boolean=true)
 
@@ -67,6 +70,14 @@ private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]
+      }
+    }
+  }
+
+  override def distinct: SelectionField = {
+    new DistinctSelectionField {
+      override def toSelection[X]: Selection[X] = {
+        JPAField.this.toSelection
       }
     }
   }
