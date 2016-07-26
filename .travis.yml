@@ -1,8 +1,8 @@
 sudo: false
 cache:
   directories:
-  - $HOME/.m2/repository
-  - $HOME/protobuf
+  - "$HOME/.m2/repository"
+  - "$HOME/protobuf"
 before_cache:
 - rm -rf $HOME/.m2/repository/com/ganshane/stark
 - find $HOME/.m2 -name "resolver-status.properties" | xargs rm
@@ -16,6 +16,7 @@ env:
   - secure: 2pm3A5Of1j1N9Dqn56xn/xBYfFS8SKwBx3TFRXLaNlBOKSt/6nojpghlC946aqXZCKzGE6Ec+Y3IsxqHQRO4MIcDvNnmUe4eiZxxdAOlnMTWZBh2JFnfmjFGUpSkCD1X6GD9hsjSAIO1Itx1yPKkBABZJjP63gERXZy8tAU9WKQD6hB/02rQ8QfpXsf2eGz7eRD8uHWUICMW7tkIqaxOYUQS23+bvg7tOQBGzFnBVdDssrPYYITGTRDHdHNVvzrtPkJRez1omeiJJtdmHoOGw6+Fj6CeH0V/RCeiN85HVy5GiNnshAj4z40edXNcO83adzu4nwBI0lpojc7RFuNfc4g8VlnWv0VhX0gK5KP7Dt6GgtaiNl4UCufCpWeKxisUYhffL3bDbvLIjvr+jC3iDRsnshdQ8WqsxZ6oHLbJUcd0ULu8US99ojnUH64V0LGy66AnWVDLLpgNWA0D6QoZ4iZ5+sKUybsfRmjJixlcWpOBWgzNw22zjzCY5peykrwu6KOGjTY6RG5gVBhAIAid3490X6LjQyZJJpzpVxsoq3ij/7/DBi4JOp99v1Cn0J6UlYjmBHSKfD4QqmUdwP4RKth7QyUXL0keXcml8DDqu3ua/c4kfZG6CCSa7y8nHAuY0dgireoPOrZjtLIfjeh4JRJARaaoOoYUxKSztM9i0bo=
   - GPG_DIR="`pwd`/support/deploy"
   - MAVEN_OPTS="-XX:MaxPermSize=128m -Xmx1g -Xms1g"
+  - secure: 2q7kulnoSpMgZcASOJCuJMVu1kRldjzX5s2SZ12s/YGtgWGt/MMtv63USP32/kx9dFYDqCttHzsIpjouyDi2WHT0Cqpf0cBfuWFsMJdsBopjBrnyLQ9Qr3PwXwx8np1KIAnhDXu1Vjfxvoo8Sc/ZUTOZqhivkh8o6HQejhbWdaC3Fg+SN2fqbhDLAvvqXTiHxO2E2Czuvuc3TuwrLLcxmZWmKGdHFdFfr5UiCzIoq6ie8cCijjRkZ+CIfdm//ThVEKU3fbfimaSPlef/rHxAK0l+9oJ+ogomdVYvoG0HqvzN1rasoX+T8vMeXXjKWwUldiYJGwb4AIQgMiXyOzA3mZ4dm0HAENI6vzGb/gZw6k2Vhdq+bfxQh3YS/Twey/IvXiJ0VPvmbZMKPyEj0LZXp2SCWr7/09XRh6hC7oi5VwkWL8IUAWN8kYm1VwuRGdhqR1eDbcU+BrutSnAs3Ypv3KTs1ujf1emxkeWpG8nXccb6twBZcNizF4WceR0/pdfArGGmBuNB0GQ6jhWXmOQSe+wMjre3GQxqfBjr9xPTORdP/mLQSyHj3gnHZ0IObevMjPLWoaYEEC8dOxqDRMUQpu3Xw+q6DeqFpB8IYvCBP/5a8qV4APghq7hkfl3qI6ZUne8d4dg8QCm4SZ1zaAzOED6nbETnffj3t1pgZ3nyYbg=
 before_install:
 - bash support/scripts/install-protobuf.sh
 - export PATH=$PATH:$HOME/protobuf/bin
