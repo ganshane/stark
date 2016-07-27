@@ -587,6 +587,7 @@
             <version>0.12</version>
             <configuration>
               <message>Creating site for ${project.version}</message>
+              <merge>true</merge>
             </configuration>
             <executions>
               <execution>
@@ -672,5 +673,6 @@
     <!-- for deploy site to github.io -->
     <github.global.server>github</github.global.server>
     <github.global.oauth2Token>${env.GITHUB_OAUTH_TOKEN}</github.global.oauth2Token>
+    <github.site.path>${project.version}</github.site.path>
   </properties>
 </project>

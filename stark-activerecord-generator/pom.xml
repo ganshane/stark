@@ -52,4 +52,8 @@
       </plugin>
     </plugins>
   </build>
+  <properties>
+  <github.site.path>${project.version}/${project.artifactId}</github.site.path>
+  </properties>
+
 </project>
