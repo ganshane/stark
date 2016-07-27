@@ -1,0 +1,235 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>internal - Stark RPC Framework dev-SNAPSHOT API - stark.rpc.internal</title>
+          <meta name="description" content="internal - Stark RPC Framework dev - SNAPSHOT API - stark.rpc.internal" />
+          <meta name="keywords" content="internal Stark RPC Framework dev SNAPSHOT API stark.rpc.internal" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../../lib/template.js"></script>
+      <script type="text/javascript" src="../../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../../index.html';
+            var hash = 'stark.rpc.internal.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img alt="Package" src="../../../lib/package_big.png" />
+        <p id="owner"><a href="../../package.html" class="extype" name="stark">stark</a>.<a href="../package.html" class="extype" name="stark.rpc">rpc</a></p>
+        <h1>internal</h1><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">internal</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="stark.rpc.internal.NettyProtobufPipelineSupport" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NettyProtobufPipelineSupportextendsAnyRef"></a>
+      <a id="NettyProtobufPipelineSupport:NettyProtobufPipelineSupport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="NettyProtobufPipelineSupport.html"><span class="name">NettyProtobufPipelineSupport</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@NettyProtobufPipelineSupportextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">netty protocol pipeline support
+</p>
+    </li><li name="stark.rpc.internal.NettyRpcClientImpl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NettyRpcClientImplextendsRpcClientwithNettyProtobufPipelineSupportwithProtobufCommandHelperwithServiceWaitingInitSupportwithLoggerSupport"></a>
+      <a id="NettyRpcClientImpl:NettyRpcClientImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NettyRpcClientImpl.html"><span class="name">NettyRpcClientImpl</span></a><span class="result"> extends <a href="../services/RpcClient.html" class="extype" name="stark.rpc.services.RpcClient">RpcClient</a> with <a href="NettyProtobufPipelineSupport.html" class="extype" name="stark.rpc.internal.NettyProtobufPipelineSupport">NettyProtobufPipelineSupport</a> with <a href="../services/ProtobufCommandHelper.html" class="extype" name="stark.rpc.services.ProtobufCommandHelper">ProtobufCommandHelper</a> with <span class="extype" name="stark.utils.services.ServiceWaitingInitSupport">ServiceWaitingInitSupport</span> with <span class="extype" name="stark.utils.services.LoggerSupport">LoggerSupport</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@NettyRpcClientImplextendsRpcClientwithNettyProtobufPipelineSupportwithProtobufCommandHelperwithServiceWaitingInitSupportwithLoggerSupport" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">implements rpc client using netty framework
+</p>
+    </li><li name="stark.rpc.internal.NettyRpcServerImpl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NettyRpcServerImplextendsRpcServerwithNettyProtobufPipelineSupportwithServerChannelManagerSupportwithLoggerSupport"></a>
+      <a id="NettyRpcServerImpl:NettyRpcServerImpl"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="NettyRpcServerImpl.html"><span class="name">NettyRpcServerImpl</span></a><span class="result"> extends <a href="../services/RpcServer.html" class="extype" name="stark.rpc.services.RpcServer">RpcServer</a> with <a href="NettyProtobufPipelineSupport.html" class="extype" name="stark.rpc.internal.NettyProtobufPipelineSupport">NettyProtobufPipelineSupport</a> with <a href="ServerChannelManagerSupport.html" class="extype" name="stark.rpc.internal.ServerChannelManagerSupport">ServerChannelManagerSupport</a> with <span class="extype" name="stark.utils.services.LoggerSupport">LoggerSupport</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@NettyRpcServerImplextendsRpcServerwithNettyProtobufPipelineSupportwithServerChannelManagerSupportwithLoggerSupport" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">rpc server based on netty
+</p><div class="fullcomment"><div class="comment cmt"><p>rpc server based on netty
+</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@EagerLoad</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="stark.rpc.internal.RpcServerFinderWithZk" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RpcServerFinderWithZkextendsRpcServerFinderwithLoggerSupport"></a>
+      <a id="RpcServerFinderWithZk:RpcServerFinderWithZk"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RpcServerFinderWithZk.html"><span class="name">RpcServerFinderWithZk</span></a><span class="result"> extends <a href="../services/RpcServerFinder.html" class="extype" name="stark.rpc.services.RpcServerFinder">RpcServerFinder</a> with <span class="extype" name="stark.utils.services.LoggerSupport">LoggerSupport</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@RpcServerFinderWithZkextendsRpcServerFinderwithLoggerSupport" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">implements server finder
+TODO offline or cache the server info
+</p>
+    </li><li name="stark.rpc.internal.ServerChannelManagerSupport" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ServerChannelManagerSupportextendsAnyRef"></a>
+      <a id="ServerChannelManagerSupport:ServerChannelManagerSupport"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerChannelManagerSupport.html"><span class="name">ServerChannelManagerSupport</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@ServerChannelManagerSupportextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">server channel manager
+</p>
+    </li><li name="stark.rpc.internal.ServerResponse" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ServerResponseextendsCommandResponsewithProtobufCommandHelper"></a>
+      <a id="ServerResponse:ServerResponse"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ServerResponse.html"><span class="name">ServerResponse</span></a><span class="result"> extends <a href="../services/CommandResponse.html" class="extype" name="stark.rpc.services.CommandResponse">CommandResponse</a> with <a href="../services/ProtobufCommandHelper.html" class="extype" name="stark.rpc.services.ProtobufCommandHelper">ProtobufCommandHelper</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@ServerResponseextendsCommandResponsewithProtobufCommandHelper" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="stark.rpc.internal.AsyncTaskMonitor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AsyncTaskMonitor"></a>
+      <a id="AsyncTaskMonitor:AsyncTaskMonitor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="AsyncTaskMonitor$.html"><span class="name">AsyncTaskMonitor</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.rpc.internal.package@AsyncTaskMonitor" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">针对多个服务器进行请求处理
+</p><div class="fullcomment"><div class="comment cmt"><p>针对多个服务器进行请求处理
+</p></div><dl class="attributes block"> <dt>Since</dt><dd><p>2015-02-26</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

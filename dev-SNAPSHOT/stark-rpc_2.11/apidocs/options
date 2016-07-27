@@ -1,0 +1,39 @@
+-breakiterator
+-classpath
+'/home/travis/build/ganshane/stark/stark-rpc/target/classes:/home/travis/.m2/repository/log4j/log4j/1.2.14/log4j-1.2.14.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-json/5.3.8/tapestry-json-5.3.8.jar:/home/travis/.m2/repository/org/apache/zookeeper/zookeeper/3.4.6/zookeeper-3.4.6.jar:/home/travis/.m2/repository/jline/jline/0.9.94/jline-0.9.94.jar:/home/travis/.m2/repository/com/google/protobuf/protobuf-java/2.6.1/protobuf-java-2.6.1.jar:/home/travis/.m2/repository/org/xerial/snappy/snappy-java/1.1.1.7/snappy-java-1.1.1.7.jar:/home/travis/.m2/repository/org/apache/curator/curator-client/2.6.0/curator-client-2.6.0.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-ioc/5.3.8/tapestry-ioc-5.3.8.jar:/home/travis/.m2/repository/io/netty/netty/3.10.3.Final/netty-3.10.3.Final.jar:/home/travis/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/home/travis/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:/home/travis/.m2/repository/org/apache/tapestry/plastic/5.3.8/plastic-5.3.8.jar:/home/travis/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/home/travis/.m2/repository/javassist/javassist/3.12.1.GA/javassist-3.12.1.GA.jar:/home/travis/.m2/repository/org/scala-lang/scala-library/2.11.7/scala-library-2.11.7.jar:/home/travis/.m2/repository/com/google/guava/guava/16.0.1/guava-16.0.1.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry5-annotations/5.3.8/tapestry5-annotations-5.3.8.jar:/home/travis/.m2/repository/org/apache/curator/curator-framework/2.6.0/curator-framework-2.6.0.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-func/5.3.8/tapestry-func-5.3.8.jar:/home/travis/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar:/home/travis/build/ganshane/stark/stark-utils/target/classes'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/travis/build/ganshane/stark/stark-rpc/src/main/scala:/home/travis/build/ganshane/stark/stark-rpc/target/generated-sources'
+-author
+-bottom
+'Copyright &#169; 2015&#x2013;2016 <a href="https://github.com/ganshane">Ganshane Developer Team</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/home/travis/build/ganshane/stark/stark-rpc/target/site/apidocs'
+-docencoding
+'UTF-8'
+-docfilessubdirs
+-doctitle
+'Stark RPC Framework dev-SNAPSHOT API'
+-keywords
+-link
+'http://java.sun.com/j2se/${maven.compiler.source}/docs/api'
+-link
+'http://slf4j.org/api'
+-link
+'http://commons.apache.org/lang/api-release'
+-link
+'http://commons.apache.org/io/api-release'
+-link
+'http://junit.sourceforge.net/javadoc'
+-linkoffline
+'http://docs.oracle.com/javase/7/docs/api' '/home/travis/build/ganshane/stark/stark-rpc/target/javadoc-bundle-options'
+-linkoffline
+'https://github.com/ganshane/stark/stark-utils_2.11/apidocs' '/home/travis/build/ganshane/stark/stark-utils/target/site/apidocs'
+-use
+-version
+-windowtitle
+'Stark RPC Framework dev-SNAPSHOT API'
