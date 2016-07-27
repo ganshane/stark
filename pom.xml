@@ -588,6 +588,7 @@
             <configuration>
               <message>Creating site for ${project.version}</message>
               <merge>true</merge>
+              <path>${github.site.path}</path>
             </configuration>
             <executions>
               <execution>
