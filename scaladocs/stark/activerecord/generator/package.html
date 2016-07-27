@@ -1,9 +1,9 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>config - Stark Activerecord dev-SNAPSHOT API - stark.activerecord.config</title>
-          <meta name="description" content="config - Stark Activerecord dev - SNAPSHOT API - stark.activerecord.config" />
-          <meta name="keywords" content="config Stark Activerecord dev SNAPSHOT API stark.activerecord.config" />
+          <title>generator - Stark Object Relative Geneator Tools dev-SNAPSHOT API - stark.activerecord.generator</title>
+          <meta name="description" content="generator - Stark Object Relative Geneator Tools dev - SNAPSHOT API - stark.activerecord.generator" />
+          <meta name="keywords" content="generator Stark Object Relative Geneator Tools dev SNAPSHOT API stark.activerecord.generator" />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="../../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
@@ -16,7 +16,7 @@
       <script type="text/javascript">
          if(top === self) {
             var url = '../../../index.html';
-            var hash = 'stark.activerecord.config.package';
+            var hash = 'stark.activerecord.generator.package';
             var anchor = window.location.hash;
             var anchor_opt = '';
             if (anchor.length >= 1)
@@ -30,8 +30,8 @@
       <div id="definition">
         <img alt="Package" src="../../../lib/package_big.png" />
         <p id="owner"><a href="../../package.html" class="extype" name="stark">stark</a>.<a href="../package.html" class="extype" name="stark.activerecord">activerecord</a></p>
-        <h1>config</h1><span class="permalink">
-      <a href="../../../index.html#stark.activerecord.config.package" title="Permalink" target="_top">
+        <h1>generator</h1><span class="permalink">
+      <a href="../../../index.html#stark.activerecord.generator.package" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -43,7 +43,7 @@
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <span class="name">config</span>
+        <span class="name">generator</span>
       </span>
       </h4>
       
@@ -66,51 +66,68 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="stark.activerecord.config.ActiveRecordConfigSupport" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="ActiveRecordConfigSupportextendsAnyRef"></a>
-      <a id="ActiveRecordConfigSupport:ActiveRecordConfigSupport"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a href="ActiveRecordConfigSupport.html"><span class="name">ActiveRecordConfigSupport</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#stark.activerecord.config.package@ActiveRecordConfigSupportextendsAnyRef" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      <p class="shortcomment cmt">config orm</p><div class="fullcomment"><div class="comment cmt"><p>config orm</p></div><dl class="attributes block"> <dt>Since</dt><dd><p>2016-01-03</p></dd></dl></div>
-    </li><li name="stark.activerecord.config.JpaProperty" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="JpaPropertyextendsAnyRef"></a>
-      <a id="JpaProperty:JpaProperty"></a>
+              <ol><li name="stark.activerecord.generator.ActiverecordExporter" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ActiverecordExporterextendsPOJOExporter"></a>
+      <a id="ActiverecordExporter:ActiverecordExporter"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="JpaProperty.html"><span class="name">JpaProperty</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="ActiverecordExporter.html"><span class="name">ActiverecordExporter</span></a><span class="result"> extends <span class="extype" name="org.hibernate.tool.hbm2x.POJOExporter">POJOExporter</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#stark.activerecord.config.package@JpaPropertyextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../index.html#stark.activerecord.generator.package@ActiverecordExporterextendsPOJOExporter" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">JPA属性配置
-</p><div class="fullcomment"><div class="comment cmt"><p>JPA属性配置
-</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@XmlRootElement</span><span class="args">()</span>
-              
-        </dd></dl></div>
+      
+    </li><li name="stark.activerecord.generator.InMemoryDataSourceProvider" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InMemoryDataSourceProviderextendsDatasourceConnectionProviderImpl"></a>
+      <a id="InMemoryDataSourceProvider:InMemoryDataSourceProvider"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="InMemoryDataSourceProvider.html"><span class="name">InMemoryDataSourceProvider</span></a><span class="result"> extends <span class="extype" name="org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl">DatasourceConnectionProviderImpl</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.activerecord.generator.package@InMemoryDataSourceProviderextendsDatasourceConnectionProviderImpl" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
         
 
-        
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="stark.activerecord.generator.ActiverecordGenerator" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ActiverecordGenerator"></a>
+      <a id="ActiverecordGenerator:ActiverecordGenerator"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ActiverecordGenerator$.html"><span class="name">ActiverecordGenerator</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#stark.activerecord.generator.package@ActiverecordGenerator" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">activerecord generator
+</p><div class="fullcomment"><div class="comment cmt"><p>activerecord generator
+</p></div><dl class="attributes block"> <dt>Since</dt><dd><p>2016-01-05</p></dd></dl></div>
+    </li></ol>
+            </div>
 
         
 
