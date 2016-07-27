@@ -1,0 +1,1494 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>Migration - Stark Database Migration dev-SNAPSHOT API - stark.migration.Migration</title>
+          <meta name="description" content="Migration - Stark Database Migration dev - SNAPSHOT API - stark.migration.Migration" />
+          <meta name="keywords" content="Migration Stark Database Migration dev SNAPSHOT API stark.migration.Migration" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'stark.migration.Migration';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../lib/class_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="stark">stark</a>.<a href="package.html" class="extype" name="stark.migration">migration</a></p>
+        <h1>Migration</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="stark.migration">package migration</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Migration</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="stark.migration.Migration"><span>Migration</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="stark.migration.Migration#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():stark.migration.Migration"></a>
+      <a id="&lt;init&gt;:Migration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Migration</span><span class="params">()</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@&lt;init&gt;():stark.migration.Migration" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="stark.migration.Migration#down" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="down():Unit"></a>
+      <a id="down():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">down</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@down():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Concrete migration classes must define this method to back out of
+this migration.</p><div class="fullcomment"><div class="comment cmt"><p>Concrete migration classes must define this method to back out of
+this migration.  If the migration cannot be reversed, then a
+IrreversibleMigrationException should be thrown.
+</p></div></div>
+    </li><li name="stark.migration.Migration#up" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="up():Unit"></a>
+      <a id="up():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">up</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@up():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Concrete migration classes must define this method to migrate the
+database up to a new migration.</p>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@##():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.Migration#addCheck" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addCheck(on:stark.migration.On,expr:String,options:stark.migration.CheckOption*):Unit"></a>
+      <a id="addCheck(On,String,CheckOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addCheck</span><span class="params">(<span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="expr">expr: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="options">options: <a href="CheckOption.html" class="extype" name="stark.migration.CheckOption">CheckOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addCheck(on:stark.migration.On,expr:String,options:stark.migration.CheckOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a CHECK constraint on a table and one or more columns.</p><div class="fullcomment"><div class="comment cmt"><p>Add a CHECK constraint on a table and one or more columns.  The
+constraint name is automatically generated unless Name() is given
+as an option.
+</p></div><dl class="paramcmts block"><dt class="param">on</dt><dd class="cmt"><p>the table and columns to add the CHECK constraint on</p></dd><dt class="param">expr</dt><dd class="cmt"><p>the expression to check</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of check options to
+       customize the creation of the CHECK constraint</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#addColumn" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="addColumn(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Unit"></a>
+      <a id="addColumn(String,String,SqlType,ColumnOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addColumn</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="options">options: <a href="ColumnOption.html" class="extype" name="stark.migration.ColumnOption">ColumnOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addColumn(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="stark.migration.Migration#addForeignKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addForeignKey(references:stark.migration.References,on:stark.migration.On,options:stark.migration.ForeignKeyOption*):Unit"></a>
+      <a id="addForeignKey(References,On,ForeignKeyOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addForeignKey</span><span class="params">(<span name="references">references: <a href="References.html" class="extype" name="stark.migration.References">References</a></span>, <span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="options">options: <a href="ForeignKeyOption.html" class="extype" name="stark.migration.ForeignKeyOption">ForeignKeyOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addForeignKey(references:stark.migration.References,on:stark.migration.On,options:stark.migration.ForeignKeyOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a foreign key to a table.</p><div class="fullcomment"><div class="comment cmt"><p>Add a foreign key to a table.  The name of the foreign key is
+automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">references</dt><dd class="cmt"><p>the table and column name(s) that the foreign
+       key references</p></dd><dt class="param">on</dt><dd class="cmt"><p>the table and column name(s) to place the foreign key
+       on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of foreign key options to
+       customize the creation of the foreign key</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#addForeignKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addForeignKey(on:stark.migration.On,references:stark.migration.References,options:stark.migration.ForeignKeyOption*):Unit"></a>
+      <a id="addForeignKey(On,References,ForeignKeyOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addForeignKey</span><span class="params">(<span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="references">references: <a href="References.html" class="extype" name="stark.migration.References">References</a></span>, <span name="options">options: <a href="ForeignKeyOption.html" class="extype" name="stark.migration.ForeignKeyOption">ForeignKeyOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addForeignKey(on:stark.migration.On,references:stark.migration.References,options:stark.migration.ForeignKeyOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a foreign key to a table.</p><div class="fullcomment"><div class="comment cmt"><p>Add a foreign key to a table.  The name of the foreign key is
+automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">on</dt><dd class="cmt"><p>the table and column name(s) to place the foreign key
+       on</p></dd><dt class="param">references</dt><dd class="cmt"><p>the table and column name(s) that the foreign
+       key references</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of foreign key options to
+       customize the creation of the foreign key</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#addIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addIndex(tableName:String,columnName:String,options:stark.migration.IndexOption*):Unit"></a>
+      <a id="addIndex(String,String,IndexOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addIndex</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="options">options: <a href="IndexOption.html" class="extype" name="stark.migration.IndexOption">IndexOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addIndex(tableName:String,columnName:String,options:stark.migration.IndexOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add an index to a table on a column.</p><div class="fullcomment"><div class="comment cmt"><p>Add an index to a table on a column.  The name of the index is
+automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table to add the index to</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column that the index will be
+       on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of index options to
+       customize the creation of the index</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#addIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addIndex(tableName:String,columnNames:Array[String],options:stark.migration.IndexOption*):Unit"></a>
+      <a id="addIndex(String,Array[String],IndexOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addIndex</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnNames">columnNames: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="options">options: <a href="IndexOption.html" class="extype" name="stark.migration.IndexOption">IndexOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addIndex(tableName:String,columnNames:Array[String],options:stark.migration.IndexOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add an index to a table on a non-empty list of column names.</p><div class="fullcomment"><div class="comment cmt"><p>Add an index to a table on a non-empty list of column names.  The
+name of the index is automatically generated unless Name() is
+given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table to add the index to</p></dd><dt class="param">columnNames</dt><dd class="cmt"><p>a list of one or more column names that the
+       index will be on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of index options to
+       customize the creation of the index</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#addTrigger" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="addTrigger(tableName:String,triggerName:String,options:stark.migration.TriggerOption*)(f:=&gt;String):Unit"></a>
+      <a id="addTrigger(String,String,TriggerOption*)(⇒String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addTrigger</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="triggerName">triggerName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="options">options: <a href="TriggerOption.html" class="extype" name="stark.migration.TriggerOption">TriggerOption</a>*</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addTrigger(tableName:String,triggerName:String,options:stark.migration.TriggerOption*)(f:=&gt;String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">add trigger
+</p>
+    </li><li name="stark.migration.Migration#addingForeignKeyConstraintCreatesIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addingForeignKeyConstraintCreatesIndex:Boolean"></a>
+      <a id="addingForeignKeyConstraintCreatesIndex:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addingForeignKeyConstraintCreatesIndex</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@addingForeignKeyConstraintCreatesIndex:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This value is true if the database implicitly adds an index on
+the column that has a foreign key constraint added to it.</p><div class="fullcomment"><div class="comment cmt"><p>This value is true if the database implicitly adds an index on
+the column that has a foreign key constraint added to it.</p><p>The following SQL can be used to test the database.  The last
+statement will fail with a message that there already is an index
+on the column.</p><p>  create table parent (pk int primary key);
+  create table child (pk int primary key, pk_parent int not null);
+  alter table child
+    add constraint idx_child_pk_parent foreign key (pk_parent)
+    references parent (pk);
+  create index idx_child_pk_parent on child (pk_parent);
+</p></div></div>
+    </li><li name="stark.migration.Migration#alterColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alterColumn(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Unit"></a>
+      <a id="alterColumn(String,String,SqlType,ColumnOption*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alterColumn</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="options">options: <a href="ColumnOption.html" class="extype" name="stark.migration.ColumnOption">ColumnOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@alterColumn(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Alter the definition of an existing column.</p><div class="fullcomment"><div class="comment cmt"><p>Alter the definition of an existing column.</p><p>NOTE: if the original column definition uses CharacterSet() then
+it must be used here again, unless the base SQL data type is
+being changed.  For example, on Oracle, creating a column without
+CharacterSet uses VARCHAR2 while using CharacterSet(Unicode) uses
+NVARCHAR2, so if the original column used CharacterSet(Unicode)
+and #alterColumn() is not passed CharacterSet(Unicode), then the
+column's data type will be change from NVARCHAR2 to VARCHAR2.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the column</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column</p></dd><dt class="param">columnType</dt><dd class="cmt"><p>the type the column is being altered to</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty array of column options to
+       customize the column</p></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@clone():Object" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="stark.migration.Migration#commentColumn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="commentColumn(tableName:String,columnName:String,comment:String):Unit"></a>
+      <a id="commentColumn(String,String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commentColumn</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="comment">comment: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@commentColumn(tableName:String,columnName:String,comment:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">comment column
+</p><div class="fullcomment"><div class="comment cmt"><p>comment column
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>table name</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>column name</p></dd><dt class="param">comment</dt><dd class="cmt"><p>comment</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#commentTable" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="commentTable(tableName:String,comment:String):Unit"></a>
+      <a id="commentTable(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commentTable</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="comment">comment: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@commentTable(tableName:String,comment:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">comment table
+</p><div class="fullcomment"><div class="comment cmt"><p>comment table
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>table name</p></dd><dt class="param">comment</dt><dd class="cmt"><p>comment</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#connection" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="connection:java.sql.Connection"></a>
+      <a id="connection:Connection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">connection</span><span class="result">: <span class="extype" name="java.sql.Connection">Connection</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@connection:java.sql.Connection" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Get the connection to the database the migration can use for any
+custom work.</p><div class="fullcomment"><div class="comment cmt"><p>Get the connection to the database the migration can use for any
+custom work.  This connection logs all operations performed on
+it.  The Migration subclass must be careful with this connection
+and leave it in a good state, as all of the other migration
+methods defined in Migration use the same connection.
+</p></div></div>
+    </li><li name="stark.migration.Migration#createTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="createTable(tableName:String,options:stark.migration.TableOption*)(body:stark.migration.TableDefinition=&gt;Unit):Unit"></a>
+      <a id="createTable(String,TableOption*)((TableDefinition)⇒Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createTable</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="options">options: <a href="TableOption.html" class="extype" name="stark.migration.TableOption">TableOption</a>*</span>)</span><span class="params">(<span name="body">body: (<a href="TableDefinition.html" class="extype" name="stark.migration.TableDefinition">TableDefinition</a>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@createTable(tableName:String,options:stark.migration.TableOption*)(body:stark.migration.TableDefinition=&gt;Unit):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="stark.migration.Migration#databaseVendor" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="databaseVendor:stark.migration.Vendor"></a>
+      <a id="databaseVendor:Vendor"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">databaseVendor</span><span class="result">: <a href="Vendor.html" class="extype" name="stark.migration.Vendor">Vendor</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@databaseVendor:stark.migration.Vendor" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The vendor of the database the migration is being run on.</p>
+    </li><li name="stark.migration.Migration#dropSequence" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dropSequence(name:String):Unit"></a>
+      <a id="dropSequence(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dropSequence</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@dropSequence(name:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">删除序列
+</p><div class="fullcomment"><div class="comment cmt"><p>删除序列
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>序列的名称</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#dropTable" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="dropTable(tableName:String):Unit"></a>
+      <a id="dropTable(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dropTable</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@dropTable(tableName:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="stark.migration.Migration#dropTrigger" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dropTrigger(triggerName:String):Unit"></a>
+      <a id="dropTrigger(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dropTrigger</span><span class="params">(<span name="triggerName">triggerName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@dropTrigger(triggerName:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">droper some trigger
+</p><div class="fullcomment"><div class="comment cmt"><p>droper some trigger
+</p></div><dl class="paramcmts block"><dt class="param">triggerName</dt><dd class="cmt"><p>trigger name</p></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.Migration#execute" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="execute(sql:String*):Unit"></a>
+      <a id="execute(String*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">execute</span><span class="params">(<span name="sql">sql: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@execute(sql:String*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Execute the given SQL string using the migration's connection.</p><div class="fullcomment"><div class="comment cmt"><p>Execute the given SQL string using the migration's connection.
+</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>the SQL to execute</p></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.Migration#grant" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grant(tableName:String,grantee:String,privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="grant(String,String,GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grant</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantee">grantee: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grant(tableName:String,grantee:String,privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a grant on a table to a grantee.</p><div class="fullcomment"><div class="comment cmt"><p>Add a grant on a table to a grantee.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to add the grants to</p></dd><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to grant the privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grant" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grant(tableName:String,grantee:stark.migration.User,privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="grant(String,User,GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grant</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantee">grantee: <a href="User.html" class="extype" name="stark.migration.User">User</a></span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grant(tableName:String,grantee:stark.migration.User,privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a grant on a table to a grantee.</p><div class="fullcomment"><div class="comment cmt"><p>Add a grant on a table to a grantee.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to add the grants to</p></dd><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to grant the privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grant" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grant(tableName:String,grantees:Array[String],privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="grant(String,Array[String],GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grant</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grant(tableName:String,grantees:Array[String],privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a grant on a table to one or more grantees.</p><div class="fullcomment"><div class="comment cmt"><p>Add a grant on a table to one or more grantees.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to add the grants to</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grant" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grant(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="grant(String,Array[User],GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grant</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grant(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Add a grant on a table to one or more grantees.</p><div class="fullcomment"><div class="comment cmt"><p>Add a grant on a table to one or more grantees.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to add the grants to</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grantSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantSchemaPrivilege(grantee:String,privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="grantSchemaPrivilege(String,SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantSchemaPrivilege</span><span class="params">(<span name="grantee">grantee: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grantSchemaPrivilege(grantee:String,privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to grant the privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grantSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantSchemaPrivilege(grantee:stark.migration.User,privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="grantSchemaPrivilege(User,SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantSchemaPrivilege</span><span class="params">(<span name="grantee">grantee: <a href="User.html" class="extype" name="stark.migration.User">User</a></span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grantSchemaPrivilege(grantee:stark.migration.User,privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to grant the privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grantSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantSchemaPrivilege(grantees:Array[String],privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="grantSchemaPrivilege(Array[String],SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantSchemaPrivilege</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grantSchemaPrivilege(grantees:Array[String],privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#grantSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantSchemaPrivilege(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="grantSchemaPrivilege(Array[User],SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantSchemaPrivilege</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@grantSchemaPrivilege(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to grant to the
+       grantees</p></dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@notify():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="stark.migration.Migration#on" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="on(definition:stark.migration.TableColumnDefinition):stark.migration.On"></a>
+      <a id="on(TableColumnDefinition):On"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">on</span><span class="params">(<span name="definition">definition: <a href="TableColumnDefinition.html" class="extype" name="stark.migration.TableColumnDefinition">TableColumnDefinition</a></span>)</span><span class="result">: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@on(definition:stark.migration.TableColumnDefinition):stark.migration.On" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Convert a table and column name definition into a On foreign key
+instance.</p>
+    </li><li name="stark.migration.Migration#rawConnection" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rawConnection:java.sql.Connection"></a>
+      <a id="rawConnection:Connection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rawConnection</span><span class="result">: <span class="extype" name="java.sql.Connection">Connection</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@rawConnection:java.sql.Connection" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Get the raw connection to the database the migration can use for
+any custom work.</p><div class="fullcomment"><div class="comment cmt"><p>Get the raw connection to the database the migration can use for
+any custom work.  This connection is the raw connection that
+underlies the logging connection and does not log any operations
+performed on it.  It should only be used when the logging
+connection does not provide a required feature.  The Migration
+subclass must be careful with this connection and leave it in a
+good state, as all of the other migration methods defined in
+Migration use the same connection.
+</p></div></div>
+    </li><li name="stark.migration.Migration#references" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="references(definition:stark.migration.TableColumnDefinition):stark.migration.References"></a>
+      <a id="references(TableColumnDefinition):References"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">references</span><span class="params">(<span name="definition">definition: <a href="TableColumnDefinition.html" class="extype" name="stark.migration.TableColumnDefinition">TableColumnDefinition</a></span>)</span><span class="result">: <a href="References.html" class="extype" name="stark.migration.References">References</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@references(definition:stark.migration.TableColumnDefinition):stark.migration.References" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Convert a table and column name definition into a References
+foreign key instance.</p>
+    </li><li name="stark.migration.Migration#removeCheck" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeCheck(on:stark.migration.On,options:stark.migration.Name*):Unit"></a>
+      <a id="removeCheck(On,Name*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeCheck</span><span class="params">(<span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="options">options: <a href="Name.html" class="extype" name="stark.migration.Name">Name</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeCheck(on:stark.migration.On,options:stark.migration.Name*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove a CHECK constraint on a table and one or more columns.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a CHECK constraint on a table and one or more columns.
+The constraint name is automatically generated unless Name() is
+given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">on</dt><dd class="cmt"><p>the table and columns to remove the CHECK constraint
+       from</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of check options to
+       customize the removal of the CHECK constraint</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#removeColumn" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="removeColumn(tableName:String,columnName:String):Unit"></a>
+      <a id="removeColumn(String,String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeColumn</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeColumn(tableName:String,columnName:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="stark.migration.Migration#removeForeignKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeForeignKey(references:stark.migration.References,on:stark.migration.On,options:stark.migration.Name*):Unit"></a>
+      <a id="removeForeignKey(References,On,Name*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeForeignKey</span><span class="params">(<span name="references">references: <a href="References.html" class="extype" name="stark.migration.References">References</a></span>, <span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="options">options: <a href="Name.html" class="extype" name="stark.migration.Name">Name</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeForeignKey(references:stark.migration.References,on:stark.migration.On,options:stark.migration.Name*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove a foreign key from a table.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a foreign key from a table.  The name of the foreign key
+is automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">references</dt><dd class="cmt"><p>the table and column name(s) that the foreign
+       key references</p></dd><dt class="param">on</dt><dd class="cmt"><p>the table and column name(s) to remove the foreign key
+       from</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of foreign key options to
+       customize the removal of the foreign key</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#removeForeignKey" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeForeignKey(on:stark.migration.On,references:stark.migration.References,options:stark.migration.Name*):Unit"></a>
+      <a id="removeForeignKey(On,References,Name*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeForeignKey</span><span class="params">(<span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="references">references: <a href="References.html" class="extype" name="stark.migration.References">References</a></span>, <span name="options">options: <a href="Name.html" class="extype" name="stark.migration.Name">Name</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeForeignKey(on:stark.migration.On,references:stark.migration.References,options:stark.migration.Name*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove a foreign key from a table.</p><div class="fullcomment"><div class="comment cmt"><p>Remove a foreign key from a table.  The name of the foreign key
+is automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">on</dt><dd class="cmt"><p>the table and column name(s) to remove the foreign key
+       from</p></dd><dt class="param">references</dt><dd class="cmt"><p>the table and column name(s) that the foreign
+       key references</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of foreign key options to
+       customize the removal of the foreign key</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#removeIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeIndex(tableName:String,columnName:String,options:stark.migration.Name*):Unit"></a>
+      <a id="removeIndex(String,String,Name*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeIndex</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="options">options: <a href="Name.html" class="extype" name="stark.migration.Name">Name</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeIndex(tableName:String,columnName:String,options:stark.migration.Name*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove an index on a column in a table.</p><div class="fullcomment"><div class="comment cmt"><p>Remove an index on a column in a table.  The name of the index to
+remove is automatically generated unless Name() is given as an
+option.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table to remove the index from</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column the index is on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of index options to
+       customize the removal of the index</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#removeIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeIndex(tableName:String,columnNames:Array[String],options:stark.migration.Name*):Unit"></a>
+      <a id="removeIndex(String,Array[String],Name*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeIndex</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnNames">columnNames: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="options">options: <a href="Name.html" class="extype" name="stark.migration.Name">Name</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@removeIndex(tableName:String,columnNames:Array[String],options:stark.migration.Name*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove an index on a table that is composed of a non-empty list
+of column names.</p><div class="fullcomment"><div class="comment cmt"><p>Remove an index on a table that is composed of a non-empty list
+of column names.  The name of the index to remove is
+automatically generated unless Name() is given as an option.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table to remove the index from</p></dd><dt class="param">columnNames</dt><dd class="cmt"><p>a list of one or more column names that the
+       index is on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty list of index options to
+       customize the removal of the index</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revoke" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revoke(tableName:String,grantee:String,privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="revoke(String,String,GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revoke</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantee">grantee: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revoke(tableName:String,grantee:String,privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove privileges on a table from a grantee.</p><div class="fullcomment"><div class="comment cmt"><p>Remove privileges on a table from a grantee.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to remove the grants from</p></dd><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to revoke privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to remove from
+       the grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revoke" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revoke(tableName:String,grantee:stark.migration.User,privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="revoke(String,User,GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revoke</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantee">grantee: <a href="User.html" class="extype" name="stark.migration.User">User</a></span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revoke(tableName:String,grantee:stark.migration.User,privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove privileges on a table from a grantee.</p><div class="fullcomment"><div class="comment cmt"><p>Remove privileges on a table from a grantee.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to remove the grants from</p></dd><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to revoke privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to remove from
+       the grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revoke" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revoke(tableName:String,grantees:Array[String],privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="revoke(String,Array[String],GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revoke</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revoke(tableName:String,grantees:Array[String],privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove privileges on a table from one or more grantees.</p><div class="fullcomment"><div class="comment cmt"><p>Remove privileges on a table from one or more grantees.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to remove the grants from</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to remove from
+       the grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revoke" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revoke(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):Unit"></a>
+      <a id="revoke(String,Array[User],GrantPrivilegeType*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revoke</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revoke(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Remove privileges on a table from one or more grantees.</p><div class="fullcomment"><div class="comment cmt"><p>Remove privileges on a table from one or more grantees.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the table name to remove the grants from</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to remove from
+       the grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revokeSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeSchemaPrivilege(grantee:String,privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="revokeSchemaPrivilege(String,SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeSchemaPrivilege</span><span class="params">(<span name="grantee">grantee: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revokeSchemaPrivilege(grantee:String,privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to revoke from
+       the grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revokeSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeSchemaPrivilege(grantee:stark.migration.User,privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="revokeSchemaPrivilege(User,SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeSchemaPrivilege</span><span class="params">(<span name="grantee">grantee: <a href="User.html" class="extype" name="stark.migration.User">User</a></span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revokeSchemaPrivilege(grantee:stark.migration.User,privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantee</dt><dd class="cmt"><p>the grantee to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to revoke from
+       the grantee</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revokeSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeSchemaPrivilege(grantees:Array[String],privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="revokeSchemaPrivilege(Array[String],SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeSchemaPrivilege</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revokeSchemaPrivilege(grantees:Array[String],privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to revoke from the
+       grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#revokeSchemaPrivilege" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeSchemaPrivilege(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):Unit"></a>
+      <a id="revokeSchemaPrivilege(Array[User],SchemaPrivilege*):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeSchemaPrivilege</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@revokeSchemaPrivilege(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>a non-empty array of grantees</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>a non-empty array of privileges to revoke from the
+       grantees</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#sequence" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sequence(name:String):Unit"></a>
+      <a id="sequence(String):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sequence</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@sequence(name:String):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">创建序列
+</p><div class="fullcomment"><div class="comment cmt"><p>创建序列
+</p></div><dl class="paramcmts block"><dt class="param">name</dt><dd class="cmt"><p>序列名称</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#stringToMigrationArrowAssoc" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stringToMigrationArrowAssoc(s:String):stark.migration.MigrationArrowAssoc"></a>
+      <a id="stringToMigrationArrowAssoc(String):MigrationArrowAssoc"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stringToMigrationArrowAssoc</span><span class="params">(<span name="s">s: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="MigrationArrowAssoc.html" class="extype" name="stark.migration.MigrationArrowAssoc">MigrationArrowAssoc</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@stringToMigrationArrowAssoc(s:String):stark.migration.MigrationArrowAssoc" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Override the -&gt; implicit definition to create a
+MigrationArrowAssoc instead of a scala.Predef.ArrowAssoc.</p><div class="fullcomment"><div class="comment cmt"><p>Override the -&gt; implicit definition to create a
+MigrationArrowAssoc instead of a scala.Predef.ArrowAssoc.  See
+the above comment on the MigrationArrowAssoc class why this is
+done.
+</p></div></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@toString():String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@wait():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="stark.migration.Migration#withPreparedStatement" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withPreparedStatement(sql:String)(f:java.sql.PreparedStatement=&gt;Unit):Unit"></a>
+      <a id="withPreparedStatement(String)((PreparedStatement)⇒Unit):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withPreparedStatement</span><span class="params">(<span name="sql">sql: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="java.sql.PreparedStatement">PreparedStatement</span>) ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@withPreparedStatement(sql:String)(f:java.sql.PreparedStatement=&gt;Unit):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Given a SQL string and a Function1[PreparedStatement,Unit], start
+a new transaction by turning off auto-commit mode on the
+connection then create a new prepared statement with the SQL
+string and pass the prepared statement to the closure argument.</p><div class="fullcomment"><div class="comment cmt"><p>Given a SQL string and a Function1[PreparedStatement,Unit], start
+a new transaction by turning off auto-commit mode on the
+connection then create a new prepared statement with the SQL
+string and pass the prepared statement to the closure argument.
+The closure should not perform the commit as this method will
+commit the transaction.  If the closure throws an exception then
+the transaction is rolled back and the exception that caused the
+rollback is re-thrown.  Finally, the auto-commit state is reset
+to the value the connection had before this method was called.
+</p></div><dl class="paramcmts block"><dt class="param">sql</dt><dd class="cmt"><p>the SQL text that will be prepared</p></dd><dt class="param">f</dt><dd class="cmt"><p>the Function1[PreparedStatement,Unit] that will be given
+       a new prepared statement</p></dd></dl></div>
+    </li><li name="stark.migration.Migration#withResultSet" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withResultSet[R](rs:java.sql.ResultSet)(f:java.sql.ResultSet=&gt;R):R"></a>
+      <a id="withResultSet[R](ResultSet)((ResultSet)⇒R):R"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withResultSet</span><span class="tparams">[<span name="R">R</span>]</span><span class="params">(<span name="rs">rs: <span class="extype" name="java.sql.ResultSet">ResultSet</span></span>)</span><span class="params">(<span name="f">f: (<span class="extype" name="java.sql.ResultSet">ResultSet</span>) ⇒ <span class="extype" name="stark.migration.Migration.withResultSet.R">R</span></span>)</span><span class="result">: <span class="extype" name="stark.migration.Migration.withResultSet.R">R</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.Migration@withResultSet[R](rs:java.sql.ResultSet)(f:java.sql.ResultSet=&gt;R):R" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Given a SQL result set and a Function1[ResultSet,R], pass the
+result set to the closure.</p><div class="fullcomment"><div class="comment cmt"><p>Given a SQL result set and a Function1[ResultSet,R], pass the
+result set to the closure.  After the closure has completed,
+either normally via a return or by throwing an exception, close
+the result set.
+</p></div><dl class="paramcmts block"><dt class="param">rs</dt><dd class="cmt"><p>the SQL result set</p></dd><dt class="param">f</dt><dd class="cmt"><p>the Function1[ResultSet,R] that will be given the result
+       set</p></dd><dt>returns</dt><dd class="cmt"><p>the result of f if f returns normally</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

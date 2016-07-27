@@ -1,0 +1,1462 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>OracleDatabaseAdapter - Stark Database Migration dev-SNAPSHOT API - stark.migration.OracleDatabaseAdapter</title>
+          <meta name="description" content="OracleDatabaseAdapter - Stark Database Migration dev - SNAPSHOT API - stark.migration.OracleDatabaseAdapter" />
+          <meta name="keywords" content="OracleDatabaseAdapter Stark Database Migration dev SNAPSHOT API stark.migration.OracleDatabaseAdapter" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="../../lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      <script type="text/javascript" src="../../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'stark.migration.OracleDatabaseAdapter';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="../../lib/class_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="stark">stark</a>.<a href="package.html" class="extype" name="stark.migration">migration</a></p>
+        <h1>OracleDatabaseAdapter</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="stark.migration">package migration</a>
+          </div></span></h3><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OracleDatabaseAdapter</span><span class="result"> extends <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="stark.migration.OracleDatabaseAdapter"><span>OracleDatabaseAdapter</span></li><li class="in" name="stark.migration.DatabaseAdapter"><span>DatabaseAdapter</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="stark.migration.OracleDatabaseAdapter#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(schemaNameOpt:Option[String]):stark.migration.OracleDatabaseAdapter"></a>
+      <a id="&lt;init&gt;:OracleDatabaseAdapter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">OracleDatabaseAdapter</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@&lt;init&gt;(schemaNameOpt:Option[String]):stark.migration.OracleDatabaseAdapter" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="stark.migration.DatabaseAdapter.PrivilegeTarget" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="PrivilegeTargetextendsAnyRef"></a>
+      <a id="PrivilegeTarget:PrivilegeTarget"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="DatabaseAdapter$PrivilegeTarget.html"><span class="name">PrivilegeTarget</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.DatabaseAdapter@PrivilegeTargetextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter.TablePrivilegeTarget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TablePrivilegeTargetextendsDatabaseAdapter.this.PrivilegeTargetwithProductwithSerializable"></a>
+      <a id="TablePrivilegeTarget:TablePrivilegeTarget"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DatabaseAdapter$TablePrivilegeTarget.html"><span class="name">TablePrivilegeTarget</span></a><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="DatabaseAdapter$PrivilegeTarget.html" class="extype" name="stark.migration.DatabaseAdapter.PrivilegeTarget">PrivilegeTarget</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.DatabaseAdapter@TablePrivilegeTargetextendsDatabaseAdapter.this.PrivilegeTargetwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@##():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter.SchemaPrivilegeTarget" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SchemaPrivilegeTarget"></a>
+      <a id="SchemaPrivilegeTarget:SchemaPrivilegeTarget"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DatabaseAdapter$SchemaPrivilegeTarget$.html"><span class="name">SchemaPrivilegeTarget</span></a><span class="result"> extends <a href="DatabaseAdapter$PrivilegeTarget.html" class="extype" name="stark.migration.DatabaseAdapter.PrivilegeTarget">PrivilegeTarget</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.DatabaseAdapter@SchemaPrivilegeTarget" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#addingForeignKeyConstraintCreatesIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addingForeignKeyConstraintCreatesIndex:Boolean"></a>
+      <a id="addingForeignKeyConstraintCreatesIndex:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addingForeignKeyConstraintCreatesIndex</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@addingForeignKeyConstraintCreatesIndex:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">This value is true if the database implicitly adds an index on
+the column that has a foreign key constraint added to it.</p><div class="fullcomment"><div class="comment cmt"><p>This value is true if the database implicitly adds an index on
+the column that has a foreign key constraint added to it.</p><p>The following SQL can be used to test the database.  The last
+statement will fail with a message that there already is an index
+on the column.</p><p>  CREATE TABLE parent (pk INT PRIMARY KEY);
+  CREATE TABLE child (pk INT PRIMARY KEY, pk_parent INT NOT NULL);
+  ALTER TABLE child
+    ADD CONSTRAINT idx_child_pk_parent FOREIGN KEY (pk_parent)
+    REFERENCES parent (pk);
+  CREATE INDEX idx_child_pk_parent ON child (pk_parent);
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#alterColumnSql" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alterColumnSql(schemaNameOpt:Option[String],columnDefinition:stark.migration.ColumnDefinition):String"></a>
+      <a id="alterColumnSql(Option[String],ColumnDefinition):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alterColumnSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="columnDefinition">columnDefinition: <a href="ColumnDefinition.html" class="extype" name="stark.migration.ColumnDefinition">ColumnDefinition</a></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@alterColumnSql(schemaNameOpt:Option[String],columnDefinition:stark.migration.ColumnDefinition):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#alterColumnSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alterColumnSql(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Array[String]"></a>
+      <a id="alterColumnSql(String,String,SqlType,ColumnOption*):Array[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alterColumnSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="options">options: <a href="ColumnOption.html" class="extype" name="stark.migration.ColumnOption">ColumnOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@alterColumnSql(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Array[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to alter a column's
+definition.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to alter a column's
+definition.  Uses the schemaNameOpt defined in the adapter.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the column</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column</p></dd><dt class="param">columnType</dt><dd class="cmt"><p>the type the column is being altered to</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty array of column options to
+       customize the column</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to alter the column</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#alterColumnSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alterColumnSql(schemaNameOpt:Option[String],tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Array[String]"></a>
+      <a id="alterColumnSql(Option[String],String,String,SqlType,ColumnOption*):Array[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alterColumnSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="options">options: <a href="ColumnOption.html" class="extype" name="stark.migration.ColumnOption">ColumnOption</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@alterColumnSql(schemaNameOpt:Option[String],tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):Array[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to alter a column's
+definition.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to alter a column's
+definition.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the column</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column</p></dd><dt class="param">columnType</dt><dd class="cmt"><p>the type the column is being altered to</p></dd><dt class="param">options</dt><dd class="cmt"><p>a possibly empty array of column options to
+       customize the column</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to alter the column</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#alterTableDropForeignKeyConstraintPhrase" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alterTableDropForeignKeyConstraintPhrase:String"></a>
+      <a id="alterTableDropForeignKeyConstraintPhrase:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alterTableDropForeignKeyConstraintPhrase</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@alterTableDropForeignKeyConstraintPhrase:String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The SQL keyword(s) or &quot;phrase&quot; used to drop a foreign key
+constraint.</p><div class="fullcomment"><div class="comment cmt"><p>The SQL keyword(s) or &quot;phrase&quot; used to drop a foreign key
+constraint.  For example, Derby, Oracle and PostgreSQL use</p><p>  ALTER TABLE child DROP CONSTRAINT idx_child_pk_parent;
+                         ^^^^^^^^^^</p><p>while MySQL uses</p><p>  ALTER TABLE child DROP FOREIGN KEY idx_child_pk_parent;
+                         ^^^^^^^^^^
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@clone():Object" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#columnDefinitionFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="columnDefinitionFactory(columnType:stark.migration.SqlType,characterSetOpt:Option[stark.migration.CharacterSet]):stark.migration.ColumnDefinition"></a>
+      <a id="columnDefinitionFactory(SqlType,Option[CharacterSet]):ColumnDefinition"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">columnDefinitionFactory</span><span class="params">(<span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="characterSetOpt">characterSetOpt: <span class="extype" name="scala.Option">Option</span>[<a href="CharacterSet.html" class="extype" name="stark.migration.CharacterSet">CharacterSet</a>]</span>)</span><span class="result">: <a href="ColumnDefinition.html" class="extype" name="stark.migration.ColumnDefinition">ColumnDefinition</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@columnDefinitionFactory(columnType:stark.migration.SqlType,characterSetOpt:Option[stark.migration.CharacterSet]):stark.migration.ColumnDefinition" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Concrete subclasses must define this method that returns a newly
+constructed, but uninitialized, concrete ColumnDefinition
+subclass for the given SQL data type and optional CharacterSet.</p><div class="fullcomment"><div class="comment cmt"><p>Concrete subclasses must define this method that returns a newly
+constructed, but uninitialized, concrete ColumnDefinition
+subclass for the given SQL data type and optional CharacterSet.
+</p></div><dl class="paramcmts block"><dt class="param">columnType</dt><dd class="cmt"><p>the column's data type</p></dd><dt class="param">characterSetOpt</dt><dd class="cmt"><p>an optional CharacterSet</p></dd><dt>returns</dt><dd class="cmt"><p>a newly constructed but uninitialized ColumnDefinition
+        for the columnType</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#commentColumnSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="commentColumnSql(tableName:String,columnName:String,comment:String):String"></a>
+      <a id="commentColumnSql(String,String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commentColumnSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="comment">comment: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@commentColumnSql(tableName:String,columnName:String,comment:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">对某一列增加注释</p><div class="fullcomment"><div class="comment cmt"><p>对某一列增加注释</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>表名</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>列名</p></dd><dt class="param">comment</dt><dd class="cmt"><p>注释</p></dd><dt>returns</dt><dd class="cmt"><p>注释的sql</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#commentTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="commentTableSql(tableName:String,comment:String):String"></a>
+      <a id="commentTableSql(String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">commentTableSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="comment">comment: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@commentTableSql(tableName:String,comment:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">对表添加注释</p><div class="fullcomment"><div class="comment cmt"><p>对表添加注释</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>表名</p></dd><dt class="param">comment</dt><dd class="cmt"><p>注释</p></dd><dt>returns</dt><dd class="cmt"><p>注释的sql</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#createTriggerSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="createTriggerSql(tableName:String,triggerName:String,timingPointOpt:Option[stark.migration.TriggerTimingPoint],triggerFiringOpt:List[stark.migration.TriggerFiring],referencingOpt:Option[stark.migration.Referencing],forEachRowOpt:Option[stark.migration.ForEachRow.type],whenOpt:Option[stark.migration.When])(f:=&gt;String):String"></a>
+      <a id="createTriggerSql(String,String,Option[TriggerTimingPoint],List[TriggerFiring],Option[Referencing],Option[ForEachRow.type],Option[When])(⇒String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">createTriggerSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="triggerName">triggerName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="timingPointOpt">timingPointOpt: <span class="extype" name="scala.Option">Option</span>[<a href="TriggerTimingPoint.html" class="extype" name="stark.migration.TriggerTimingPoint">TriggerTimingPoint</a>]</span>, <span name="triggerFiringOpt">triggerFiringOpt: <span class="extype" name="scala.List">List</span>[<a href="TriggerFiring.html" class="extype" name="stark.migration.TriggerFiring">TriggerFiring</a>]</span>, <span name="referencingOpt">referencingOpt: <span class="extype" name="scala.Option">Option</span>[<a href="Referencing.html" class="extype" name="stark.migration.Referencing">Referencing</a>]</span>, <span name="forEachRowOpt">forEachRowOpt: <span class="extype" name="scala.Option">Option</span>[<a href="ForEachRow$.html" class="extype" name="stark.migration.ForEachRow">ForEachRow</a>.type]</span>, <span name="whenOpt">whenOpt: <span class="extype" name="scala.Option">Option</span>[<a href="When.html" class="extype" name="stark.migration.When">When</a>]</span>)</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@createTriggerSql(tableName:String,triggerName:String,timingPointOpt:Option[stark.migration.TriggerTimingPoint],triggerFiringOpt:List[stark.migration.TriggerFiring],referencingOpt:Option[stark.migration.Referencing],forEachRowOpt:Option[stark.migration.ForEachRow.type],whenOpt:Option[stark.migration.When])(f:=&gt;String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#dropSequenceSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="dropSequenceSql(name:String):String"></a>
+      <a id="dropSequenceSql(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">dropSequenceSql</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@dropSequenceSql(name:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#fetchColumnCommentSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fetchColumnCommentSql(tableName:String,columnName:String):String"></a>
+      <a id="fetchColumnCommentSql(String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fetchColumnCommentSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@fetchColumnCommentSql(tableName:String,columnName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#fetchTableCommentSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fetchTableCommentSql(tableName:String):String"></a>
+      <a id="fetchTableCommentSql(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fetchTableCommentSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@fetchTableCommentSql(tableName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@finalize():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#findSequencesSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="findSequencesSql():Option[String]"></a>
+      <a id="findSequencesSql():Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">findSequencesSql</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@findSequencesSql():Option[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#findTriggersSql" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="findTriggersSql():Option[String]"></a>
+      <a id="findTriggersSql():Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">findTriggersSql</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@findTriggersSql():Option[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="stark.migration.DatabaseAdapter#generateCheckConstraintName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="generateCheckConstraintName(on:stark.migration.On,options:stark.migration.CheckOption*):(String,List[stark.migration.CheckOption])"></a>
+      <a id="generateCheckConstraintName(On,CheckOption*):(String,List[CheckOption])"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">generateCheckConstraintName</span><span class="params">(<span name="on">on: <a href="On.html" class="extype" name="stark.migration.On">On</a></span>, <span name="options">options: <a href="CheckOption.html" class="extype" name="stark.migration.CheckOption">CheckOption</a>*</span>)</span><span class="result">: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.List">List</span>[<a href="CheckOption.html" class="extype" name="stark.migration.CheckOption">CheckOption</a>])</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@generateCheckConstraintName(on:stark.migration.On,options:stark.migration.CheckOption*):(String,List[stark.migration.CheckOption])" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Given a check constraint, create a name for it, using a Name() if it is
+provided in the options.</p><div class="fullcomment"><div class="comment cmt"><p>Given a check constraint, create a name for it, using a Name() if it is
+provided in the options.
+</p></div><dl class="paramcmts block"><dt class="param">on</dt><dd class="cmt"><p>the table and columns the check constraint is on</p></dd><dt class="param">options</dt><dd class="cmt"><p>a varargs list of CheckOptions</p></dd><dt>returns</dt><dd class="cmt"><p>a two-tuple with the calculated name or the overridden
+        name from a Name and the remaining options</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#grantOnSchemaSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantOnSchemaSql(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String"></a>
+      <a id="grantOnSchemaSql(Array[User],SchemaPrivilege*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantOnSchemaSql</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@grantOnSchemaSql(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to grant the new privileges
+       to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more SchemaPrivilege objects describing
+       the types of privileges to grant</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to grant privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#grantOnSchemaSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantOnSchemaSql(schemaName:String,grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String"></a>
+      <a id="grantOnSchemaSql(String,Array[User],SchemaPrivilege*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantOnSchemaSql</span><span class="params">(<span name="schemaName">schemaName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@grantOnSchemaSql(schemaName:String,grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Grant one or more privileges to a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Grant one or more privileges to a schema.
+</p></div><dl class="paramcmts block"><dt class="param">schemaName</dt><dd class="cmt"><p>the name of the schema to grant privileges on</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to grant the new privileges
+       to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more SchemaPrivilege objects describing
+       the types of privileges to grant</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to grant privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#grantOnTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantOnTableSql(schemaNameOpt:Option[String],tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String"></a>
+      <a id="grantOnTableSql(Option[String],String,Array[User],GrantPrivilegeType*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantOnTableSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@grantOnTableSql(schemaNameOpt:Option[String],tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases have different limitations on the GRANT statement.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases have different limitations on the GRANT statement.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to grant the new privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more GrantPrivilegeType objects describing the
+       types of privileges to grant</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to grant privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#grantOnTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="grantOnTableSql(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String"></a>
+      <a id="grantOnTableSql(String,Array[User],GrantPrivilegeType*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">grantOnTableSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@grantOnTableSql(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases have different limitations on the GRANT statement.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases have different limitations on the GRANT statement.
+Uses the schemaNameOpt defined in the adapter.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to grant the new privileges to</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more GrantPrivilegeType objects describing the
+       types of privileges to grant</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to grant privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@hashCode():Int" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#lockTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lockTableSql(tableName:String):String"></a>
+      <a id="lockTableSql(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lockTableSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@lockTableSql(tableName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to lock a table.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to lock a table.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table to lock</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to lock the table</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#lockTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lockTableSql(schemaNameOpt:Option[String],tableName:String):String"></a>
+      <a id="lockTableSql(Option[String],String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lockTableSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@lockTableSql(schemaNameOpt:Option[String],tableName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to lock a table.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to lock a table.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table to lock</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to lock the table</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#logger" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="logger:org.slf4j.Logger"></a>
+      <a id="logger:Logger"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">logger</span><span class="result">: <span class="extype" name="org.slf4j.Logger">Logger</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@logger:org.slf4j.Logger" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#newColumnDefinition" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="newColumnDefinition(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):stark.migration.ColumnDefinition"></a>
+      <a id="newColumnDefinition(String,String,SqlType,ColumnOption*):ColumnDefinition"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">newColumnDefinition</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnType">columnType: <a href="SqlType.html" class="extype" name="stark.migration.SqlType">SqlType</a></span>, <span name="options">options: <a href="ColumnOption.html" class="extype" name="stark.migration.ColumnOption">ColumnOption</a>*</span>)</span><span class="result">: <a href="ColumnDefinition.html" class="extype" name="stark.migration.ColumnDefinition">ColumnDefinition</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@newColumnDefinition(tableName:String,columnName:String,columnType:stark.migration.SqlType,options:stark.migration.ColumnOption*):stark.migration.ColumnDefinition" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Given a table name, column name and column data type, return a
+newly constructed and fully initialized ColumnDefinition.</p><div class="fullcomment"><div class="comment cmt"><p>Given a table name, column name and column data type, return a
+newly constructed and fully initialized ColumnDefinition.  The
+class of the returned ColumnDefinition only depends upon the
+input column data type.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table the column is in</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the column's name</p></dd><dt class="param">columnType</dt><dd class="cmt"><p>the data type of the column</p></dd><dt class="param">options</dt><dd class="cmt"><p>a list of column options customizing the column</p></dd><dt>returns</dt><dd class="cmt"><p>a new ColumnDefinition</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@notify():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#onDeleteSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onDeleteSql(onDeleteOpt:Option[stark.migration.OnDelete]):String"></a>
+      <a id="onDeleteSql(Option[OnDelete]):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onDeleteSql</span><span class="params">(<span name="onDeleteOpt">onDeleteOpt: <span class="extype" name="scala.Option">Option</span>[<a href="OnDelete.html" class="extype" name="stark.migration.OnDelete">OnDelete</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@onDeleteSql(onDeleteOpt:Option[stark.migration.OnDelete]):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Return the SQL text for the ON DELETE clause for a foreign key
+relationship.</p><div class="fullcomment"><div class="comment cmt"><p>Return the SQL text for the ON DELETE clause for a foreign key
+relationship.</p><p>Oracle rejects adding a foreign key relationship containing the
+&quot;ON DELETE RESTRICT&quot; text, so do not generate any SQL text for
+it.  The behavior is the same though.  Let any other unsupported
+options pass through, such as &quot;ON DELETE NO ACTION&quot;, in case
+Oracle ever does support that clause, which it does not in 10g.
+</p></div><dl class="paramcmts block"><dt class="param">onDeleteOpt</dt><dd class="cmt"><p>an Option[OnDelete]</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL text to append to the SQL to create a foreign key
+        relationship</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#onUpdateSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="onUpdateSql(onUpdateOpt:Option[stark.migration.OnUpdate]):String"></a>
+      <a id="onUpdateSql(Option[OnUpdate]):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">onUpdateSql</span><span class="params">(<span name="onUpdateOpt">onUpdateOpt: <span class="extype" name="scala.Option">Option</span>[<a href="OnUpdate.html" class="extype" name="stark.migration.OnUpdate">OnUpdate</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@onUpdateSql(onUpdateOpt:Option[stark.migration.OnUpdate]):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Return the SQL text in a foreign key relationship for an optional
+ON UPDATE clause.</p><div class="fullcomment"><div class="comment cmt"><p>Return the SQL text in a foreign key relationship for an optional
+ON UPDATE clause.
+</p></div><dl class="paramcmts block"><dt class="param">onUpdateOpt</dt><dd class="cmt"><p>an Option[OnUpdate]</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL text to append to the SQL to create a foreign
+        key relationship</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#quoteCharacter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteCharacter:Char"></a>
+      <a id="quoteCharacter:Char"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteCharacter</span><span class="result">: <span class="extype" name="scala.Char">Char</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteCharacter:Char" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The character that is used to quote identifiers.</p><div class="fullcomment"><div class="comment cmt"><p>The character that is used to quote identifiers.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#quoteColumnName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteColumnName(columnName:String):String"></a>
+      <a id="quoteColumnName(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteColumnName</span><span class="params">(<span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteColumnName(columnName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Quote a column name.</p><div class="fullcomment"><div class="comment cmt"><p>Quote a column name.
+</p></div><dl class="paramcmts block"><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column to quote</p></dd><dt>returns</dt><dd class="cmt"><p>a properly quoted column name</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#quoteIndexName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteIndexName(schemaNameOpt:Option[String],indexName:String):String"></a>
+      <a id="quoteIndexName(Option[String],String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteIndexName</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteIndexName(schemaNameOpt:Option[String],indexName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Quote an index name.</p><div class="fullcomment"><div class="comment cmt"><p>Quote an index name.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>an optional schema name</p></dd><dt class="param">indexName</dt><dd class="cmt"><p>the name of the index to quote</p></dd><dt>returns</dt><dd class="cmt"><p>a properly quoted index name</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#quoteSchemaName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteSchemaName(schemaName:String):String"></a>
+      <a id="quoteSchemaName(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteSchemaName</span><span class="params">(<span name="schemaName">schemaName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteSchemaName(schemaName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Quote a schema name.</p><div class="fullcomment"><div class="comment cmt"><p>Quote a schema name.
+</p></div><dl class="paramcmts block"><dt class="param">schemaName</dt><dd class="cmt"><p>the name of the schema to quote</p></dd><dt>returns</dt><dd class="cmt"><p>a properly quoted schema name</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#quoteTableName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteTableName(tableName:String):String"></a>
+      <a id="quoteTableName(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteTableName</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteTableName(tableName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Quote a table name.</p><div class="fullcomment"><div class="comment cmt"><p>Quote a table name.  If the database adapter was provided with a
+default schema name, then the quoted table name is prepended with
+the quoted schema name along with a '.'.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table to quote</p></dd><dt>returns</dt><dd class="cmt"><p>the table name properly quoted for the database,
+        prepended with the quoted schema name and a '.' if the
+        database adapter was provided with a default schema name</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#quoteTableName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="quoteTableName(schemaNameOpt:Option[String],tableName:String):String"></a>
+      <a id="quoteTableName(Option[String],String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">quoteTableName</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@quoteTableName(schemaNameOpt:Option[String],tableName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Quote a table name, prepending the quoted schema name to the
+quoted table name along with a '.' if a schema name is provided.</p><div class="fullcomment"><div class="comment cmt"><p>Quote a table name, prepending the quoted schema name to the
+quoted table name along with a '.' if a schema name is provided.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>an optional schema name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table to quote</p></dd><dt>returns</dt><dd class="cmt"><p>the table name properly quoted for the database,
+        prepended with the quoted schema name and a '.' if a
+        schema name is provided</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#removeColumnSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeColumnSql(schemaNameOpt:Option[String],tableName:String,columnName:String):String"></a>
+      <a id="removeColumnSql(Option[String],String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeColumnSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@removeColumnSql(schemaNameOpt:Option[String],tableName:String,columnName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to drop a column.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to drop a column.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the column</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to drop the column</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#removeColumnSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeColumnSql(tableName:String,columnName:String):String"></a>
+      <a id="removeColumnSql(String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeColumnSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="columnName">columnName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@removeColumnSql(tableName:String,columnName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to drop a column.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to drop a column.
+Uses the schemaNameOpt defined in the adapter.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the column</p></dd><dt class="param">columnName</dt><dd class="cmt"><p>the name of the column</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to drop the column</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#removeIndexSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeIndexSql(tableName:String,indexName:String):String"></a>
+      <a id="removeIndexSql(String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeIndexSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@removeIndexSql(tableName:String,indexName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to drop an index.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to drop an index.
+Uses the schemaNameOpt defined in the adapter.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">indexName</dt><dd class="cmt"><p>the name of the index</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to drop the index</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#removeIndexSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="removeIndexSql(schemaNameOpt:Option[String],tableName:String,indexName:String):String"></a>
+      <a id="removeIndexSql(Option[String],String,String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">removeIndexSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@removeIndexSql(schemaNameOpt:Option[String],tableName:String,indexName:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases require different SQL to drop an index.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases require different SQL to drop an index.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">indexName</dt><dd class="cmt"><p>the name of the index</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to drop the index</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#revokeOnSchemaSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeOnSchemaSql(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String"></a>
+      <a id="revokeOnSchemaSql(Array[User],SchemaPrivilege*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeOnSchemaSql</span><span class="params">(<span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@revokeOnSchemaSql(grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more SchemaPrivilege objects describing
+       the types of privileges to revoke</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to revoke privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#revokeOnSchemaSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeOnSchemaSql(schemaName:String,grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String"></a>
+      <a id="revokeOnSchemaSql(String,Array[User],SchemaPrivilege*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeOnSchemaSql</span><span class="params">(<span name="schemaName">schemaName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="SchemaPrivilege.html" class="extype" name="stark.migration.SchemaPrivilege">SchemaPrivilege</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@revokeOnSchemaSql(schemaName:String,grantees:Array[stark.migration.User],privileges:stark.migration.SchemaPrivilege*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Revoke one or more privileges from a schema.</p><div class="fullcomment"><div class="comment cmt"><p>Revoke one or more privileges from a schema.
+</p></div><dl class="paramcmts block"><dt class="param">schemaName</dt><dd class="cmt"><p>the name of the schema to revoke privileges
+       from</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more SchemaPrivilege objects describing
+       the types of privileges to revoke</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to revoke privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#revokeOnTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeOnTableSql(schemaNameOpt:Option[String],tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String"></a>
+      <a id="revokeOnTableSql(Option[String],String,Array[User],GrantPrivilegeType*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeOnTableSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@revokeOnTableSql(schemaNameOpt:Option[String],tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases have different limitations on the REVOKE statement.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases have different limitations on the REVOKE statement.
+</p></div><dl class="paramcmts block"><dt class="param">schemaNameOpt</dt><dd class="cmt"><p>the optional schema name to qualify the
+       table name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more GrantPrivilegeType objects describing the
+       types of privileges to revoke</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to revoke privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#revokeOnTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="revokeOnTableSql(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String"></a>
+      <a id="revokeOnTableSql(String,Array[User],GrantPrivilegeType*):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">revokeOnTableSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="grantees">grantees: <span class="extype" name="scala.Array">Array</span>[<a href="User.html" class="extype" name="stark.migration.User">User</a>]</span>, <span name="privileges">privileges: <a href="GrantPrivilegeType.html" class="extype" name="stark.migration.GrantPrivilegeType">GrantPrivilegeType</a>*</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@revokeOnTableSql(tableName:String,grantees:Array[stark.migration.User],privileges:stark.migration.GrantPrivilegeType*):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Different databases have different limitations on the REVOKE statement.</p><div class="fullcomment"><div class="comment cmt"><p>Different databases have different limitations on the REVOKE statement.
+Uses the schemaNameOpt defined in the adapter.
+</p></div><dl class="paramcmts block"><dt class="param">tableName</dt><dd class="cmt"><p>the name of the table with the index</p></dd><dt class="param">grantees</dt><dd class="cmt"><p>one or more objects to revoke the privileges from</p></dd><dt class="param">privileges</dt><dd class="cmt"><p>one or more GrantPrivilegeType objects describing the
+       types of privileges to revoke</p></dd><dt>returns</dt><dd class="cmt"><p>the SQL to revoke privileges</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#schemaNameOpt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="schemaNameOpt:Option[String]"></a>
+      <a id="schemaNameOpt:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">schemaNameOpt</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@schemaNameOpt:Option[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#sequenceSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="sequenceSql(name:String):String"></a>
+      <a id="sequenceSql(String):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sequenceSql</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@sequenceSql(name:String):String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#supportsCheckConstraints" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="supportsCheckConstraints:Boolean"></a>
+      <a id="supportsCheckConstraints:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">supportsCheckConstraints</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@supportsCheckConstraints:Boolean" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">If the database supports table and column check constraints.</p><div class="fullcomment"><div class="comment cmt"><p>If the database supports table and column check constraints.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@toString():String" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#unlockTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unlockTableSql(tableName:String):Option[String]"></a>
+      <a id="unlockTableSql(String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unlockTableSql</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@unlockTableSql(tableName:String):Option[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.DatabaseAdapter#unlockTableSql" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unlockTableSql(schemaNameOpt:Option[String],tableName:String):Option[String]"></a>
+      <a id="unlockTableSql(Option[String],String):Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unlockTableSql</span><span class="params">(<span name="schemaNameOpt">schemaNameOpt: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@unlockTableSql(schemaNameOpt:Option[String],tableName:String):Option[String]" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#unquotedNameConverter" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unquotedNameConverter:stark.migration.UppercaseUnquotedNameConverter.type"></a>
+      <a id="unquotedNameConverter:UppercaseUnquotedNameConverter.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unquotedNameConverter</span><span class="result">: <a href="UppercaseUnquotedNameConverter$.html" class="extype" name="stark.migration.UppercaseUnquotedNameConverter">UppercaseUnquotedNameConverter</a>.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@unquotedNameConverter:stark.migration.UppercaseUnquotedNameConverter.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">To properly quote table names the database adapter needs to know
+how the database treats unquoted names.</p><div class="fullcomment"><div class="comment cmt"><p>To properly quote table names the database adapter needs to know
+how the database treats unquoted names.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#userFactory" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="userFactory:stark.migration.PlainUserFactory.type"></a>
+      <a id="userFactory:PlainUserFactory.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">userFactory</span><span class="result">: <a href="PlainUserFactory$.html" class="extype" name="stark.migration.PlainUserFactory">PlainUserFactory</a>.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@userFactory:stark.migration.PlainUserFactory.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">A factory for creating User instances from a bare user name.</p><div class="fullcomment"><div class="comment cmt"><p>A factory for creating User instances from a bare user name.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="stark.migration.OracleDatabaseAdapter#vendor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="vendor:stark.migration.Oracle.type"></a>
+      <a id="vendor:Oracle.type"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">vendor</span><span class="result">: <a href="Oracle$.html" class="extype" name="stark.migration.Oracle">Oracle</a>.type</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@vendor:stark.migration.Oracle.type" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">The vendor of the database.</p><div class="fullcomment"><div class="comment cmt"><p>The vendor of the database.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="stark.migration.OracleDatabaseAdapter">OracleDatabaseAdapter</a> → <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@wait():Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../index.html#stark.migration.OracleDatabaseAdapter@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="stark.migration.DatabaseAdapter">
+              <h3>Inherited from <a href="DatabaseAdapter.html" class="extype" name="stark.migration.DatabaseAdapter">DatabaseAdapter</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>
