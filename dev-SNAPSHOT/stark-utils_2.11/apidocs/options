@@ -1,0 +1,37 @@
+-breakiterator
+-classpath
+'/home/travis/build/ganshane/stark/stark-utils/target/classes:/home/travis/.m2/repository/log4j/log4j/1.2.14/log4j-1.2.14.jar:/home/travis/.m2/repository/org/antlr/stringtemplate/3.2.1/stringtemplate-3.2.1.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-security/8.1.16.v20140903/jetty-security-8.1.16.v20140903.jar:/home/travis/.m2/repository/org/apache/zookeeper/zookeeper/3.4.6/zookeeper-3.4.6.jar:/home/travis/.m2/repository/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-ioc/5.3.8/tapestry-ioc-5.3.8.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-server/8.1.16.v20140903/jetty-server-8.1.16.v20140903.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-io/8.1.16.v20140903/jetty-io-8.1.16.v20140903.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-http/8.1.16.v20140903/jetty-http-8.1.16.v20140903.jar:/home/travis/.m2/repository/javassist/javassist/3.12.1.GA/javassist-3.12.1.GA.jar:/home/travis/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/home/travis/.m2/repository/com/google/guava/guava/16.0.1/guava-16.0.1.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-continuation/8.1.16.v20140903/jetty-continuation-8.1.16.v20140903.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-core/5.3.8/tapestry-core-5.3.8.jar:/home/travis/.m2/repository/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/home/travis/.m2/repository/antlr/antlr/2.7.7/antlr-2.7.7.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-util/8.1.16.v20140903/jetty-util-8.1.16.v20140903.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-json/5.3.8/tapestry-json-5.3.8.jar:/home/travis/.m2/repository/jline/jline/0.9.94/jline-0.9.94.jar:/home/travis/.m2/repository/org/apache/httpcomponents/httpclient/4.3.5/httpclient-4.3.5.jar:/home/travis/.m2/repository/org/antlr/antlr-runtime/3.3/antlr-runtime-3.3.jar:/home/travis/.m2/repository/org/apache/curator/curator-client/2.6.0/curator-client-2.6.0.jar:/home/travis/.m2/repository/org/eclipse/jetty/jetty-servlet/8.1.16.v20140903/jetty-servlet-8.1.16.v20140903.jar:/home/travis/.m2/repository/io/netty/netty/3.10.3.Final/netty-3.10.3.Final.jar:/home/travis/.m2/repository/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar:/home/travis/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar:/home/travis/.m2/repository/org/apache/tapestry/plastic/5.3.8/plastic-5.3.8.jar:/home/travis/.m2/repository/org/scala-lang/scala-library/2.11.7/scala-library-2.11.7.jar:/home/travis/.m2/repository/org/eclipse/jetty/orbit/javax.servlet/3.0.0.v201112011016/javax.servlet-3.0.0.v201112011016.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry5-annotations/5.3.8/tapestry5-annotations-5.3.8.jar:/home/travis/.m2/repository/org/apache/curator/curator-framework/2.6.0/curator-framework-2.6.0.jar:/home/travis/.m2/repository/org/apache/tapestry/tapestry-func/5.3.8/tapestry-func-5.3.8.jar:/home/travis/.m2/repository/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar:/home/travis/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/travis/build/ganshane/stark/stark-utils/src/main/scala'
+-author
+-bottom
+'Copyright &#169; 2015&#x2013;2016 <a href="https://github.com/ganshane">Ganshane Developer Team</a>. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/home/travis/build/ganshane/stark/stark-utils/target/site/apidocs'
+-docencoding
+'UTF-8'
+-docfilessubdirs
+-doctitle
+'Stark Utils Support dev-SNAPSHOT API'
+-keywords
+-link
+'http://java.sun.com/j2se/${maven.compiler.source}/docs/api'
+-link
+'http://slf4j.org/api'
+-link
+'http://commons.apache.org/lang/api-release'
+-link
+'http://commons.apache.org/io/api-release'
+-link
+'http://junit.sourceforge.net/javadoc'
+-linkoffline
+'http://docs.oracle.com/javase/7/docs/api' '/home/travis/build/ganshane/stark/stark-utils/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'Stark Utils Support dev-SNAPSHOT API'
