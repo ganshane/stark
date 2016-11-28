@@ -145,7 +145,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Tapestry-Module-Classes>stark.webservice.LichenWebServiceModule</Tapestry-Module-Classes>
+              <Tapestry-Module-Classes>stark.webservice.StarkWebServiceModule</Tapestry-Module-Classes>
             </manifestEntries>
           </archive>
         </configuration>
