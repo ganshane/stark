@@ -19,7 +19,7 @@
   <parent>
     <artifactId>stark-project_2.11</artifactId>
     <groupId>com.ganshane.stark</groupId>
-    <version>0.1.12</version>
+    <version>0.1.13-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>stark-webservice_2.11</artifactId>
