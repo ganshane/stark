@@ -4,7 +4,6 @@ import java.util.Properties
 import javax.persistence.{EntityManager, EntityManagerFactory}
 import javax.sql.DataSource
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory
 import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.orm.jpa.support.SharedEntityManagerBean
@@ -14,7 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 import stark.activerecord.config.ActiveRecordConfigSupport
 import stark.activerecord.internal.EntityServiceImpl
-import stark.activerecord.services.ActiveRecord
+import stark.activerecord.services.{ActiveRecord, EntityService}
 
 /**
   * 实现了简单方便的ORM模块
@@ -25,13 +24,11 @@ import stark.activerecord.services.ActiveRecord
  */
 @Configuration
 @EnableTransactionManagement
-class StarkActiveRecordModule {
-  @Autowired private var beanFactory:AutowireCapableBeanFactory = _ ;
+class StarkActiveRecordModule(beanFactory: AutowireCapableBeanFactory) {
   ActiveRecord.objectLocator = beanFactory
-
  // private var springBeanFactoryOpt:Option[LocalContainerEntityManagerFactoryBean] =  None
  @Bean
- def entityService(): Unit ={
+ def entityService(): EntityService ={
    beanFactory.createBean(classOf[EntityServiceImpl])
  }
   @Bean
@@ -43,7 +40,7 @@ class StarkActiveRecordModule {
 
 
     val jpaIt = activeRecordConfig.jpaProperties.iterator()
-    if(jpaIt.hasNext){
+    while(jpaIt.hasNext){
       val jpaProperty = jpaIt.next()
       if(jpaProperty.name == StarkActiveRecordConstants.PACKAGE_SCAN_KEY){
         val packages = jpaProperty.value.split(",")

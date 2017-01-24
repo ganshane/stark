@@ -5,7 +5,6 @@ import javax.inject.Inject
 import javax.persistence._
 import javax.sql.DataSource
 
-import org.apache.tapestry5.ioc.{Configuration, Registry}
 import org.junit.runner.RunWith
 import org.junit.{After, Before}
 import org.springframework.beans.factory.BeanFactory
@@ -13,6 +12,8 @@ import org.springframework.context.annotation
 import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.datasource.DriverManagerDataSource
 import org.springframework.orm.jpa.{EntityManagerFactoryUtils, EntityManagerHolder}
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction.support.TransactionSynchronizationManager
@@ -28,30 +29,28 @@ import scala.reflect.{ClassTag, classTag}
  * @since 2016-01-03
  */
 @RunWith(classOf[SpringJUnit4ClassRunner])
+@DirtiesContext(classMode=ClassMode.AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(classes = Array(classOf[TestDataModule],classOf[StarkActiveRecordModule]))
 class BaseActiveRecordTestCase {
   @Inject
   private var beanFactory:BeanFactory = _
 
-  private var registry:Registry = _
   protected def getService[T:ClassTag]:T={
     beanFactory.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])
   }
   @Before
   def setup: Unit ={
-    /*
     val entityManagerFactory= getService[EntityManagerFactory]
     val emHolder= new EntityManagerHolder(entityManagerFactory.createEntityManager())
     TransactionSynchronizationManager.bindResource(entityManagerFactory, emHolder)
-    */
   }
   @After
   def down: Unit ={
-    val emf: EntityManagerFactory = registry.getService(classOf[EntityManagerFactory])
-    val emHolder: EntityManagerHolder = TransactionSynchronizationManager.unbindResource(emf).asInstanceOf[EntityManagerHolder]
-    EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager)
+    val emf: EntityManagerFactory = getService[EntityManagerFactory]
+ val emHolder: EntityManagerHolder = TransactionSynchronizationManager.unbindResource(emf).asInstanceOf[EntityManagerHolder]
+ EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager)
 
-    registry.shutdown()
+   // registry.shutdown()
   }
 }
 object ModelA extends ActiveRecordInstance[ModelA]{
@@ -106,9 +105,6 @@ class TestDataModule{
     val dataSource = new DriverManagerDataSource("jdbc:h2:file:"+dbPath+"/xx","sa",null)
     dataSource
   }
-  def contributeEntityManagerFactory(configuration:Configuration[String]): Unit ={
-    configuration.add("stark.activerecord")
-  }
   @Bean
   def buildHallOrmConfigSupport: ActiveRecordConfigSupport={
     val support = new ActiveRecordConfigSupport {}
@@ -124,6 +120,7 @@ class TestDataModule{
     jpaProperty = new JpaProperty
     jpaProperty.name = StarkActiveRecordConstants.PACKAGE_SCAN_KEY
     jpaProperty.value="stark.activerecord"
+    support.jpaProperties.add(jpaProperty)
 
     support
   }
