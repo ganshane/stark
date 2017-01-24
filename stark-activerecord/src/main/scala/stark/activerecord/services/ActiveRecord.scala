@@ -3,7 +3,9 @@ package stark.activerecord.services
 import javax.persistence.{EntityManager, Id, Transient}
 
 import org.apache.tapestry5.ioc.ObjectLocator
+import org.hibernate.annotations.common.util.impl.LoggerFactory
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.BeanFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.DSLSelectionQuery
 
@@ -21,9 +23,9 @@ import scala.reflect.{ClassTag, classTag}
 object ActiveRecord {
 
   //logger
-  private val logger = LoggerFactory getLogger getClass
+//  private val logger = LoggerFactory getLogger getClass
   @volatile
-  private[activerecord] var objectLocator:ObjectLocator= _
+  private[activerecord] var objectLocator:BeanFactory = _
 
   private[activerecord] def entityManager:EntityManager =  getService[EntityManager]
   private[activerecord] def entityService:EntityService = getService[EntityService]
@@ -81,7 +83,7 @@ object ActiveRecord {
   private def getService[T:ClassTag]:T={
     if(objectLocator == null)
       throw new IllegalStateException("object locator is null")
-    objectLocator.getService(classTag[T].runtimeClass.asInstanceOf[Class[T]])
+    objectLocator.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])
   }
   /**
    * find_by and where function
@@ -191,6 +193,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
 
   /**
     * select some fields
+    *
     * @param fields fields
     * @return Select step
     */
@@ -200,6 +203,7 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
 
   /**
     * where by DSL
+    *
     * @return select step
     */
   def where:DSLSelectionQuery[A,A] ={

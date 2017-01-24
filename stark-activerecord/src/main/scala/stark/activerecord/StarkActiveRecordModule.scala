@@ -1,22 +1,20 @@
 package stark.activerecord
 
-import java.util
 import java.util.Properties
 import javax.persistence.{EntityManager, EntityManagerFactory}
 import javax.sql.DataSource
 
-import org.apache.tapestry5.ioc.annotations._
-import org.apache.tapestry5.ioc.{MethodAdviceReceiver, ObjectLocator, ServiceBinder}
-import org.slf4j.Logger
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory
+import org.springframework.context.annotation.{Bean, Configuration}
 import org.springframework.orm.jpa.support.SharedEntityManagerBean
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
 import org.springframework.orm.jpa.{JpaTransactionManager, JpaVendorAdapter, LocalContainerEntityManagerFactoryBean}
 import org.springframework.transaction.PlatformTransactionManager
-import org.springframework.transaction.annotation.{AnnotationTransactionAttributeSource, Transactional}
-import org.springframework.transaction.interceptor.TransactionInterceptor
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import stark.activerecord.config.ActiveRecordConfigSupport
-import stark.activerecord.internal.{EntityManagerTransactionAdvice, EntityServiceImpl}
-import stark.activerecord.services.{ActiveRecord, EntityService}
+import stark.activerecord.internal.EntityServiceImpl
+import stark.activerecord.services.ActiveRecord
 
 /**
   * 实现了简单方便的ORM模块
@@ -25,29 +23,41 @@ import stark.activerecord.services.{ActiveRecord, EntityService}
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-02
  */
-object StarkActiveRecordModule {
-  private var springBeanFactoryOpt:Option[LocalContainerEntityManagerFactoryBean] =  None
-  def bind(binder:ServiceBinder): Unit ={
-    binder.bind(classOf[EntityService],classOf[EntityServiceImpl])
-  }
+@Configuration
+@EnableTransactionManagement
+class StarkActiveRecordModule {
+  @Autowired private var beanFactory:AutowireCapableBeanFactory = _ ;
+  ActiveRecord.objectLocator = beanFactory
 
-  @EagerLoad
+ // private var springBeanFactoryOpt:Option[LocalContainerEntityManagerFactoryBean] =  None
+ @Bean
+ def entityService(): Unit ={
+   beanFactory.createBean(classOf[EntityServiceImpl])
+ }
+  @Bean
   def buildEntityManagerFactory(dataSource: DataSource,
-                                configuration: util.Collection[String],
-                                ormConfig:ActiveRecordConfigSupport,
-                                objectLocator: ObjectLocator):EntityManagerFactory= {
+                                activeRecordConfig:ActiveRecordConfigSupport):LocalContainerEntityManagerFactoryBean = {
     val entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean
 
     entityManagerFactoryBean.setDataSource(dataSource)
 
-    val packages = configuration.toArray(new Array[String](configuration.size()))
-    entityManagerFactoryBean.setPackagesToScan(packages:_*)
+
+    val jpaIt = activeRecordConfig.jpaProperties.iterator()
+    if(jpaIt.hasNext){
+      val jpaProperty = jpaIt.next()
+      if(jpaProperty.name == StarkActiveRecordConstants.PACKAGE_SCAN_KEY){
+        val packages = jpaProperty.value.split(",")
+        entityManagerFactoryBean.setPackagesToScan(packages:_*)
+      }
+    }
 
     val properties = new Properties
-    val it = ormConfig.jpaProperties.iterator()
+    val it = activeRecordConfig.jpaProperties.iterator()
     while(it.hasNext){
       val jpaProperty = it.next()
-      properties.put(jpaProperty.name,jpaProperty.value)
+      if(jpaProperty.name != StarkActiveRecordConstants.PACKAGE_SCAN_KEY) {
+        properties.put(jpaProperty.name, jpaProperty.value)
+      }
     }
     entityManagerFactoryBean.setJpaProperties(properties)
 
@@ -57,26 +67,20 @@ object StarkActiveRecordModule {
     else
       entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter)
 
-
-    ActiveRecord.objectLocator = objectLocator
-    /*
-    ActiveRecord.entityManager = entityManager
-    ActiveRecord.entityService = entityService
-    */
-    entityManagerFactoryBean.afterPropertiesSet()
-    springBeanFactoryOpt = Some(entityManagerFactoryBean)
-    entityManagerFactoryBean.getObject
+    entityManagerFactoryBean
   }
 
   //@Scope(ScopeConstants.PERTHREAD)
-  def buildEntityManager(logger: Logger,@Local entityManagerFactory: EntityManagerFactory):EntityManager={
+  @Bean
+  def buildEntityManager(entityManagerFactory: EntityManagerFactory):SharedEntityManagerBean={
     val shared = new SharedEntityManagerBean()
     shared.setEntityManagerFactory(entityManagerFactory)
     shared.setEntityManagerInterface(classOf[EntityManager])
-    shared.afterPropertiesSet()
 
-    shared.getObject
+    shared
+
   }
+  @Bean
   def buildJpaTransactionManager(entityManagerFactory:EntityManagerFactory,
                                  dataSource: DataSource
                                  ):PlatformTransactionManager={
@@ -84,11 +88,12 @@ object StarkActiveRecordModule {
     //保证全局事务使用的key都是自身申明的对象
     transactionManager.setEntityManagerFactory(entityManagerFactory)
     //设置JPA厂商
-    springBeanFactoryOpt.foreach(x=>transactionManager.setJpaDialect(x.getJpaDialect))
+//    springBeanFactoryOpt.foreach(x=>transactionManager.setJpaDialect(x.getJpaDialect))
 
     transactionManager
   }
 
+  /*
    def buildTransactionInterceptor(@Local transactionManager: PlatformTransactionManager): TransactionInterceptor = {
     val transactionAttributeSource = new AnnotationTransactionAttributeSource
     val transactionInterceptor = new TransactionInterceptor(transactionManager, transactionAttributeSource)
@@ -103,4 +108,5 @@ object StarkActiveRecordModule {
         receiver.adviseMethod(m, new EntityManagerTransactionAdvice(transactionInterceptor, m))
     }
   };
+  */
 }

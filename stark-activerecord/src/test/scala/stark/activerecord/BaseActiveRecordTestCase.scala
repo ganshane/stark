@@ -1,17 +1,24 @@
 package stark.activerecord
 
 import java.io.File
+import javax.inject.Inject
 import javax.persistence._
 import javax.sql.DataSource
 
-import org.apache.tapestry5.ioc.{Configuration, Registry, RegistryBuilder}
+import org.apache.tapestry5.ioc.{Configuration, Registry}
+import org.junit.runner.RunWith
 import org.junit.{After, Before}
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.context.annotation
+import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.datasource.DriverManagerDataSource
-import org.springframework.orm.jpa.{EntityManagerHolder, EntityManagerFactoryUtils}
+import org.springframework.orm.jpa.{EntityManagerFactoryUtils, EntityManagerHolder}
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.FileSystemUtils
-import stark.activerecord.config.{JpaProperty, ActiveRecordConfigSupport}
-import stark.activerecord.services.{ActiveRecordInstance, ActiveRecord}
+import stark.activerecord.config.{ActiveRecordConfigSupport, JpaProperty}
+import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -20,22 +27,23 @@ import scala.reflect.{ClassTag, classTag}
  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-01-03
  */
+@RunWith(classOf[SpringJUnit4ClassRunner])
+@ContextConfiguration(classes = Array(classOf[TestDataModule],classOf[StarkActiveRecordModule]))
 class BaseActiveRecordTestCase {
+  @Inject
+  private var beanFactory:BeanFactory = _
 
   private var registry:Registry = _
   protected def getService[T:ClassTag]:T={
-    registry.getService(classTag[T].runtimeClass.asInstanceOf[Class[T]])
+    beanFactory.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])
   }
   @Before
   def setup: Unit ={
-    val modules = Seq[String](
-      "stark.activerecord.StarkActiveRecordModule",
-      "stark.activerecord.TestDataModule").map(Class.forName)
-    registry = RegistryBuilder.buildAndStartupRegistry(modules: _*)
-    //OpenSession In Thread
+    /*
     val entityManagerFactory= getService[EntityManagerFactory]
     val emHolder= new EntityManagerHolder(entityManagerFactory.createEntityManager())
     TransactionSynchronizationManager.bindResource(entityManagerFactory, emHolder)
+    */
   }
   @After
   def down: Unit ={
@@ -89,7 +97,9 @@ class ModelB extends ActiveRecord{
   @JoinColumn(name="model_a_id")
   var modelA:ModelA = _
 }
-object TestDataModule{
+@annotation.Configuration
+class TestDataModule{
+  @Bean
   def buildDataSource: DataSource ={
     val dbPath = "target/test.db"
     FileSystemUtils.deleteRecursively(new File(dbPath))
@@ -99,6 +109,7 @@ object TestDataModule{
   def contributeEntityManagerFactory(configuration:Configuration[String]): Unit ={
     configuration.add("stark.activerecord")
   }
+  @Bean
   def buildHallOrmConfigSupport: ActiveRecordConfigSupport={
     val support = new ActiveRecordConfigSupport {}
     var jpaProperty = new JpaProperty
@@ -109,6 +120,10 @@ object TestDataModule{
     jpaProperty.name = "hibernate.hbm2ddl.auto"
     jpaProperty.value="create"
     support.jpaProperties.add(jpaProperty)
+
+    jpaProperty = new JpaProperty
+    jpaProperty.name = StarkActiveRecordConstants.PACKAGE_SCAN_KEY
+    jpaProperty.value="stark.activerecord"
 
     support
   }

@@ -7,4 +7,5 @@ package stark.activerecord
  */
 object StarkActiveRecordConstants {
   final val JPA_VENDOR_KEY="vendor"
+  final val PACKAGE_SCAN_KEY="package.scan"
 }

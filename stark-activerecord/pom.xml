@@ -36,7 +36,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
-      <artifactId>spring-context-support</artifactId>
+      <artifactId>spring-context</artifactId>
     </dependency>
     <dependency>
       <groupId>aopalliance</groupId>
@@ -58,6 +58,12 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring-release-version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
