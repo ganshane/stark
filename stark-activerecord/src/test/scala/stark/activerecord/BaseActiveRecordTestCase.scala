@@ -6,7 +6,7 @@ import javax.persistence._
 import javax.sql.DataSource
 
 import org.junit.runner.RunWith
-import org.junit.{After, Before}
+import org.junit.{Test, After, Before}
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.context.annotation
 import org.springframework.context.annotation.Bean
@@ -51,6 +51,9 @@ class BaseActiveRecordTestCase {
  EntityManagerFactoryUtils.closeEntityManager(emHolder.getEntityManager)
 
    // registry.shutdown()
+  }
+  @Test
+  def test: Unit ={
   }
 }
 object ModelA extends ActiveRecordInstance[ModelA]{
