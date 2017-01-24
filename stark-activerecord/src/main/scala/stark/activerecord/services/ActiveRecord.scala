@@ -2,9 +2,6 @@ package stark.activerecord.services
 
 import javax.persistence.{EntityManager, Id, Transient}
 
-import org.apache.tapestry5.ioc.ObjectLocator
-import org.hibernate.annotations.common.util.impl.LoggerFactory
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.BeanFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.DSLSelectionQuery
