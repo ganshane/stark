@@ -15,14 +15,15 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet
 
 trait SpringMvcServerCreator{
-  private var modules: Option[Array[Class[_]]] = None
   private var serverOpt: Option[Server] = None
 
   protected def startServer(config: WebServerConfig, pkg: String, classes: Class[_]*): Server = {
-    this.modules = Some(classes.toArray)
     try {
       val bind = StarkUtils.parseBind(config.bind)
-      val server = SpringMvcServerCreator.createTapestryWebapp(bind._1, bind._2, new StarkWebContext)
+      val context = new AnnotationConfigWebApplicationContext
+      classes.foreach(c=>context.register(c))
+
+      val server = SpringMvcServerCreator.createSpringWebapp(bind._1, bind._2, context)
       SpringMvcServerCreator.configServer(server, config)
       server.start()
       serverOpt = Some(server)
@@ -40,18 +41,6 @@ trait SpringMvcServerCreator{
   protected def shutdownServer() {
     serverOpt.foreach(_.stop())
   }
-
-  class StarkWebContext extends AnnotationConfigWebApplicationContext {
-    override def afterPropertiesSet(): Unit = {
-      modules match {
-        case Some(m) =>
-          super.register(m:_*)
-        case None =>
-      }
-      super.afterPropertiesSet()
-    }
-  }
-
 }
 
 /**
@@ -60,14 +49,15 @@ trait SpringMvcServerCreator{
 object SpringMvcServerCreator {
   /**
     * create spring web application
+    *
     * @param host listen host
     * @param port listen port
     * @param webContext  web application
     * @return server instance
     */
-  def createTapestryWebapp(host: String,
-                           port: Int,
-                           webContext: AnnotationConfigWebApplicationContext): Server = {
+  def createSpringWebapp(host: String,
+                         port: Int,
+                         webContext: AnnotationConfigWebApplicationContext): Server = {
     val contextHandler = new ServletContextHandler()
     contextHandler.setErrorHandler(null)
     contextHandler.setContextPath("/")
