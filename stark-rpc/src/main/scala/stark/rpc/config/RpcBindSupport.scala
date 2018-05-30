@@ -14,6 +14,7 @@ trait RpcBindSupport {
   var rpc: RpcBind = new RpcBind
 }
 
+@XmlType(name = "RpcBind")
 class RpcBind {
   @XmlElement(name = "bind")
   var bind: String = _
