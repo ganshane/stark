@@ -46,7 +46,7 @@
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>stark-rpc_${scala-binary-version}</artifactId>
+        <artifactId>stark-migration_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

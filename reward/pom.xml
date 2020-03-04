@@ -69,6 +69,11 @@
       <version>2.10.2</version>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-joda</artifactId>
+      <version>2.10.2</version>
+    </dependency>
+    <dependency>
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>3.4.2</version>
@@ -78,6 +83,17 @@
       <groupId>com.ganshane.stark</groupId>
       <artifactId>stark-activerecord_${scala-binary-version}</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.ganshane.stark</groupId>
+      <artifactId>stark-migration_${scala-binary-version}</artifactId>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.jadira.usertype/usertype.core -->
+    <dependency>
+      <groupId>org.jadira.usertype</groupId>
+      <artifactId>usertype.core</artifactId>
+      <version>6.0.1.GA</version>
+    </dependency>
+
     <dependency>
       <groupId>com.ganshane.stark</groupId>
       <artifactId>stark-utils_${scala-binary-version}</artifactId>

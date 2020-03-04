@@ -18,6 +18,7 @@ import reward.pages.UserController
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 import stark.activerecord.config.JpaProperty
 import stark.activerecord.{StarkActiveRecordConstants, StarkActiveRecordModule}
+import stark.migration.{DatabaseAdapter, InstallAllMigrations, Migrator, Vendor}
 import stark.utils.services.StarkUtils
 
 /**
@@ -40,21 +41,33 @@ class RewardModule {
     val dbPath = "target/test.db"
     FileSystemUtils.deleteRecursively(new File(dbPath))
     config.db.url="jdbc:h2:file:"+dbPath+"/xx"
-    config.db.user="sa"
+    config.db.user="public"
     config.db.driver = "org.h2.Driver"
 
     var jpaProperty = new JpaProperty
     jpaProperty.name = "hibernate.show_sql"
     jpaProperty.value="true"
     config.jpaProperties.add(jpaProperty)
+    /*
     jpaProperty = new JpaProperty
     jpaProperty.name = "hibernate.hbm2ddl.auto"
     jpaProperty.value="create"
     config.jpaProperties.add(jpaProperty)
+    */
+    jpaProperty = new JpaProperty
+    jpaProperty.name = "hibernate.physical_naming_strategy"
+    jpaProperty.value="org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy"
+    config.jpaProperties.add(jpaProperty)
 
     jpaProperty = new JpaProperty
     jpaProperty.name = StarkActiveRecordConstants.PACKAGE_SCAN_KEY
-    jpaProperty.value="stark.api.server"
+    jpaProperty.value="reward.entities"
+    config.jpaProperties.add(jpaProperty)
+
+    jpaProperty = new JpaProperty
+    jpaProperty.name = "jadira.usertype.autoRegisterUserTypes"
+    jpaProperty.value="true"
+
     config.jpaProperties.add(jpaProperty)
 
     config
@@ -84,7 +97,16 @@ class RewardModule {
     hikariConfig.setMaximumPoolSize(15)
 
 
-    new HikariDataSource(hikariConfig)
+    val dataSource = new HikariDataSource(hikariConfig)
+
+    //升级数据库
+    val driverClassName: String = config.db.driver
+    val vendor = Vendor.forDriver(driverClassName)
+    val databaseAdapter = DatabaseAdapter.forVendor(vendor, Option(config.db.user))
+    val migrator = new Migrator(dataSource, databaseAdapter)
+    migrator.migrate(InstallAllMigrations, "reward.migrations", searchSubPackages = false)
+
+    dataSource
   }
   @Bean
   def buildScalaJackson: Module ={
