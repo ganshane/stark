@@ -24,6 +24,31 @@ class Migrate_202003041655_Init extends Migration{
       t.column("alipay_name", VarcharType, Limit(50), Nullable)
       t.column("created_at", TimestampType,Nullable)
     }
+    createTable("recharge",Comment("充值记录")){ t=>
+      t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
+      t.column("card_no", VarcharType, Limit(32), NotNull,Comment("卡号"))
+      t.column("card_secret", VarcharType, Limit(32), Nullable,Comment("卡密码"))
+      t.column("amount", IntegerType,NotNull,Comment("面值,单位:分"))
+      t.column("owner_id", BigintType,Nullable,Comment("所属用户"))
+      t.column("created_id", BigintType,Nullable,Comment("创建卡的用户"))
+      t.column("created_at", TimestampType, Nullable)
+      t.column("expired_at", TimestampType, Nullable,Comment("过期时间"))
+      t.column("activated_at", TimestampType, Nullable,Comment("激活时间"))
+    }
+    createTable("consumption",Comment("消费记录")){ t=>
+      t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
+      t.column("amount", VarcharType, Limit(32), NotNull,Comment("消费金额，单位：分"))
+      t.column("item_id", VarcharType, Limit(32), Nullable)
+      t.column("item_img", IntegerType,NotNull)
+      t.column("item_link", BigintType,Nullable)
+      t.column("created_at", TimestampType, Nullable)
+    }
+    createTable("administrator",Comment("管理员")){ t=>
+      t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
+      t.column("name", VarcharType, Limit(32), NotNull)
+      t.column("password", VarcharType, Limit(32), Nullable)
+      t.column("created_at", TimestampType, Nullable)
+    }
   }
 
   /**
