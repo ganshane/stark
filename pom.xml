@@ -15,10 +15,11 @@
     <module>stark-activerecord</module>
     <module>stark-activerecord-macro</module>
     <module>stark-activerecord-generator</module>
-    <module>stark-rpc</module>
+    <!-- <module>stark-rpc</module> -->
     <module>stark-migration</module>
     <module>stark-utils</module>
     <module>stark-webservice</module>
+    <module>reward</module>
   </modules>
   <scm>
     <url>https://github.com/ganshane/stark</url>
@@ -131,7 +132,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
-        <version>4.3.11.Final</version>
+        <version>5.4.12.Final</version>
       </dependency>
       <!-- netty -->
       <dependency>
@@ -379,8 +380,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>2.3.2</version>
           <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
+            <source>1.8</source>
+            <target>1.8</target>
             <optimize>true</optimize>
             <encoding>UTF-8</encoding>
           </configuration>
@@ -681,7 +682,8 @@
     <lucene-release-version>5.2.1</lucene-release-version>
     <proguard-release-version>5.1</proguard-release-version>
     <axis-release-version>1.6.4</axis-release-version>
-    <spring-release-version>4.3.5.RELEASE</spring-release-version>
+    <!--<spring-release-version>4.3.5.RELEASE</spring-release-version>-->
+    <spring-release-version>5.2.4.RELEASE</spring-release-version>
     <PermGen>64m</PermGen>
     <MaxPermGen>512m</MaxPermGen>
     <CodeCacheSize>512m</CodeCacheSize>
