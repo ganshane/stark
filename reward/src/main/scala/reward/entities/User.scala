@@ -1,5 +1,6 @@
 package reward.entities
 
+import io.swagger.annotations.{ApiModel, ApiModelProperty}
 import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -11,12 +12,14 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "user")
+@ApiModel("用户信息")
 class User extends ActiveRecord{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
   var id:Int = _
   @Column
+  @ApiModelProperty(value="电话号码",example = "13900000001")
   var phone:String= _
   @Column
   var name:String= _

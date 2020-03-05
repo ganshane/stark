@@ -58,5 +58,8 @@ class Migrate_202003041655_Init extends Migration{
     */
   override def down(): Unit = {
     dropTable("user")
+    dropTable("recharge")
+    dropTable("consumption")
+    dropTable("administrator")
   }
 }

@@ -15,6 +15,10 @@ import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy
 import org.springframework.util.FileSystemUtils
 import reward.config.RewardConfig
 import reward.pages.UserController
+import reward.services.GlobalApiExceptionHandler
+import springfox.documentation.builders.ApiInfoBuilder
+import springfox.documentation.service._
+import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 import stark.activerecord.config.JpaProperty
 import stark.activerecord.{StarkActiveRecordConstants, StarkActiveRecordModule}
@@ -29,7 +33,7 @@ import stark.utils.services.StarkUtils
 @SpringBootApplication
 @EnableSwagger2
 @ComponentScan(basePackageClasses = {
-  Array[Class[_]](classOf[UserController])
+  Array[Class[_]](classOf[UserController],classOf[GlobalApiExceptionHandler])
 })
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {
@@ -112,25 +116,57 @@ class RewardModule {
   def buildScalaJackson: Module ={
     DefaultScalaModule
   }
-  /*
+
+  import java.util
+
+  import org.springframework.context.annotation.Bean
+  import org.springframework.web.bind.annotation.RequestMethod
+  import springfox.documentation.builders.ResponseMessageBuilder
+  import springfox.documentation.schema.ModelRef
+  import springfox.documentation.service.ResponseMessage
+  import springfox.documentation.spi.DocumentationType
+  import springfox.documentation.spring.web.plugins.Docket
+
   @Bean
-  def buildHallOrmConfigSupport: ActiveRecordConfigSupport={
-    val support = new ActiveRecordConfigSupport {}
-    var jpaProperty = new JpaProperty
-    jpaProperty.name = "hibernate.show_sql"
-    jpaProperty.value="true"
-    support.jpaProperties.add(jpaProperty)
-    jpaProperty = new JpaProperty
-    jpaProperty.name = "hibernate.hbm2ddl.auto"
-    jpaProperty.value="create"
-    support.jpaProperties.add(jpaProperty)
+  def userApi: Docket = {
+    val responseMessageList = new util.ArrayList[ResponseMessage]
+    responseMessageList.add(new ResponseMessageBuilder().code(500).message("服务器内部错误").responseModel(new ModelRef("ApiError")).build)
+    new Docket(DocumentationType.SWAGGER_2)
+      .useDefaultResponseMessages(false)
+      .globalResponseMessage(RequestMethod.GET, responseMessageList)
+      .globalResponseMessage(RequestMethod.POST, responseMessageList)
+      .globalResponseMessage(RequestMethod.PUT, responseMessageList)
+      .globalResponseMessage(RequestMethod.DELETE, responseMessageList)
+      .apiInfo(apiInfo)
+      .securitySchemes(util.Arrays.asList(apiKey()))
+//      .securityContexts(util.Arrays.asList(securityContext()))
+//    .securitySchemes(securitySchemes)
+  }
+  private def apiInfo={
+    new ApiInfoBuilder()
+      .title("淘分享API")
+      .description("淘分享API，注意查看API文档说明")
+      .contact(new Contact("jcai","http://www.ganshane.com","jcai AT Ganshane dot com"))
+      .build()
+  }
+  private def apiKey()= {
+    new ApiKey(RewardConstants.GLOBAL_AUTH, RewardConstants.GLOBAL_AUTH, "header");
+  }
 
-    jpaProperty = new JpaProperty
-    jpaProperty.name = StarkActiveRecordConstants.PACKAGE_SCAN_KEY
-    jpaProperty.value="stark.api.server"
-    support.jpaProperties.add(jpaProperty)
+  private def securityContext()= {
+    SecurityContext.builder().securityReferences(defaultAuth())
+//      .forPaths(PathSelectors.regex("^(?!auth).*$"))
+      .build()
+  }
 
-    support
-  } */
+  private def defaultAuth()= {
+    val authorizationScope = new AuthorizationScope(
+      "global", "accessEverything");
+    util.Arrays.asList(new SecurityReference(RewardConstants.GLOBAL_AUTH,Array(authorizationScope)))
+  }
+
+
+
+  private def securitySchemes = util.Arrays.asList(new BasicAuth("Authorization"))
 }
 
