@@ -120,28 +120,24 @@ class RewardModule {
   import java.util
 
   import org.springframework.context.annotation.Bean
-  import org.springframework.web.bind.annotation.RequestMethod
-  import springfox.documentation.builders.ResponseMessageBuilder
-  import springfox.documentation.schema.ModelRef
-  import springfox.documentation.service.ResponseMessage
   import springfox.documentation.spi.DocumentationType
   import springfox.documentation.spring.web.plugins.Docket
 
   @Bean
   def userApi: Docket = {
-    val responseMessageList = new util.ArrayList[ResponseMessage]
-    responseMessageList.add(new ResponseMessageBuilder().code(500).message("服务器内部错误").responseModel(new ModelRef("ApiError")).build)
     new Docket(DocumentationType.SWAGGER_2)
-      .useDefaultResponseMessages(false)
-      .globalResponseMessage(RequestMethod.GET, responseMessageList)
-      .globalResponseMessage(RequestMethod.POST, responseMessageList)
-      .globalResponseMessage(RequestMethod.PUT, responseMessageList)
-      .globalResponseMessage(RequestMethod.DELETE, responseMessageList)
       .apiInfo(apiInfo)
+      .select().paths(paths).build()
       .securitySchemes(util.Arrays.asList(apiKey()))
 //      .securityContexts(util.Arrays.asList(securityContext()))
 //    .securitySchemes(securitySchemes)
   }
+
+  import com.google.common.base.Predicates
+  import springfox.documentation.builders.PathSelectors
+
+  //不显示错误的API
+  private def paths = Predicates.not(PathSelectors.regex("/error.*"))
   private def apiInfo={
     new ApiInfoBuilder()
       .title("淘分享API")
