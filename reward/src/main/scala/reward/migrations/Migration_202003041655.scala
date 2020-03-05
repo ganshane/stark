@@ -49,6 +49,18 @@ class Migrate_202003041655_Init extends Migration{
       t.column("password", VarcharType, Limit(32), Nullable)
       t.column("created_at", TimestampType, Nullable)
     }
+    createTable("online_user",Comment("在线的用户")){ t=>
+      t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
+      t.column("user_id", BigintType, NotNull)
+      t.column("token", VarcharType, Limit(32), Nullable,Unique)
+      t.column("created_at", TimestampType, Nullable)
+      t.column("expired_at", TimestampType, Nullable)
+      t.column("updated_at", TimestampType, Nullable)
+    }
+
+    execute("insert into user (phone,name) values('11111111111','jcai')")
+    val token = "asdf"
+    execute("insert into online_user(user_id,token) values(1,'"+token+"')")
   }
 
   /**
@@ -61,5 +73,6 @@ class Migrate_202003041655_Init extends Migration{
     dropTable("recharge")
     dropTable("consumption")
     dropTable("administrator")
+    dropTable("online_user")
   }
 }

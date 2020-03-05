@@ -1,3 +1,14 @@
 spring:
   jackson:
     property-naming-strategy:   CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+logging:
+  level:
+    root: WARN
+    org:
+      springframework:
+        security: DEBUG
+        web: ERROR
+      hibernate: DEBUG
+      apache:
+        commons:
+          dbcp2: DEBUG

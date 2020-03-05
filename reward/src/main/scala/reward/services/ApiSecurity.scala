@@ -2,6 +2,8 @@ package reward.services
 
 import java.time.Instant
 
+import org.apache.commons.logging.LogFactory
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationProvider
@@ -17,6 +19,8 @@ import org.springframework.security.oauth2.server.resource.BearerTokenAuthentica
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import reward.RewardConstants
+import reward.entities.OnlineUser
+import stark.activerecord.services.DSL.update
 
 import scala.collection.JavaConversions._
 
@@ -28,18 +32,27 @@ import scala.collection.JavaConversions._
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled=true,securedEnabled = true)
 class ApiSecurity extends WebSecurityConfigurerAdapter{
+  private val logger = LogFactory.getLog(getClass());
   @Autowired
 //  var authenticationManager:AuthenticationManager = _
   override def configure(auth: AuthenticationManagerBuilder): Unit = {
     auth.authenticationProvider(new AuthenticationProvider(){
       override def authenticate(authentication: Authentication): Authentication = {
         val bearer = authentication.asInstanceOf[BearerTokenAuthenticationToken]
-        val attributes=Map[String,AnyRef]("token"->bearer.getToken)
-        //TODO check user_tokens from databases
-        val roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
-        val principal = new DefaultOAuth2AuthenticatedPrincipal("name",attributes,roles)
-        val accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, bearer.getToken, Instant.now(), Instant.now().plusSeconds(60*30))
-        new BearerTokenAuthentication(principal, accessToken, principal.getAuthorities)
+        val token = bearer.getToken
+        val num = update[OnlineUser] set (expiredAt=DateTime.now.plusMinutes(30)) where OnlineUser.token === token execute
+
+        if(num == 1) {
+          val attributes = Map[String, AnyRef]("token" -> bearer.getToken)
+          val roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
+          val principal = new DefaultOAuth2AuthenticatedPrincipal("name", attributes, roles)
+          val accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, bearer.getToken, Instant.now(), Instant.now().plusSeconds(60 * 30))
+          new BearerTokenAuthentication(principal, accessToken, principal.getAuthorities)
+        }else {
+//          throw new AuthenticationCredentialsNotFoundException("用户未找到,重新登录")
+          logger.debug("user not found")
+          authentication
+        }
       }
       override def supports(authenticationClass: Class[_]): Boolean = {
         authenticationClass.isAssignableFrom(classOf[BearerTokenAuthenticationToken])

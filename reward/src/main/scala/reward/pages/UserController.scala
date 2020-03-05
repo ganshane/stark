@@ -1,9 +1,11 @@
 package reward.pages
 
 import io.swagger.annotations._
+import javax.validation.constraints.Size
 import org.joda.time.DateTime
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.User
@@ -16,11 +18,12 @@ import reward.entities.User
 @RestController
 @RequestMapping(Array("/user"))
 @Api(value="用户相关接口",description="用户相关接口")
+@Validated
 class UserController {
   @PostMapping(Array("/sendSms"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="发送短信验证码",authorizations=Array(new Authorization("Authorization")))
-  def sendSmsCode(@ApiParam(value="电话号码",required=true) @RequestParam("phone") phone:String)={
+  def sendSmsCode(@ApiParam(value="电话号码",required=true) @RequestParam("phone") @Size(min=11,max=11) phone:String)={
     ResponseEntity.ok().build()
   }
   @GetMapping(Array("/sayHello"))
