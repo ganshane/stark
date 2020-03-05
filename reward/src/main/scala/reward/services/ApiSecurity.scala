@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.{EnableWebSecurity, WebSecurityConfigurerAdapter}
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.{UserDetails, UserDetailsService}
 import org.springframework.security.core.{Authentication, GrantedAuthority}
@@ -75,8 +76,8 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
 //      .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**")
 //      .permitAll()
 //      .anyRequest().authenticated().and()
-//      .sessionManagement()
-//      .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
      http.addFilterBefore(authenticationJwtTokenFilter(),classOf[BearerTokenAuthenticationFilter])
 
   }
