@@ -46,7 +46,7 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
         if(num == 1) {
           val attributes = Map[String, AnyRef]("token" -> bearer.getToken)
           val roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
-          val principal = new DefaultOAuth2AuthenticatedPrincipal("name", attributes, roles)
+          val principal = new DefaultOAuth2AuthenticatedPrincipal(RewardConstants.GLOBAL_AUTH, attributes, roles)
           val accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, bearer.getToken, Instant.now(), Instant.now().plusSeconds(60 * 30))
           new BearerTokenAuthentication(principal, accessToken, principal.getAuthorities)
         }else {

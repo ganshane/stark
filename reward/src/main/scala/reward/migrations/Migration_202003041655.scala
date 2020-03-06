@@ -15,7 +15,7 @@ class Migrate_202003041655_Init extends Migration{
   override def up(): Unit = {
     createTable("user", Comment("用户")) { t =>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
-      t.column("phone", VarcharType, Limit(11), NotNull)
+      t.column("phone", VarcharType, Limit(11), NotNull,Unique)
       t.column("name", VarcharType, Limit(20), Nullable)
       t.column("nick_name", VarcharType,Limit(20), Nullable)
       t.column("relation_id", VarcharType, Limit(30), Nullable)
@@ -51,8 +51,8 @@ class Migrate_202003041655_Init extends Migration{
     }
     createTable("online_user",Comment("在线的用户")){ t=>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
-      t.column("user_id", BigintType, NotNull)
-      t.column("token", VarcharType, Limit(32), Nullable,Unique)
+      t.column("user_id", BigintType, NotNull,Unique)
+      t.column("token", VarcharType, Limit(50), Nullable,Unique)
       t.column("created_at", TimestampType, Nullable)
       t.column("expired_at", TimestampType, Nullable)
       t.column("updated_at", TimestampType, Nullable)

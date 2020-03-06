@@ -17,7 +17,7 @@ class OnlineUser extends ActiveRecord{
   @Column
   var id:Int = _
   @Column
-  var userId:String= _
+  var userId:Long = _
   @Column
   var token:String= _
   @Column
