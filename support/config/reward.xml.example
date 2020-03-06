@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<stark_reward>
+    <log_file>${server.home}/log/stark.reward.log</log_file>
+    <web>
+        <bind>0.0.0.0:8080</bind>
+    </web>
+    <database>
+        <driver>org.h2.Driver</driver>
+        <user>public</user>
+        <password></password>
+        <url>jdbc:h2:mem:stark_reward</url>
+    </database>
+    <jpa>
+        <property name="hibernate.show_sql" value="true"/>
+        <property name="hibernate.physical_naming_strategy" value="org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy"/>
+        <property name="package.scan" value="reward.entities"/>
+        <property name="jadira.usertype.autoRegisterUserTypes" value="true"/>
+    </jpa>
+</stark_reward>

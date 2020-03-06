@@ -1,6 +1,5 @@
 package reward
 
-import java.io.File
 import java.net.InetAddress
 
 import com.fasterxml.jackson.databind.Module
@@ -12,18 +11,17 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy}
-import org.springframework.util.FileSystemUtils
 import reward.config.RewardConfig
+import reward.internal.StarkConfigFileUtils
 import reward.pages.UserController
 import reward.services.GlobalApiExceptionHandler
 import springfox.documentation.builders.ApiInfoBuilder
 import springfox.documentation.service._
 import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.swagger2.annotations.EnableSwagger2
-import stark.activerecord.config.JpaProperty
-import stark.activerecord.{StarkActiveRecordConstants, StarkActiveRecordModule}
+import stark.activerecord.StarkActiveRecordModule
 import stark.migration.{DatabaseAdapter, InstallAllMigrations, Migrator, Vendor}
-import stark.utils.services.StarkUtils
+import stark.utils.services.{StarkUtils, XmlLoader}
 
 /**
   * reward application core modules
@@ -39,7 +37,7 @@ import stark.utils.services.StarkUtils
 class RewardModule {
   @Bean
   def buildRewardConfig(@Value(RewardConstants.SERVER_HOME) serverHome: String): RewardConfig={
-    val config = new RewardConfig
+    /*val config = new RewardConfig
     config.web.bind = "0.0.0.0:8080"
 
     val dbPath = "target/test.db"
@@ -74,7 +72,10 @@ class RewardModule {
 
     config.jpaProperties.add(jpaProperty)
 
-    config
+    config*/
+
+    val content = StarkConfigFileUtils.readConfigFileContent(serverHome, "reward.xml")
+    XmlLoader.parseXML[RewardConfig](content, xsd = Some(getClass.getResourceAsStream("/stark/reward/reward.xsd")))
   }
   @Bean
   def buildWebServerFactoryCustomizer(config:RewardConfig):WebServerFactoryCustomizer[ConfigurableServletWebServerFactory]= new WebServerFactoryCustomizer[ConfigurableServletWebServerFactory]{

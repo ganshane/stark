@@ -10,6 +10,8 @@ import stark.utils.services.WebServerConfigSupport
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
   * @since 2020-03-04
   */
+@XmlRootElement(name = "stark_reward")
+@XmlType(name = "starkRewardConfig")
 class RewardConfig
   extends WebServerConfigSupport
   with ActiveRecordConfigSupport{
