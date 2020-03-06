@@ -37,7 +37,7 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
       override def authenticate(authentication: Authentication): Authentication = {
         val bearer = authentication.asInstanceOf[BearerTokenAuthenticationToken]
         val token = bearer.getToken
-        val num = update[OnlineUser] set (expiredAt=DateTime.now.plusMinutes(30)) where OnlineUser.token === token execute
+        val num = update[OnlineUser] set (updatedAt=DateTime.now,expiredAt=DateTime.now.plusMinutes(30)) where OnlineUser.token === token execute
 
         if(num == 1) {
           val user = OnlineUser.find_by_token(token).head.user

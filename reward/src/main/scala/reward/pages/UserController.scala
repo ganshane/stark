@@ -4,7 +4,6 @@ import io.swagger.annotations._
 import javax.validation.constraints.Size
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
@@ -34,7 +33,7 @@ class UserController {
              @RequestParam("phone") @Size(min=11,max=11)
              phone:String,
              @ApiParam(value="验证码",required=true)
-             @RequestParam("verifySms")
+             @RequestParam("code")
              code:String): OnlineUser ={
     //通过电话找到用户
     lazy val user = {
@@ -48,23 +47,23 @@ class UserController {
           user.save()
       }
     }
-    if(userService.verifySmsCode(code)){//校验短信先
-      val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
-      onlineUserOpt match{
-        case Some(ou) =>
-          ou.updatedAt= DateTime.now
-          ou.expiredAt = DateTime.now.plusMinutes(30)
-          ou.save()
-        case _ =>
-          val onlineUser = new OnlineUser
-          onlineUser.token = userService.generateToken(user)
-          onlineUser.userId = user.id
-          onlineUser.createdAt = DateTime.now
-          onlineUser.expiredAt = DateTime.now.plusMinutes(30)
-          onlineUser.save()
-      }
-    }else{
-      throw new UnsupportedOperationException("校验短信码失败")
+
+    //校验短信先
+    userService.verifySmsCode(phone,code)
+
+    val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
+    onlineUserOpt match{
+      case Some(ou) =>
+        ou.updatedAt= DateTime.now
+        ou.expiredAt = DateTime.now.plusMinutes(30)
+        ou.save()
+      case _ =>
+        val onlineUser = new OnlineUser
+        onlineUser.token = userService.generateToken(user)
+        onlineUser.userId = user.id
+        onlineUser.createdAt = DateTime.now
+        onlineUser.expiredAt = DateTime.now.plusMinutes(30)
+        onlineUser.save()
     }
   }
   @PostMapping(Array("/logout"))
@@ -96,7 +95,7 @@ class UserController {
                    @ApiParam(value="电话号码",required=true)
                    @RequestParam("phone") @Size(min=11,max=11)
                    phone:String
-                 )={
-    ResponseEntity.ok().build[String]()
+                 ):Unit ={
+    userService.sendSmsCode(phone)
   }
 }
