@@ -25,9 +25,9 @@ class Recharge extends ActiveRecord{
   @Column
   var createdAt:DateTime = _
   @Column
-  var createdId:Long= _
+  var createdId:java.lang.Long= _
   @Column
-  var ownerId:Long= _
+  var ownerId:java.lang.Long= _
   @Column
   var expiredAt:DateTime = _
   @Column

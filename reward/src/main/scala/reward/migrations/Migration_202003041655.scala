@@ -62,6 +62,8 @@ class Migrate_202003041655_Init extends Migration{
     execute("insert into user (phone,name,is_admin) values('11111111111','jcai',1)")
     val token = "asdf"
     execute("insert into online_user(user_id,token) values(1,'"+token+"')")
+
+    execute("insert into recharge (card_no,card_secret,amount) values('111','SSS',10000)")
   }
 
   /**
