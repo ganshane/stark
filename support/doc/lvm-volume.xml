@@ -1,5 +1,0 @@
-<volume type="block">
-  <name>virt-win7</name>
-  <allocation>0</allocation>
-  <capacity unit="G">30</capacity>
-</volume>
