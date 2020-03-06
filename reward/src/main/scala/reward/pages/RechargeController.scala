@@ -19,9 +19,11 @@ import reward.RewardConstants
 class RechargeController {
 
   @PostMapping
-  @ApiOperation(value="充值",authorizations=Array(new Authorization("Authorization")))
-  def doRecharge(){}
+  @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def doRecharge(
+                  cardNo:String,
+                   cardSecret:String){}
   @GetMapping(Array("/list"))
-  @ApiOperation(value="充值列表",authorizations=Array(new Authorization("Authorization")))
+  @ApiOperation(value="充值列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def listRecharge(){}
 }

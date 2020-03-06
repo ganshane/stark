@@ -41,7 +41,10 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
 
         if(num == 1) {
           val user = OnlineUser.find_by_token(token).head.user
-          val roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
+          var roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
+          if(user.isAdmin == 1){
+            roles :+= new SimpleGrantedAuthority(RewardConstants.ROLE_ADMIN)
+          }
           new UsernamePasswordAuthenticationToken(user,user,roles)
         }else {
 //          throw new AuthenticationCredentialsNotFoundException("用户未找到,重新登录")

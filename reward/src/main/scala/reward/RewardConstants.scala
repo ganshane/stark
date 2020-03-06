@@ -14,4 +14,5 @@ object RewardConstants {
   final val GLOBAL_AUTH="Authorization"
   /** role **/
   final val ROLE_USER="ROLE_USER"
+  final val ROLE_ADMIN="ROLE_ADMIN"
 }

@@ -28,7 +28,7 @@ trait Relation[A] {
     ActiveRecord.count(this)
   }
 
-  def order(params:(String,Any)*):this.type
+  def order(params:(String,String)*):this.type
   def asc(fields:String*):this.type={
     order(fields.map((_,"asc")):_*)
   }
@@ -104,7 +104,7 @@ class QlRelation[A](val entityClazz:Class[A],val primaryKey:String) extends Rela
   private[activerecord] var updateParams:Seq[Any] = Nil
 
 
-  def order(params:(String,Any)*):this.type= {
+  def order(params:(String,String)*):this.type= {
     params.foreach{case (key,value)=>
       orderBy match{
         case Some(o) =>

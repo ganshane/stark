@@ -34,6 +34,8 @@ class User extends ActiveRecord{
   @Column
   var alipayName:String = _
   @Column
+  var isAdmin:Int= _
+  @Column
   var createdAt:DateTime = _
 }
 

@@ -22,6 +22,7 @@ class Migrate_202003041655_Init extends Migration{
       t.column("invitation_id", VarcharType, Limit(20), Nullable)
       t.column("alipay", VarcharType, Limit(50), Nullable)
       t.column("alipay_name", VarcharType, Limit(50), Nullable)
+      t.column("is_admin",IntegerType, Default(0))
       t.column("created_at", TimestampType,Nullable)
     }
     createTable("recharge",Comment("充值记录")){ t=>
@@ -58,7 +59,7 @@ class Migrate_202003041655_Init extends Migration{
       t.column("updated_at", TimestampType, Nullable)
     }
 
-    execute("insert into user (phone,name) values('11111111111','jcai')")
+    execute("insert into user (phone,name,is_admin) values('11111111111','jcai',1)")
     val token = "asdf"
     execute("insert into online_user(user_id,token) values(1,'"+token+"')")
   }
