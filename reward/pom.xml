@@ -22,7 +22,7 @@
     <version>2.0.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>stark-api-server</artifactId>
+  <artifactId>reward</artifactId>
   <name>Stark Api Server Module</name>
   <description>Stark Api Server Based on swagger2</description>
   <dependencies>
@@ -129,13 +129,40 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestEntries>
-              <Tapestry-Module-Classes>stark.webservice.StarkWebServiceModule</Tapestry-Module-Classes>
-            </manifestEntries>
-          </archive>
-        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>run</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <finalName>reward-${project.version}</finalName>
+              <descriptors>
+                <descriptor>support/assembly/bin-reward.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <overWriteReleases>false</overWriteReleases>
+              <includeScope>runtime</includeScope>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

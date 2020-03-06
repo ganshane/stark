@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zvirt_web>
+  <log_file>${server.home}/log/monad.api.log</log_file>
+  <web>
+    <bind>0.0.0.0:9081</bind>
+  </web>
+  <database>
+    <driver>org.h2.Driver</driver>
+    <user>sa</user>
+    <url>jdbc:h2:file:target/zvirt</url>
+  </database>
+  <jpa>
+    <property name="hibernate.show_sql" value="true"/>
+    <property name="package.scan" value="zvirt.web.entities"/>
+  </jpa>
+</zvirt_web>

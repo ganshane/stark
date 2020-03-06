@@ -1,0 +1,37 @@
+<assembly xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+<!-- 
+   Copyright 2017 the OrienRoc Inc. All rights reserved.
+   site: http://www.orienroc.com
+-->
+
+  <id>bin</id>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>../support/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>reward</include>
+      </includes>
+      <fileMode>755</fileMode>
+    </fileSet>
+    <fileSet>
+      <directory>../support/doc</directory>
+      <outputDirectory>doc</outputDirectory>
+      <includes>
+        <include>changelog.txt</include>
+        <include>README.txt</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+    </dependencySet>
+  </dependencySets>
+</assembly>

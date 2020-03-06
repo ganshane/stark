@@ -1,0 +1,65 @@
+<domain type='kvm' id='2'>
+  <name>win7</name>
+  <uuid>27bc73fd-ef23-436f-914d-215320db44c5</uuid>
+  <memory unit='KiB'>2097152</memory>
+  <currentMemory unit='KiB'>2097152</currentMemory>
+  <vcpu placement='static'>8</vcpu>
+  <cpu match='exact'>
+  <topology sockets='2' cores='4' threads='1'/>
+  </cpu>
+  <os>
+    <type arch='x86_64' machine='pc-0.12'>hvm</type>
+    <boot dev='cdrom'/>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='localtime'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/kvm</emulator>
+    <disk type='volume' device='disk'>
+      <driver name='qemu' type='raw'/>
+      <source pool='virt' volume='virt-win7'/>
+      <target dev='sda' bus='virtio'/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/home/gafis/win7_64/cn_windows_7_ultimate_with_sp1_x64_dvd_u_677408.iso'/>
+      <backingStore/>
+      <target dev='hda' bus='ide'/>
+      <readonly/>
+    </disk>
+    <disk type='file' device='cdrom'>
+      <driver name='qemu' type='raw'/>
+      <source file='/home/gafis/win7_64/virtio-win.iso'/>
+      <backingStore/>
+      <target dev='hdb' bus='ide'/>
+      <readonly/>
+    </disk>
+    <interface type='network'>
+      <source network='default'/>
+      <!-- <model type='virtio'/> -->
+    </interface>
+    <input type='tablet' bus='usb'/>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+<!--     <graphics type='vnc' port='-1' autoport='yes' /> -->
+    <sound model='ac97'>
+      <alias name='sound0'/>
+    </sound>
+   <graphics type='spice' port='5930' autoport='no' listen='10.1.7.203' passwd='password'/>
+   <video>
+      <model type='qxl' ram='640536' vram='320768' vgamem='32768' heads='1'/>
+<!--    <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x0'/> -->
+   </video>
+
+    <memballoon model='virtio'>
+      <alias name='balloon0'/>
+    </memballoon>
+  </devices>
+</domain>

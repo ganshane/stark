@@ -40,7 +40,7 @@ class RewardModule {
   @Bean
   def buildRewardConfig(@Value(RewardConstants.SERVER_HOME) serverHome: String): RewardConfig={
     val config = new RewardConfig
-    config.web.bind = "localhost:8080"
+    config.web.bind = "0.0.0.0:8080"
 
     val dbPath = "target/test.db"
     FileSystemUtils.deleteRecursively(new File(dbPath))

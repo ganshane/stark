@@ -17,7 +17,7 @@ class User extends ActiveRecord{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
-  var id:Int = _
+  var id:Long= _
   @Column
   @ApiModelProperty(value="电话号码",example = "13900000001")
   var phone:String= _

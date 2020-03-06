@@ -1,12 +1,10 @@
 package reward.services
 
-import java.time.Instant
-
 import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
-import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.{AuthenticationProvider, UsernamePasswordAuthenticationToken}
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -15,9 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.{UserDetails, UserDetailsService}
 import org.springframework.security.core.{Authentication, GrantedAuthority}
-import org.springframework.security.oauth2.core.{DefaultOAuth2AuthenticatedPrincipal, OAuth2AccessToken}
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken
-import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthentication
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
 import reward.RewardConstants
 import reward.entities.OnlineUser
@@ -44,11 +40,9 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
         val num = update[OnlineUser] set (expiredAt=DateTime.now.plusMinutes(30)) where OnlineUser.token === token execute
 
         if(num == 1) {
-          val attributes = Map[String, AnyRef]("token" -> bearer.getToken)
+          val user = OnlineUser.find_by_token(token).head.user
           val roles = List[GrantedAuthority](new SimpleGrantedAuthority(RewardConstants.ROLE_USER))
-          val principal = new DefaultOAuth2AuthenticatedPrincipal(RewardConstants.GLOBAL_AUTH, attributes, roles)
-          val accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER, bearer.getToken, Instant.now(), Instant.now().plusSeconds(60 * 30))
-          new BearerTokenAuthentication(principal, accessToken, principal.getAuthorities)
+          new UsernamePasswordAuthenticationToken(user,user,roles)
         }else {
 //          throw new AuthenticationCredentialsNotFoundException("用户未找到,重新登录")
           logger.debug("user not found")

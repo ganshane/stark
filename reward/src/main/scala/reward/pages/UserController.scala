@@ -1,11 +1,14 @@
 package reward.pages
 
+import java.security.Principal
+
 import io.swagger.annotations._
 import javax.validation.constraints.Size
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
@@ -67,13 +70,14 @@ class UserController {
     }
   }
   @PostMapping(Array("/logout"))
-  @ApiOperation(value="登出",authorizations=Array(new Authorization("Authorization")))
+  @ApiOperation(value="登出",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
-  def logout(){}
+  def logout(): Unit ={
+  }
   @PostMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
-  @ApiOperation(value="得到当前用户信息",authorizations=Array(new Authorization("Authorization")))
-  def info(){}
+  @ApiOperation(value="得到当前用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def info(@AuthenticationPrincipal user:User): User=user
 
   @PostMapping(Array("/sendSms"))
   @ApiOperation(value="发送短信验证码")
