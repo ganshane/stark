@@ -1,10 +1,13 @@
 package reward.pages
 
-import io.swagger.annotations.{Api, ApiOperation, Authorization}
+import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
+import org.joda.time.DateTime
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
+import reward.entities.Consumption
+import collection.JavaConversions._
 
 /**
   *
@@ -19,9 +22,28 @@ import reward.RewardConstants
 class ConsumptionController {
 
   @PostMapping
-  @ApiOperation(value="消费",authorizations=Array(new Authorization("Authorization")))
-  def consume(){}
+  @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.ROLE_USER)))
+  def consume(
+             @ApiParam(value="消费金额",required = true)
+             amount:Int,
+             @ApiParam(value="商品ID",required = true)
+             itemId:String,
+             @ApiParam(value="商品图片",required = true)
+             itemImg:String,
+             @ApiParam(value="商品连接",required = true)
+             itemLink:String): Unit ={
+    val consumption = new Consumption
+    consumption.amount = amount
+    consumption.itemId = itemId
+    consumption.itemImg = itemImg
+    consumption.itemLink = itemLink
+
+    consumption.createdAt = DateTime.now
+    consumption.save
+  }
   @GetMapping(Array("/list"))
-  @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization("Authorization")))
-  def listConsumption(){}
+  @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization(RewardConstants.ROLE_USER)))
+  def listConsumption():java.util.List[Consumption]={
+    List.empty[Consumption]
+  }
 }

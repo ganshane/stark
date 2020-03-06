@@ -1,6 +1,9 @@
 spring:
   jackson:
     property-naming-strategy:   CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES
+    serialization:
+      WRITE_NULL_MAP_VALUES: false
+
 logging:
   level:
     root: WARN
@@ -8,7 +11,3 @@ logging:
       springframework:
         security: DEBUG
         web: ERROR
-      hibernate: DEBUG
-      apache:
-        commons:
-          dbcp2: DEBUG

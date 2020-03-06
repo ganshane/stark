@@ -9,7 +9,7 @@ import reward.RewardConstants
 import reward.entities.{Recharge, User}
 import reward.services.RewardUtils
 import springfox.documentation.annotations.ApiIgnore
-
+import collection.JavaConversions._
 /**
   * 管理相关接口
   *
@@ -32,7 +32,7 @@ class AdminController {
     new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
-  def listUser(@ApiIgnore pageable: Pageable):List[User]={
+  def listUser(@ApiIgnore pageable: Pageable):java.util.List[User]={
     RewardUtils.pageActiveRecordsByPageable(User.all,pageable)
   }
   @GetMapping(Array("/cards"))
@@ -45,7 +45,7 @@ class AdminController {
     new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
-  def listCards(@ApiIgnore pageable: Pageable):List[Recharge]={
+  def listCards(@ApiIgnore pageable: Pageable):java.util.List[Recharge]={
     RewardUtils.pageActiveRecordsByPageable(Recharge.all,pageable)
   }
   @PostMapping(Array("/cards"))
@@ -53,7 +53,7 @@ class AdminController {
   def addCard(
                @ApiParam(value="卡号",required = true) @RequestParam no:String,
                @ApiParam(value="密码",required = true) @RequestParam secret:String,
-               @ApiParam(name="owner_id",value="归属用户",required = true) @RequestParam ownerId:java.lang.Long
+               @ApiParam(name="owner_id",value="归属用户",required = true,example= "1") @RequestParam ownerId:java.lang.Long
              ):Recharge={
     val recharge = new Recharge
     recharge.cardNo = no

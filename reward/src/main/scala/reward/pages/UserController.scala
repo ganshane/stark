@@ -1,7 +1,5 @@
 package reward.pages
 
-import java.security.Principal
-
 import io.swagger.annotations._
 import javax.validation.constraints.Size
 import org.joda.time.DateTime
@@ -74,10 +72,23 @@ class UserController {
   @Secured(Array(RewardConstants.ROLE_USER))
   def logout(): Unit ={
   }
-  @PostMapping(Array("/info"))
+  @GetMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="得到当前用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def info(@AuthenticationPrincipal user:User): User=user
+  @PostMapping(Array("/info"))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiOperation(value="更新用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def updateInfo(
+                  @ApiParam(value="电话号码",required=true)
+                  user:User,
+                  @AuthenticationPrincipal currentUser:User): User={
+    user.id = currentUser.id
+    user.createdAt = currentUser.createdAt
+
+    //更新用户信息
+    user.save()
+  }
 
   @PostMapping(Array("/sendSms"))
   @ApiOperation(value="发送短信验证码")

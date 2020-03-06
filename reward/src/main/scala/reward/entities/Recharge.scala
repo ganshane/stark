@@ -1,5 +1,6 @@
 package reward.entities
 
+import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -24,9 +25,11 @@ class Recharge extends ActiveRecord{
   var amount:Int= _
   @Column
   var createdAt:DateTime = _
+  @ApiModelProperty(value="创建人的ID",example = "1")
   @Column
   var createdId:java.lang.Long= _
   @Column
+  @ApiModelProperty(value="券所属人的ID",example = "1")
   var ownerId:java.lang.Long= _
   @Column
   var expiredAt:DateTime = _
