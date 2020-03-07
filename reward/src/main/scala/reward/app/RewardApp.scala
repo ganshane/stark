@@ -12,8 +12,11 @@ import stark.utils.services.GlobalLoggerConfigurationSupport
   */
 object RewardApp extends GlobalLoggerConfigurationSupport{
   def main(args: Array[String]): Unit = {
-    val serverHome = System.getProperty(RewardConstants.SERVER_HOME, RewardConstants.SERVER_HOME_DEFAULT)
-    System.setProperty(RewardConstants.SERVER_HOME, serverHome)
+    val serverHome = sys.props.getOrElseUpdate(RewardConstants.SERVER_HOME, RewardConstants.SERVER_HOME_DEFAULT)
+//    System.setProperty(RewardConstants.SERVER_HOME, serverHome)
+    val config = RewardModule.buildRewardConfig(serverHome)
+    configLogger(config.logFile, "AUTH", "reward")
+
     val ctx: ApplicationContext = SpringApplication.run(
       Array[Class[_]](classOf[RewardModule]),args)
   }

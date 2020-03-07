@@ -28,6 +28,12 @@ import stark.utils.services.{StarkUtils, XmlLoader}
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
   * @since 2020-03-04
   */
+object RewardModule{
+  def buildRewardConfig(serverHome:String): RewardConfig ={
+    val content = StarkConfigFileUtils.readConfigFileContent(serverHome, "reward.xml")
+    XmlLoader.parseXML[RewardConfig](content, xsd = Some(getClass.getResourceAsStream("/stark/reward/reward.xsd")))
+  }
+}
 @SpringBootApplication
 @EnableSwagger2
 @ComponentScan(basePackageClasses = {
@@ -36,7 +42,7 @@ import stark.utils.services.{StarkUtils, XmlLoader}
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {
   @Bean
-  def buildRewardConfig(@Value(RewardConstants.SERVER_HOME) serverHome: String): RewardConfig={
+  def buildRewardConfig(@Value("${"+RewardConstants.SERVER_HOME+"}") serverHome: String): RewardConfig={
     /*val config = new RewardConfig
     config.web.bind = "0.0.0.0:8080"
 
@@ -73,9 +79,7 @@ class RewardModule {
     config.jpaProperties.add(jpaProperty)
 
     config*/
-
-    val content = StarkConfigFileUtils.readConfigFileContent(serverHome, "reward.xml")
-    XmlLoader.parseXML[RewardConfig](content, xsd = Some(getClass.getResourceAsStream("/stark/reward/reward.xsd")))
+    RewardModule.buildRewardConfig(serverHome)
   }
   @Bean
   def buildWebServerFactoryCustomizer(config:RewardConfig):WebServerFactoryCustomizer[ConfigurableServletWebServerFactory]= new WebServerFactoryCustomizer[ConfigurableServletWebServerFactory]{
