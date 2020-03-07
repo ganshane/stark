@@ -7,6 +7,7 @@ package reward
   */
 object RewardConstants {
   final val SERVER_HOME = "server.home"
+  final val SERVER_HOME_KEY = "${%s}".format(SERVER_HOME)
   final val SERVER_HOME_DEFAULT = "support"
   /**配置文件所在目录*/
   final val CONFIG_DIR = "config.dir"

@@ -2,6 +2,7 @@ package stark.activerecord.services
 
 
 import javax.persistence.criteria.Selection
+import org.joda.time.DateTime
 
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe._
@@ -22,6 +23,7 @@ object Field {
   implicit def wrapNumericField[T<:Number](field: Field[T]):NumericField[T]= new NumericField(field)
   implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)
   implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)
+  implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)
 }
 trait Field[T] extends SelectionField{
   val fieldName:String
@@ -125,4 +127,12 @@ class NumericField[T](field:Field[T]){
 class StringField(field:Field[String]){
   def like(value: String): Condition = Condition.like(field,value)
   def notLike(value: String): Condition = Condition.notLike(field,value)
+}
+class DateTimeField(field:Field[DateTime]){
+  def >(value:DateTime):Condition={
+    Condition.gt(field,value)
+  }
+  def <(value:DateTime):Condition={
+    Condition.lt(field,value)
+  }
 }

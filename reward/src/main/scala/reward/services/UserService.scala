@@ -2,11 +2,15 @@ package reward.services
 
 import java.util.Collections
 
+import org.joda.time.DateTime
 import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.util.Base64Utils
 import org.springframework.web.client.RestTemplate
-import reward.entities.User
+import reward.entities.{OnlineUser, User}
+import stark.activerecord.services.DSL._
+
 import collection.JavaConversions._
 
 /**
@@ -41,4 +45,13 @@ class UserService {
     requestHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON))
     requestHeaders
   }
+
+  /**
+    * 定时删除过期用户
+    */
+  @Scheduled(fixedDelay = 60 * 2000)
+  private def deleteExpiredUser(): Unit = {
+    delete[OnlineUser] where OnlineUser.expiredAt[DateTime] < DateTime.now()
+  }
+
 }
