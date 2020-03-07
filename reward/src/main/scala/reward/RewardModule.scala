@@ -42,7 +42,7 @@ object RewardModule{
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {
   @Bean
-  def buildRewardConfig(@Value("${"+RewardConstants.SERVER_HOME+"}") serverHome: String): RewardConfig={
+  def buildRewardConfig(@Value(RewardConstants.SERVER_HOME) serverHome: String): RewardConfig={
     /*val config = new RewardConfig
     config.web.bind = "0.0.0.0:8080"
 
