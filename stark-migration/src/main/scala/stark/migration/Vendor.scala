@@ -64,7 +64,7 @@ object Vendor {
    */
   def forDriver(driverClassName: String): Vendor = {
     driverClassName match {
-      case "com.mysql.jdbc.Driver" =>
+      case "com.mysql.jdbc.Driver"|"com.mysql.cj.jdbc.Driver" =>
         Mysql
 
       case "oracle.jdbc.driver.OracleDriver" =>
