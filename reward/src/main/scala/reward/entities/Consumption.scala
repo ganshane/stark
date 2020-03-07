@@ -17,6 +17,8 @@ class Consumption extends ActiveRecord{
   @Column
   var id:Long= _
   @Column
+  var userId:Long= _
+  @Column
   var amount:Int= _
   @Column
   var itemId:String = _

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{OnlineUser, User}
 import reward.services.UserService
+import stark.activerecord.services.DSL._
 
 /**
   * 用户相关的控制器
@@ -69,7 +70,8 @@ class UserController {
   @PostMapping(Array("/logout"))
   @ApiOperation(value="登出",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
-  def logout(): Unit ={
+  def logout(@AuthenticationPrincipal user:User): Unit ={
+    delete[OnlineUser] where OnlineUser.userId === user.id execute
   }
   @GetMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
@@ -84,6 +86,7 @@ class UserController {
                   @AuthenticationPrincipal currentUser:User): User={
     user.id = currentUser.id
     user.createdAt = currentUser.createdAt
+    user.updatedAt = DateTime.now
 
     //更新用户信息
     user.save()

@@ -7,8 +7,9 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{Recharge, User}
-import reward.services.RewardUtils
+import reward.services.ActiveRecordPageableSupport
 import springfox.documentation.annotations.ApiIgnore
+
 import collection.JavaConversions._
 /**
   * 管理相关接口
@@ -21,7 +22,7 @@ import collection.JavaConversions._
 @Api(value="管理功能",description="管理功能",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
 @Validated
 @Secured(Array(RewardConstants.ROLE_ADMIN))
-class AdminController {
+class AdminController extends ActiveRecordPageableSupport{
   @GetMapping(Array("/users"))
   @ApiOperation(value="获取所有用户列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(
@@ -33,7 +34,7 @@ class AdminController {
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
   def listUser(@ApiIgnore pageable: Pageable):java.util.List[User]={
-    RewardUtils.pageActiveRecordsByPageable(User.all,pageable)
+    pageActiveRecordsByPageable(User.all,pageable)
   }
   @GetMapping(Array("/cards"))
   @ApiOperation(value="获取所有充值卡",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -46,7 +47,7 @@ class AdminController {
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
   def listCards(@ApiIgnore pageable: Pageable):java.util.List[Recharge]={
-    RewardUtils.pageActiveRecordsByPageable(Recharge.all,pageable)
+    pageActiveRecordsByPageable(Recharge.all,pageable)
   }
   @PostMapping(Array("/cards"))
   @ApiOperation(value="增加卡",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

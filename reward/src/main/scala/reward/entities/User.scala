@@ -37,6 +37,8 @@ class User extends ActiveRecord{
   var isAdmin:Int= _
   @Column
   var createdAt:DateTime = _
+  @Column
+  var updatedAt:DateTime = _
 }
 
 object User extends ActiveRecordInstance[User]{

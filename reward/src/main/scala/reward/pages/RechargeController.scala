@@ -8,8 +8,9 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{Recharge, User}
-import reward.services.RewardUtils
+import reward.services.ActiveRecordPageableSupport
 import springfox.documentation.annotations.ApiIgnore
+
 import collection.JavaConversions._
 
 /**
@@ -22,7 +23,7 @@ import collection.JavaConversions._
 @Api(value="充值相关",description="充值API")
 @Validated
 @Secured(Array(RewardConstants.ROLE_USER))
-class RechargeController {
+class RechargeController extends ActiveRecordPageableSupport{
 
   @PostMapping
   @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -61,6 +62,6 @@ class RechargeController {
                     @AuthenticationPrincipal user:User,
                   @ApiIgnore pageable: Pageable
                   ): java.util.List[Recharge]={
-    RewardUtils.pageActiveRecordsByPageable(Recharge.all,pageable)
+    pageActiveRecordsByPageable(Recharge.all,pageable)
   }
 }

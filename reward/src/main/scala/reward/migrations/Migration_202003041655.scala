@@ -24,6 +24,7 @@ class Migrate_202003041655_Init extends Migration{
       t.column("alipay_name", VarcharType, Limit(50), Nullable)
       t.column("is_admin",IntegerType, Default(0))
       t.column("created_at", TimestampType,Nullable)
+      t.column("updated_at", TimestampType,Nullable)
     }
     createTable("recharge",Comment("充值记录")){ t=>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
@@ -39,6 +40,7 @@ class Migrate_202003041655_Init extends Migration{
     createTable("consumption",Comment("消费记录")){ t=>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
       t.column("amount", VarcharType, Limit(32), NotNull,Comment("消费金额，单位：分"))
+      t.column("user_id", BigintType, NotNull)
       t.column("item_id", VarcharType, Limit(32), Nullable)
       t.column("item_img", IntegerType,NotNull)
       t.column("item_link", BigintType,Nullable)

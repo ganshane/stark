@@ -1,13 +1,18 @@
 package reward.pages
 
-import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
+import io.swagger.annotations._
 import org.joda.time.DateTime
+import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.Consumption
-import collection.JavaConversions._
+import reward.entities.{Consumption, User}
+import reward.services.ActiveRecordPageableSupport
+import springfox.documentation.annotations.ApiIgnore
+
+import scala.collection.JavaConversions._
 
 /**
   *
@@ -19,10 +24,10 @@ import collection.JavaConversions._
 @Api(value="消费相关API",description="购物消费相关PI")
 @Validated
 @Secured(Array(RewardConstants.ROLE_USER))
-class ConsumptionController {
+class ConsumptionController extends ActiveRecordPageableSupport{
 
   @PostMapping
-  @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.ROLE_USER)))
+  @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def consume(
              @ApiParam(value="消费金额",required = true)
              amount:Int,
@@ -42,8 +47,17 @@ class ConsumptionController {
     consumption.save
   }
   @GetMapping(Array("/list"))
-  @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization(RewardConstants.ROLE_USER)))
-  def listConsumption():java.util.List[Consumption]={
-    List.empty[Consumption]
+  @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def listConsumption(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
+    val coll=Consumption.find_by_userId(user.id)
+    pageActiveRecordsByPageable(coll,pageable)
   }
 }
