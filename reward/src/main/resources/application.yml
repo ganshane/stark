@@ -1,8 +1,7 @@
 spring:
   jackson:
     property-naming-strategy:   SNAKE_CASE
-    serialization:
-      WRITE_NULL_MAP_VALUES: false
+    default-property-inclusion: NON_NULL
 
 logging:
   level:
