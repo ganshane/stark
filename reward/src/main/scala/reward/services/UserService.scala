@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.util.Base64Utils
+import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import reward.entities.{OnlineUser, User}
 import stark.activerecord.services.DSL._
@@ -36,7 +36,7 @@ class UserService extends LoggerSupport{
   }
   def generateToken(user:User):String={
     val keySource=user.phone+user.id+System.currentTimeMillis()
-    Base64Utils.encodeToString(keySource.getBytes)
+    DigestUtils.md5DigestAsHex(keySource.getBytes)
   }
   private def createHeaders={
     val requestHeaders = new HttpHeaders()
