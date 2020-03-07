@@ -50,7 +50,7 @@ class UserService extends LoggerSupport{
   /**
     * 定时删除过期用户
     */
-  @Scheduled(fixedDelay = 5000)
+  @Scheduled(fixedDelay = 5*60*1000)
   def deleteExpiredUser(): Unit = {
     logger.info("delete expired user")
 
