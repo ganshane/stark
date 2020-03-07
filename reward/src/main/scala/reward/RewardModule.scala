@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy}
+import org.springframework.scheduling.annotation.EnableScheduling
 import reward.config.RewardConfig
 import reward.internal.StarkConfigFileUtils
 import reward.pages.UserController
@@ -36,6 +37,7 @@ object RewardModule{
 }
 @SpringBootApplication
 @EnableSwagger2
+@EnableScheduling
 @ComponentScan(basePackageClasses = {
   Array[Class[_]](classOf[UserController],classOf[GlobalApiExceptionHandler])
 })

@@ -10,8 +10,9 @@ import org.springframework.util.Base64Utils
 import org.springframework.web.client.RestTemplate
 import reward.entities.{OnlineUser, User}
 import stark.activerecord.services.DSL._
+import stark.utils.services.LoggerSupport
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 /**
   * 用户服务类
@@ -19,7 +20,7 @@ import collection.JavaConversions._
   * @since 2020-03-06
   */
 @Service
-class UserService {
+class UserService extends LoggerSupport{
   private val restTemplate = new RestTemplate()
   private val LC_HEADERS=createHeaders
   private val LC_API_BASE_URL="https://leancloud.cn/1.1/"
@@ -49,9 +50,13 @@ class UserService {
   /**
     * 定时删除过期用户
     */
-  @Scheduled(fixedDelay = 60 * 2000)
-  private def deleteExpiredUser(): Unit = {
-    delete[OnlineUser] where OnlineUser.expiredAt[DateTime] < DateTime.now()
+  @Scheduled(fixedDelay = 5000)
+  def deleteExpiredUser(): Unit = {
+    logger.info("delete expired user")
+
+    val num = delete[OnlineUser] where OnlineUser.expiredAt[DateTime] < DateTime.now() execute
+
+    logger.info("finish to delete {} expired user",num)
   }
 
 }

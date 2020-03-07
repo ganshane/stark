@@ -1,7 +1,7 @@
 package stark.activerecord.services
 
 import javax.persistence.criteria.{Path, Predicate}
-
+import org.joda.time.DateTime
 import stark.activerecord.services.Condition._
 
 import scala.language.implicitConversions
@@ -52,8 +52,14 @@ object Condition{
     )
   }
   def lt[T](field:Field[T],value:T): Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),value.asInstanceOf[Number])
+    new PredicateCondition({
+      value match{
+        case v:Number =>
+          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)
+        case v:DateTime=>
+          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),v)
+      }
+    }
     )
   }
   def le[T](field:Field[T],value:T): Condition={
