@@ -3,6 +3,7 @@ package reward.pages
 import io.swagger.annotations._
 import org.joda.time.DateTime
 import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
@@ -26,18 +27,24 @@ import scala.collection.JavaConversions._
 @Secured(Array(RewardConstants.ROLE_USER))
 class ConsumptionController extends ActiveRecordPageableSupport{
 
-  @PostMapping
   @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @PostMapping(consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
   def consume(
-             @ApiParam(value="消费金额",required = true)
+             @ApiParam(value="消费金额",required = true,example = "10000")
+             @RequestParam(required = true)
              amount:Int,
              @ApiParam(value="商品ID",required = true)
+             @RequestParam(name="item_id",required = true)
              itemId:String,
              @ApiParam(value="商品图片",required = true)
+             @RequestParam(name="item_img",required = true)
              itemImg:String,
              @ApiParam(value="商品连接",required = true)
-             itemLink:String): Unit ={
+             @RequestParam(name="item_link",required = true)
+             itemLink:String,
+             @AuthenticationPrincipal user:User): Unit ={
     val consumption = new Consumption
+    consumption.userId = user.id
     consumption.amount = amount
     consumption.itemId = itemId
     consumption.itemImg = itemImg

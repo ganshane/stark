@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.{UserDetails, UserDetailsSe
 import org.springframework.security.core.{Authentication, GrantedAuthority}
 import org.springframework.security.oauth2.server.resource.BearerTokenAuthenticationToken
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter
+import org.springframework.web.cors.{CorsConfigurationSource, UrlBasedCorsConfigurationSource}
 import reward.RewardConstants
 import reward.entities.OnlineUser
 import stark.activerecord.services.DSL.update
@@ -68,7 +69,7 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
     new BearerTokenAuthenticationFilter(authenticationManager)
   }
   override def configure(http: HttpSecurity): Unit = {
-    http.csrf().disable()
+    http.cors().and().csrf().disable()
 //      .authorizeRequests()
 //      .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**")
 //      .permitAll()
@@ -77,5 +78,24 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
      http.addFilterBefore(authenticationJwtTokenFilter(),classOf[BearerTokenAuthenticationFilter])
 
+  }
+
+  import com.google.common.collect.ImmutableList
+  import org.springframework.context.annotation.Bean
+  import org.springframework.web.cors.CorsConfiguration
+
+  @Bean def corsConfigurationSource: CorsConfigurationSource = {
+    val configuration = new CorsConfiguration
+    configuration.setAllowedOrigins(ImmutableList.of("*"))
+    configuration.setAllowedMethods(ImmutableList.of("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"))
+    // setAllowCredentials(true) is important, otherwise:
+    // The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'.
+    configuration.setAllowCredentials(true)
+    // setAllowedHeaders is important! Without it, OPTIONS preflight request
+    // will fail with 403 Invalid CORS request
+    configuration.setAllowedHeaders(ImmutableList.of("Authorization", "Cache-Control", "Content-Type"))
+    val source = new UrlBasedCorsConfigurationSource
+    source.registerCorsConfiguration("/**", configuration)
+    source
   }
 }

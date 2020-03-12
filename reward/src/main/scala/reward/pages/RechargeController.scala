@@ -1,6 +1,7 @@
 package reward.pages
 
 import io.swagger.annotations._
+import org.joda.time.DateTime
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -28,11 +29,11 @@ class RechargeController extends ActiveRecordPageableSupport{
   @PostMapping
   @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def doRecharge(
-                  @ApiParam(name="no",value="卡号",required = true)
-                  @RequestParam
+                  @RequestParam(name="no",required = true)
+                  @ApiParam(value="卡号",required = true)
                   cardNo:String,
-                  @RequestParam
-                  @ApiParam(name="no",value="卡号",required = true)
+                  @RequestParam(name="secret",required = true)
+                  @ApiParam(value="卡密",required = true)
                   cardSecret:String,
                   @ApiIgnore
                   @AuthenticationPrincipal user:User
@@ -42,7 +43,11 @@ class RechargeController extends ActiveRecordPageableSupport{
       case Some(card) =>
         if(card.cardSecret != cardSecret) throw new IllegalArgumentException("错误的卡密")
         else if(card.ownerId != null) throw new IllegalStateException("卡已经被注册")
-        else {card.ownerId=user.id;card.save()}
+        else {
+          card.ownerId=user.id
+          card.activatedAt = DateTime.now
+          card.save()
+        }
       case _ =>
         throw new UnsupportedOperationException("卡未找到")
     }
@@ -60,8 +65,8 @@ class RechargeController extends ActiveRecordPageableSupport{
   def listRecharge(
                     @ApiIgnore
                     @AuthenticationPrincipal user:User,
-                  @ApiIgnore pageable: Pageable
+                    @ApiIgnore pageable: Pageable
                   ): java.util.List[Recharge]={
-    pageActiveRecordsByPageable(Recharge.all,pageable)
+    pageActiveRecordsByPageable(Recharge.find_by_ownerId(user.id),pageable)
   }
 }

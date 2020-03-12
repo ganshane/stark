@@ -1,6 +1,7 @@
 package reward.pages
 
 import io.swagger.annotations._
+import org.joda.time.DateTime
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
@@ -54,12 +55,17 @@ class AdminController extends ActiveRecordPageableSupport{
   def addCard(
                @ApiParam(value="卡号",required = true) @RequestParam no:String,
                @ApiParam(value="密码",required = true) @RequestParam secret:String,
-               @ApiParam(name="owner_id",value="归属用户",required = true,example= "1") @RequestParam ownerId:java.lang.Long
+               @ApiParam(value="金额,单位:分",required = true,example = "100000")
+               @RequestParam(required = true) amount:java.lang.Integer,
+               @ApiParam(value="卡初始赋予的用户",required = true,example= "1")
+               @RequestParam(name="created_id",required = true) createdId:java.lang.Long
              ):Recharge={
     val recharge = new Recharge
+    recharge.amount=amount
     recharge.cardNo = no
     recharge.cardSecret = secret
-    recharge.ownerId = ownerId
+    recharge.createdId = createdId
+    recharge.createdAt = DateTime.now
     recharge.save()
   }
 }

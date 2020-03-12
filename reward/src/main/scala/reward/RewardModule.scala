@@ -12,6 +12,7 @@ import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy}
 import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 import reward.config.RewardConfig
 import reward.internal.StarkConfigFileUtils
 import reward.pages.UserController
@@ -118,6 +119,14 @@ class RewardModule {
     migrator.migrate(InstallAllMigrations, "reward.migrations", searchSubPackages = false)
 
     dataSource
+  }
+
+
+  @Bean def corsConfigurer: WebMvcConfigurer = new WebMvcConfigurer() {
+    override def addCorsMappings(registry: CorsRegistry): Unit = {
+      registry.addMapping("/**").allowedOrigins("*")
+        .allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH")
+    }
   }
   @Bean
   def buildScalaJackson: Module ={

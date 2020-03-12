@@ -33,7 +33,7 @@ class Migrate_202003041655_Init extends Migration{
     }
     createTable("recharge",Comment("充值记录")){ t=>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
-      t.column("card_no", VarcharType, Limit(32), NotNull,Comment("卡号"))
+      t.column("card_no", VarcharType, Limit(32), NotNull,Comment("卡号"),Unique)
       t.column("card_secret", VarcharType, Limit(32), Nullable,Comment("卡密码"))
       t.column("amount", IntegerType,NotNull,Comment("面值,单位:分"))
       t.column("owner_id", BigintType,Nullable,Comment("所属用户"))

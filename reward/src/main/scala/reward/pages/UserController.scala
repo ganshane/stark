@@ -85,6 +85,7 @@ class UserController {
                   user:User,
                   @AuthenticationPrincipal currentUser:User): User={
     user.id = currentUser.id
+    user.isAdmin = currentUser.isAdmin //不能更新成为管理员
     user.createdAt = currentUser.createdAt
     user.updatedAt = DateTime.now
 
