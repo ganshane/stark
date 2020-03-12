@@ -84,6 +84,7 @@ class UserController {
                   @ApiParam(value="电话号码",required=true)
                   user:User,
                   @AuthenticationPrincipal currentUser:User): User={
+    //TODO 需要注意更新,此更新不正确
     user.id = currentUser.id
     user.isAdmin = currentUser.isAdmin //不能更新成为管理员
     user.createdAt = currentUser.createdAt

@@ -14,9 +14,9 @@ import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 import reward.config.RewardConfig
-import reward.internal.StarkConfigFileUtils
+import reward.internal.{DefaultUserService, StarkConfigFileUtils}
 import reward.pages.UserController
-import reward.services.GlobalApiExceptionHandler
+import reward.services.ApiSecurity
 import springfox.documentation.builders.ApiInfoBuilder
 import springfox.documentation.service._
 import springfox.documentation.spi.service.contexts.SecurityContext
@@ -40,48 +40,12 @@ object RewardModule{
 @EnableSwagger2
 @EnableScheduling
 @ComponentScan(basePackageClasses = {
-  Array[Class[_]](classOf[UserController],classOf[GlobalApiExceptionHandler])
+  Array[Class[_]](classOf[UserController],classOf[DefaultUserService],classOf[ApiSecurity])
 })
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {
   @Bean
   def buildRewardConfig(@Value(RewardConstants.SERVER_HOME_KEY) serverHome: String): RewardConfig={
-    /*val config = new RewardConfig
-    config.web.bind = "0.0.0.0:8080"
-
-    val dbPath = "target/test.db"
-    FileSystemUtils.deleteRecursively(new File(dbPath))
-    config.db.url="jdbc:h2:file:"+dbPath+"/xx"
-    config.db.user="public"
-    config.db.driver = "org.h2.Driver"
-
-    var jpaProperty = new JpaProperty
-    jpaProperty.name = "hibernate.show_sql"
-    jpaProperty.value="true"
-    config.jpaProperties.add(jpaProperty)
-    /*
-    jpaProperty = new JpaProperty
-    jpaProperty.name = "hibernate.hbm2ddl.auto"
-    jpaProperty.value="create"
-    config.jpaProperties.add(jpaProperty)
-    */
-    jpaProperty = new JpaProperty
-    jpaProperty.name = "hibernate.physical_naming_strategy"
-    jpaProperty.value="org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy"
-    config.jpaProperties.add(jpaProperty)
-
-    jpaProperty = new JpaProperty
-    jpaProperty.name = StarkActiveRecordConstants.PACKAGE_SCAN_KEY
-    jpaProperty.value="reward.entities"
-    config.jpaProperties.add(jpaProperty)
-
-    jpaProperty = new JpaProperty
-    jpaProperty.name = "jadira.usertype.autoRegisterUserTypes"
-    jpaProperty.value="true"
-
-    config.jpaProperties.add(jpaProperty)
-
-    config*/
     RewardModule.buildRewardConfig(serverHome)
   }
   @Bean

@@ -1,7 +1,7 @@
 package reward.pages
 
 import io.swagger.annotations._
-import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -9,10 +9,10 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{Recharge, User}
-import reward.services.ActiveRecordPageableSupport
+import reward.services.{ActiveRecordPageableSupport, UserService}
 import springfox.documentation.annotations.ApiIgnore
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 
 /**
   *
@@ -25,6 +25,8 @@ import collection.JavaConversions._
 @Validated
 @Secured(Array(RewardConstants.ROLE_USER))
 class RechargeController extends ActiveRecordPageableSupport{
+  @Autowired
+  private val userService:UserService = null
 
   @PostMapping
   @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -38,19 +40,7 @@ class RechargeController extends ActiveRecordPageableSupport{
                   @ApiIgnore
                   @AuthenticationPrincipal user:User
                 ): Recharge ={
-    val cardOpt = Recharge.find_by_cardNo(cardNo).headOption
-    cardOpt match{
-      case Some(card) =>
-        if(card.cardSecret != cardSecret) throw new IllegalArgumentException("错误的卡密")
-        else if(card.ownerId != null) throw new IllegalStateException("卡已经被注册")
-        else {
-          card.ownerId=user.id
-          card.activatedAt = DateTime.now
-          card.save()
-        }
-      case _ =>
-        throw new UnsupportedOperationException("卡未找到")
-    }
+    userService.recharge(cardNo,cardSecret,user)
   }
   @GetMapping(Array("/list"))
   @ApiOperation(value="充值列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

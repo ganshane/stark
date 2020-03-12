@@ -1,7 +1,7 @@
 package reward.pages
 
 import io.swagger.annotations._
-import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.http.MediaType
 import org.springframework.security.access.annotation.Secured
@@ -10,7 +10,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{Consumption, User}
-import reward.services.ActiveRecordPageableSupport
+import reward.services.{ActiveRecordPageableSupport, UserService}
 import springfox.documentation.annotations.ApiIgnore
 
 import scala.collection.JavaConversions._
@@ -26,6 +26,8 @@ import scala.collection.JavaConversions._
 @Validated
 @Secured(Array(RewardConstants.ROLE_USER))
 class ConsumptionController extends ActiveRecordPageableSupport{
+  @Autowired
+  private val userService:UserService = null
 
   @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @PostMapping(consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
@@ -42,16 +44,8 @@ class ConsumptionController extends ActiveRecordPageableSupport{
              @ApiParam(value="商品连接",required = true)
              @RequestParam(name="item_link",required = true)
              itemLink:String,
-             @AuthenticationPrincipal user:User): Unit ={
-    val consumption = new Consumption
-    consumption.userId = user.id
-    consumption.amount = amount
-    consumption.itemId = itemId
-    consumption.itemImg = itemImg
-    consumption.itemLink = itemLink
-
-    consumption.createdAt = DateTime.now
-    consumption.save
+             @AuthenticationPrincipal user:User): Consumption ={
+    userService.consume(amount,itemId,itemImg,itemLink,user)
   }
   @GetMapping(Array("/list"))
   @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

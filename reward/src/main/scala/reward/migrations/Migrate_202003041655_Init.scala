@@ -71,6 +71,7 @@ class Migrate_202003041655_Init extends Migration{
     execute("insert into online_user(user_id,token) values(1,'"+token+"')")
 
     execute("insert into recharge (card_no,card_secret,amount) values('111','SSS',10000)")
+    execute("insert into recharge (card_no,card_secret,amount) values('222','SSS',10000)")
   }
 
   /**
