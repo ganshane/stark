@@ -20,6 +20,8 @@ class RewardConfig
 
   @XmlElement(name = "database")
   var db: DatabaseConfig = new DatabaseConfig()
+  @XmlElement(name = "wechat_mp")
+  var wechat: WechatMpConfig= new WechatMpConfig()
 }
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DatabaseConfig")
@@ -36,4 +38,13 @@ class DatabaseConfig extends Serializable{
   var url: String = _
   @XmlElement(name = "max_pool_size")
   var max: Int= 10
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "WechatMpConfig")
+class WechatMpConfig {
+  @XmlElement(name = "id")
+  var id: String = _
+  @XmlElement(name = "secret")
+  var secret: String = _
 }

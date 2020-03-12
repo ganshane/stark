@@ -22,9 +22,12 @@ class User extends ActiveRecord{
   @ApiModelProperty(value="电话号码",example = "13900000001")
   var phone:String= _
   @Column
-  var name:String= _
+  @ApiModelProperty(value="微信的用户OpenId",example = "xxxsssxx")
+  var openId:String= _
   @Column
   var nickName:String= _
+  @Column
+  var avatar:String= _
   @Column
   var relationId:String= _
   @Column

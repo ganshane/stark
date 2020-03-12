@@ -10,6 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
+import reward.config.RewardConfig
 import reward.entities.{OnlineUser, User}
 import reward.services.UserService
 
@@ -21,16 +22,20 @@ import reward.services.UserService
   */
 @RestController
 @RequestMapping(Array("/wx"))
-@Api(value="微信用户相关接口",description="用户相关接口")
+@Api(value="微信相关接口",description="微信相关接口")
 @Validated
 class WxController {
 
   @Autowired
   private val userService:UserService = null
-  private val weixinPopular = {
+  @Autowired
+  private var rewardConfig:RewardConfig= _
+  private lazy val weixinPopular = {
     val config= new WxMaDefaultConfigImpl()
-    config.setAppid("wx72d1f13b506075a9")
-    config.setSecret("264a825790d4ba9cedf23e87725112ff")
+    config.setAppid(rewardConfig.wechat.id)
+    config.setSecret(rewardConfig.wechat.secret)
+//    config.setAppid("wx72d1f13b506075a9")
+//    config.setSecret("264a825790d4ba9cedf23e87725112ff")
     val s = new WxMaServiceImpl()
     s.setWxMaConfig(config)
     s
@@ -52,12 +57,19 @@ class WxController {
     val wxUser = weixinPopular.getUserService.getUserInfo(sessionKey, encryptedData, iv)
     //通过微信用户来找OpenId
     lazy val user = {
-      val headOpt = User.find_by_phone(wxUser.getOpenId).headOption
+      val headOpt = User.find_by_openId(wxUser.getOpenId).headOption
       headOpt match {
-        case Some(u) => u
+        case Some(user) => {
+          //update user info
+          user.nickName= wxUser.getNickName
+          user.avatar = wxUser.getAvatarUrl
+          user.save()
+        }
         case _ => //没找到则进行注册
           val user= new User
-          user.phone = wxUser.getOpenId
+          user.openId= wxUser.getOpenId
+          user.nickName= wxUser.getNickName
+          user.avatar = wxUser.getAvatarUrl
           user.createdAt = DateTime.now
           user.save()
       }

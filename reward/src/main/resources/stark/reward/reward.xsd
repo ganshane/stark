@@ -20,6 +20,7 @@
             </xs:element>
             <xs:element type="databaseType" name="database" minOccurs="1" maxOccurs="1"/>
             <xs:element type="jpaType" name="jpa"/>
+            <xs:element type="wechatMpType" name="wechat_mp" minOccurs="1" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -35,6 +36,12 @@
             <xs:element name="conn_idle_time_secs" type="xs:int" minOccurs="0" maxOccurs="1"/>
             <xs:element name="request_buffer_size_kb" type="xs:int" minOccurs="0" maxOccurs="1"/>
             <xs:element name="response_buffer_size_kb" type="xs:int" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="wechatMpType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="id" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="xs:string" name="secret" minOccurs="1" maxOccurs="1"/>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="databaseType">

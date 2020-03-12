@@ -15,9 +15,14 @@ class Migrate_202003041655_Init extends Migration{
   override def up(): Unit = {
     createTable("user", Comment("用户")) { t =>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
-      t.column("phone", VarcharType, Limit(11), NotNull,Unique)
-      t.column("name", VarcharType, Limit(20), Nullable)
-      t.column("nick_name", VarcharType,Limit(20), Nullable)
+      t.column("phone", VarcharType, Limit(50), Nullable,Unique)
+      t.column("open_id", VarcharType, Limit(50), Nullable,Unique)
+      /*
+       * 微信的昵称有很多是特殊字符，需要手动调整字符集
+       * alter table user change nick_name nick_name varchar(50) character set utf8mb4   collate utf8mb4_unicode_ci ;
+       */
+      t.column("nick_name", VarcharType,Limit(50), Nullable)
+      t.column("avatar", VarcharType, Limit(200), Nullable,Unique)
       t.column("relation_id", VarcharType, Limit(30), Nullable)
       t.column("invitation_id", VarcharType, Limit(20), Nullable)
       t.column("alipay", VarcharType, Limit(50), Nullable)
@@ -61,7 +66,7 @@ class Migrate_202003041655_Init extends Migration{
       t.column("updated_at", TimestampType, Nullable)
     }
 
-    execute("insert into user (phone,name,is_admin) values('11111111111','jcai',1)")
+    execute("insert into user (phone,nick_name,is_admin) values('11111111111','jcai',1)")
     val token = "asdf"
     execute("insert into online_user(user_id,token) values(1,'"+token+"')")
 
