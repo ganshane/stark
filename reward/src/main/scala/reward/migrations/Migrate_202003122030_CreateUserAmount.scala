@@ -17,8 +17,8 @@ class Migrate_202003122030_CreateUserAmount extends Migration{
       t.column("id", BigintType, NotNull, PrimaryKey)
       t.column("recharge_amount", BigintType, NotNull)
       t.column("consumption_amount", BigintType, NotNull)
-      t.column("last_recharge",TimestampType)
-      t.column("last_consume",TimestampType)
+      t.column("last_recharge",TimestampType,Nullable)
+      t.column("last_consume",TimestampType,Nullable)
     }
   }
 

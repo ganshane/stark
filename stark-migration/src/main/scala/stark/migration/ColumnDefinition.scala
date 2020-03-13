@@ -414,6 +414,7 @@ abstract class ColumnDefinition {
     // column that may have NULL values.
     notNullOpt match {
       case Some(true) => sb.append(" NOT NULL")
+      case Some(false)=>  sb.append(" NULL ") //允许NULL,针对mysql的Timestamp类型,允许NULL才能保存空值
       case _ =>
     }
 
