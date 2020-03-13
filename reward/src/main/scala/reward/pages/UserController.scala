@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{OnlineUser, User}
+import reward.entities.{OnlineUser, User, UserAmount}
 import reward.services.UserService
 import stark.activerecord.services.DSL._
 
@@ -76,7 +76,10 @@ class UserController {
   @GetMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="得到当前用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  def info(@AuthenticationPrincipal user:User): User=user
+  def info(@AuthenticationPrincipal user:User): User={
+    UserAmount.findOption(user.id).foreach(user.balance= _)
+    user
+  }
   @PostMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="更新用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

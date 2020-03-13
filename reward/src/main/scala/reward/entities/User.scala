@@ -42,6 +42,9 @@ class User extends ActiveRecord{
   var createdAt:DateTime = _
   @Column
   var updatedAt:DateTime = _
+
+  @Transient
+  var balance:UserAmount = _
 }
 
 object User extends ActiveRecordInstance[User]{

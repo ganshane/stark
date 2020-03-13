@@ -19,7 +19,7 @@ class Migrate_202003041655_Init extends Migration{
       t.column("open_id", VarcharType, Limit(50), Nullable,Unique)
       /*
        * 微信的昵称有很多是特殊字符，需要手动调整字符集
-       * alter table user change nick_name nick_name varchar(50) character set utf8mb4   collate utf8mb4_unicode_ci ;
+        alter table user change nick_name nick_name varchar(50) character set utf8mb4   collate utf8mb4_unicode_ci ;
        */
       t.column("nick_name", VarcharType,Limit(50), Nullable)
       t.column("avatar", VarcharType, Limit(200), Nullable,Unique)

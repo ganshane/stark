@@ -1,5 +1,6 @@
 package reward.entities
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -15,6 +16,7 @@ class UserAmount extends ActiveRecord{
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
+    @JsonIgnore
     var id:Long= _
     @Column
     var rechargeAmount:Long= _
