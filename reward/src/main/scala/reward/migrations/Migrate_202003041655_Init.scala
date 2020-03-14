@@ -51,12 +51,6 @@ class Migrate_202003041655_Init extends Migration{
       t.column("item_link", BigintType,Nullable)
       t.column("created_at", TimestampType, Nullable)
     }
-    createTable("administrator",Comment("管理员")){ t=>
-      t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
-      t.column("name", VarcharType, Limit(32), NotNull)
-      t.column("password", VarcharType, Limit(32), Nullable)
-      t.column("created_at", TimestampType, Nullable)
-    }
     createTable("online_user",Comment("在线的用户")){ t=>
       t.column("id",BigintType , NotNull, PrimaryKey,AutoIncrement)
       t.column("user_id", BigintType, NotNull,Unique)
@@ -83,7 +77,6 @@ class Migrate_202003041655_Init extends Migration{
     dropTable("user")
     dropTable("recharge")
     dropTable("consumption")
-    dropTable("administrator")
     dropTable("online_user")
   }
 }
