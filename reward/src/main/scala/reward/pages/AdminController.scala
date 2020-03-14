@@ -7,7 +7,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{Announce, Recharge, TaobaoPublisherOrder, User}
+import reward.entities._
 import reward.services.ActiveRecordPageableSupport
 import springfox.documentation.annotations.ApiIgnore
 import stark.activerecord.services.DSL.delete
@@ -26,14 +26,55 @@ import scala.collection.JavaConversions._
 @Secured(Array(RewardConstants.ROLE_ADMIN))
 class AdminController extends ActiveRecordPageableSupport{
 
-  @PostMapping(Array("/announces/delete"))
+  @PostMapping(Array("/slide/delete"))
+  @ApiOperation(value="删除轮播信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def deleteSlide(
+                      @ApiParam(value="ID",required = true) @RequestParam id:Long
+                    ):Unit={
+    delete[Slide] where Slide.id === id execute
+  }
+  @PostMapping(Array("/slide/add"))
+  @ApiOperation(value="增加轮播",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def addSlide(
+                   @ApiParam(value="指向URL",required = false) @RequestParam url:String,
+                   @ApiParam(value="轮播图片",required = true) @RequestParam img_url:String,
+                   @ApiParam(value="状态") @RequestParam status:Int
+                 ):Slide={
+    val slide= new Slide
+    slide.imgUrl= img_url
+    slide.url=url
+    slide.status = status
+    slide.createdAt = DateTime.now()
+    slide.save
+  }
+  @PostMapping(Array("/slide/status"))
+  @ApiOperation(value="消息列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def updateStatus(
+                    @ApiParam(value="ID",required = true) @RequestParam id:Long,
+                    @ApiParam(value="状态",required = true) @RequestParam status:Int ):Slide={
+    val slideOpt = Slide.findOption(id)
+    slideOpt match{
+      case Some(slide) =>
+        slide.status = status
+        slide.save()
+      case _ =>
+        throw new IllegalArgumentException("slide not found by id"+id)
+    }
+  }
+  @GetMapping(Array("/slide/list"))
+  @ApiOperation(value="消息列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def listSlide():java.util.List[Slide]={
+    Slide.all.toList
+  }
+
+  @PostMapping(Array("/announce/delete"))
   @ApiOperation(value="删除系统消息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def deleteAnnounce(
                    @ApiParam(value="消息的ID",required = true) @RequestParam id:Long
                  ):Unit={
     delete[Announce] where Announce.id === id execute
   }
-  @PostMapping(Array("/announces"))
+  @PostMapping(Array("/announce/add"))
   @ApiOperation(value="增加系统消息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def addAnnounce(
                    @ApiParam(value="消息内容",required = true) @RequestParam content:String,
@@ -45,7 +86,7 @@ class AdminController extends ActiveRecordPageableSupport{
     announce.createdAt = DateTime.now()
     announce.save
   }
-  @GetMapping(Array("/announces/list"))
+  @GetMapping(Array("/announce/list"))
   @ApiOperation(value="消息列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def listAnnounce():java.util.List[Announce]={
     Announce.all.toList
@@ -78,7 +119,7 @@ class AdminController extends ActiveRecordPageableSupport{
   def listUser(@ApiIgnore pageable: Pageable):java.util.List[User]={
     pageActiveRecordsByPageable(User.all,pageable)
   }
-  @GetMapping(Array("/cards"))
+  @GetMapping(Array("/card/list"))
   @ApiOperation(value="获取所有充值卡",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
@@ -91,7 +132,7 @@ class AdminController extends ActiveRecordPageableSupport{
   def listCards(@ApiIgnore pageable: Pageable):java.util.List[Recharge]={
     pageActiveRecordsByPageable(Recharge.all,pageable)
   }
-  @PostMapping(Array("/cards"))
+  @PostMapping(Array("/card/add"))
   @ApiOperation(value="增加卡",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def addCard(
                @ApiParam(value="卡号",required = true) @RequestParam no:String,

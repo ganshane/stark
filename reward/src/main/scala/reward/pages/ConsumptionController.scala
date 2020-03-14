@@ -30,8 +30,8 @@ class ConsumptionController extends ActiveRecordPageableSupport{
   private val userService:UserService = null
 
   @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  @PostMapping(consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
-  def consume(
+  @PostMapping(value=Array("/add"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+  def add(
              @ApiParam(value="消费金额",required = true,example = "10000")
              @RequestParam(required = true)
              amount:Int,
@@ -57,7 +57,7 @@ class ConsumptionController extends ActiveRecordPageableSupport{
     new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
-  def listConsumption(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
+  def list(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
     val coll=Consumption.find_by_userId(user.id)
     pageActiveRecordsByPageable(coll,pageable)
   }

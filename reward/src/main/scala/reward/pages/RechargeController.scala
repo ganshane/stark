@@ -28,9 +28,9 @@ class RechargeController extends ActiveRecordPageableSupport{
   @Autowired
   private val userService:UserService = null
 
-  @PostMapping
+  @PostMapping(Array("/add"))
   @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  def doRecharge(
+  def add(
                   @RequestParam(name="no",required = true)
                   @ApiParam(value="卡号",required = true)
                   cardNo:String,
