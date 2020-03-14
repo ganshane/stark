@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import reward.RewardConstants
+import reward.config.RewardConfig
 import reward.entities.TaobaoPublisherOrder
 import reward.services.{TaobaoService, TaobaoTaskScheduler}
 import stark.activerecord.services.DSL.select
@@ -24,32 +25,36 @@ import scala.annotation.tailrec
 @Service
 class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
   @Autowired
-  private val taobaoService:TaobaoService=null
-  val TaoAppKey = "27706268"
-  val TaoSecret = "6505ff50b4d72c56fef583b2570593fa"
+  private val taobaoService:TaobaoService = null
+  @Autowired
+  private val config:RewardConfig = null
+//  val TaoAppKey = "27706268"
+//  val TaoSecret = "6505ff50b4d72c56fef583b2570593fa"
   //  val TaoAppKey = "28430902"
   //  val TaoSecret = "c982412aeb22bccc535b918de4165a3a"
 
   @Scheduled(fixedDelay = 100000L) //5 * 60 * 1000
   override def syncTaobaoOrder(): Unit ={
-    //test save
-//    val order = new TaobaoPublisherOrder
-//    order.tradeId = "123123"
-//    order.tkCreateTime = DateTime.now
-//    order.save
-    val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime[DateTime].max)
-    var maxCreateTime = maxCreateTimeValue.head.asInstanceOf[DateTime]
-    if(maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(5)
-    logger.info("sync taobao order with max tkCreateTime ({})",maxCreateTime)
-    syncTaobaoOrder(maxCreateTime,1)
-    logger.info("finish to sync taobao order with create time")
+    if(config.taobao != null) {
+      //test save
+      //    val order = new TaobaoPublisherOrder
+      //    order.tradeId = "123123"
+      //    order.tkCreateTime = DateTime.now
+      //    order.save
+      val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime[DateTime].max)
+      var maxCreateTime = maxCreateTimeValue.head.asInstanceOf[DateTime]
+      if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(5)
+      logger.info("sync taobao order with max tkCreateTime ({})", maxCreateTime)
+      syncTaobaoOrder(maxCreateTime, 1)
+      logger.info("finish to sync taobao order with create time")
 
-    val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime[DateTime].max)
-    var maxEarningTime = maxEarningTimeValue.head.asInstanceOf[DateTime]
-    if(maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(5)
-    logger.info("sync taobao order with max maxEarningTime ({})",maxEarningTime)
-    syncTaobaoOrder(maxEarningTime,3)
-    logger.info("finish to sync taobao order with earning time")
+      val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime[DateTime].max)
+      var maxEarningTime = maxEarningTimeValue.head.asInstanceOf[DateTime]
+      if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(5)
+      logger.info("sync taobao order with max maxEarningTime ({})", maxEarningTime)
+      syncTaobaoOrder(maxEarningTime, 3)
+      logger.info("finish to sync taobao order with earning time")
+    }
   }
 
   /**
@@ -58,7 +63,7 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
     * @param queryType 查询时间类型，1：按照订单淘客创建时间查询，2:按照订单淘客付款时间查询，3:按照订单淘客结算时间查询
     */
   def syncTaobaoOrder(beginTime:DateTime,queryType:Int): Unit ={
-    val client = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", TaoAppKey, TaoSecret)
+    val client = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
     val req = new TbkOrderDetailsGetRequest
     req.setPageSize(100L)
     req.setQueryType(queryType.toLong)

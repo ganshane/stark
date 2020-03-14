@@ -22,6 +22,8 @@ class RewardConfig
   var db: DatabaseConfig = new DatabaseConfig()
   @XmlElement(name = "wechat_mp")
   var wechat: WechatMpConfig= new WechatMpConfig()
+  @XmlElement(name = "taobao")
+  var taobao: ApiConfig= _
 }
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DatabaseConfig")
@@ -46,5 +48,13 @@ class WechatMpConfig {
   @XmlElement(name = "id")
   var id: String = _
   @XmlElement(name = "secret")
+  var secret: String = _
+}
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "AppConfig")
+class ApiConfig{
+  @XmlAttribute(name = "id")
+  var id: String = _
+  @XmlAttribute(name = "secret")
   var secret: String = _
 }

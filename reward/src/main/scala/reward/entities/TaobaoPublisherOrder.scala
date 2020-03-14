@@ -1,5 +1,6 @@
 package reward.entities
 
+import io.swagger.annotations.ApiModelProperty
 import javax.persistence.{Column, Entity, Id, Table}
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -13,6 +14,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 @Table(name = "taobao_publisher_order")
 class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="adzone_id")
+  @ApiModelProperty(example = "1")
   var adzoneId:java.lang.Long = _
   @Column(name="adzone_name")
   var adzoneName:String = _
@@ -37,12 +39,14 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="item_category_name")
   var itemCategoryName:String = _
   @Column(name="item_id")
+  @ApiModelProperty(example = "1")
   var itemId:java.lang.Long = _
   @Column(name="item_img")
   var itemImg:String = _
   @Column(name="item_link")
   var itemLink:String = _
   @Column(name="item_num")
+  @ApiModelProperty(example = "1")
   var itemNum:java.lang.Long = _
   @Column(name="item_price")
   var itemPrice:String = _
@@ -53,6 +57,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="pay_price")
   var payPrice:String = _
   @Column(name="pub_id")
+  @ApiModelProperty(example = "1")
   var pubId:java.lang.Long = _
   @Column(name="pub_share_fee")
   var pubShareFee:String = _
@@ -61,18 +66,22 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="pub_share_rate")
   var pubShareRate:String = _
   @Column(name="refund_tag")
+  @ApiModelProperty(example = "1")
   var refundTag:java.lang.Long = _
   @Column(name="relation_id")
+  @ApiModelProperty(example = "1")
   var relationId:java.lang.Long = _
   @Column(name="seller_nick")
   var sellerNick:String = _
   @Column(name="seller_shop_title")
   var sellerShopTitle:String = _
   @Column(name="site_id")
+  @ApiModelProperty(example = "1")
   var siteId:java.lang.Long = _
   @Column(name="site_name")
   var siteName:String = _
   @Column(name="special_id")
+  @ApiModelProperty(example = "1")
   var specialId:java.lang.Long = _
   @Column(name="subsidy_fee")
   var subsidyFee:String = _
@@ -99,10 +108,12 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="tk_earning_time")
   var tkEarningTime:DateTime= _
   @Column(name="tk_order_role")
+  @ApiModelProperty(example = "1")
   var tkOrderRole:java.lang.Long = _
   @Column(name="tk_paid_time")
   var tkPaidTime:DateTime= _
   @Column(name="tk_status")
+  @ApiModelProperty(example = "1")
   var tkStatus:java.lang.Long = _
   @Column(name="tk_total_rate")
   var tkTotalRate:String = _

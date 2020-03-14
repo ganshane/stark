@@ -7,11 +7,12 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{Recharge, TaobaoPublisherOrder, User}
+import reward.entities.{Announce, Recharge, TaobaoPublisherOrder, User}
 import reward.services.ActiveRecordPageableSupport
 import springfox.documentation.annotations.ApiIgnore
+import stark.activerecord.services.DSL.delete
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 /**
   * 管理相关接口
   *
@@ -24,6 +25,33 @@ import collection.JavaConversions._
 @Validated
 @Secured(Array(RewardConstants.ROLE_ADMIN))
 class AdminController extends ActiveRecordPageableSupport{
+
+  @PostMapping(Array("/announces/delete"))
+  @ApiOperation(value="删除系统消息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def deleteAnnounce(
+                   @ApiParam(value="消息的ID",required = true) @RequestParam id:Long
+                 ):Unit={
+    delete[Announce] where Announce.id === id execute
+  }
+  @PostMapping(Array("/announces"))
+  @ApiOperation(value="增加系统消息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def addAnnounce(
+                   @ApiParam(value="消息内容",required = true) @RequestParam content:String,
+                   @ApiParam(value="消息指向的URL") @RequestParam url:String
+                   ):Announce={
+    val announce = new Announce
+    announce.content = content
+    announce.url=url
+    announce.createdAt = DateTime.now()
+    announce.save
+  }
+  @GetMapping(Array("/announces/list"))
+  @ApiOperation(value="消息列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def listAnnounce():java.util.List[Announce]={
+    Announce.all.toList
+  }
+
+
   @GetMapping(Array("/orders/tbk"))
   @ApiOperation(value="获取淘宝客中的订单",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(
