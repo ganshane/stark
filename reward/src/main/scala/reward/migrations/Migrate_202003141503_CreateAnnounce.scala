@@ -14,7 +14,7 @@ class Migrate_202003141503_CreateAnnounce extends Migration{
     */
   override def up(): Unit = {
     createTable("announce"){t=>
-      t.column("id",IntegerType,PrimaryKey)
+      t.column("id",IntegerType,PrimaryKey,AutoIncrement)
       t.column("content",VarcharType,Limit(100),NotNull)
       t.column("url",VarcharType,Limit(200))
       t.column("created_at",TimestampType,Nullable)
