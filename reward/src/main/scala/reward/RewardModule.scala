@@ -14,7 +14,7 @@ import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 import reward.config.RewardConfig
-import reward.internal.{DefaultUserService, StarkConfigFileUtils}
+import reward.internal.{UserServiceImpl, StarkConfigFileUtils}
 import reward.pages.UserController
 import reward.services.ApiSecurity
 import springfox.documentation.builders.ApiInfoBuilder
@@ -40,7 +40,7 @@ object RewardModule{
 @EnableSwagger2
 @EnableScheduling
 @ComponentScan(basePackageClasses = {
-  Array[Class[_]](classOf[UserController],classOf[DefaultUserService],classOf[ApiSecurity])
+  Array[Class[_]](classOf[UserController],classOf[UserServiceImpl],classOf[ApiSecurity])
 })
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {

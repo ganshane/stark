@@ -19,4 +19,6 @@ object RewardConstants {
   /** role **/
   final val ROLE_USER="ROLE_USER"
   final val ROLE_ADMIN="ROLE_ADMIN"
+
+  final val TAOBAO_DATETIME_FORMATE="yyyy-MM-dd HH:mm:ss"
 }

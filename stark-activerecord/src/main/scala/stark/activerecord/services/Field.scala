@@ -40,6 +40,7 @@ trait Field[T] extends SelectionField{
   def asc:SortField[T]
   def count:SelectionField
   def distinct:SelectionField
+  def max:SelectionField
 }
 trait SelectionField{
   def toSelection[X]:Selection[X]
@@ -72,6 +73,15 @@ private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]
+      }
+    }
+  }
+
+
+  override def max: SelectionField = {
+    new SelectionField {
+      override def toSelection[X]: Selection[X] = {
+        DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]
       }
     }
   }

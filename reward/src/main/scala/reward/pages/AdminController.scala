@@ -7,7 +7,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{Recharge, User}
+import reward.entities.{Recharge, TaobaoPublisherOrder, User}
 import reward.services.ActiveRecordPageableSupport
 import springfox.documentation.annotations.ApiIgnore
 
@@ -24,6 +24,19 @@ import collection.JavaConversions._
 @Validated
 @Secured(Array(RewardConstants.ROLE_ADMIN))
 class AdminController extends ActiveRecordPageableSupport{
+  @GetMapping(Array("/orders/tbk"))
+  @ApiOperation(value="获取淘宝客中的订单",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def listTaobao(@ApiIgnore pageable: Pageable):java.util.List[TaobaoPublisherOrder]={
+    pageActiveRecordsByPageable(TaobaoPublisherOrder.all,pageable)
+  }
   @GetMapping(Array("/users"))
   @ApiOperation(value="获取所有用户列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(

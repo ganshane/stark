@@ -15,7 +15,7 @@ object RewardApp extends GlobalLoggerConfigurationSupport{
     val serverHome = sys.props.getOrElseUpdate(RewardConstants.SERVER_HOME, RewardConstants.SERVER_HOME_DEFAULT)
 //    System.setProperty(RewardConstants.SERVER_HOME, serverHome)
     val config = RewardModule.buildRewardConfig(serverHome)
-    configLogger(config.logFile, "AUTH", "reward")
+    configLogger(config.logFile, "REWARD", "reward")
 
     val ctx: ApplicationContext = SpringApplication.run(
       Array[Class[_]](classOf[RewardModule]),args)

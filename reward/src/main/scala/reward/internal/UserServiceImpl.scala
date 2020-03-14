@@ -22,7 +22,7 @@ import scala.collection.JavaConversions._
   * @since 2020-03-06
   */
 @Service
-class DefaultUserService extends LoggerSupport with UserService {
+class UserServiceImpl extends LoggerSupport with UserService {
   private val restTemplate = new RestTemplate()
   private val LC_HEADERS=createHeaders
   private val LC_API_BASE_URL="https://leancloud.cn/1.1/"
@@ -121,5 +121,6 @@ class DefaultUserService extends LoggerSupport with UserService {
 
     logger.info("finish to delete {} expired user",num)
   }
+
 
 }
