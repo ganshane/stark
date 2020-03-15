@@ -10,12 +10,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 @RestControllerAdvice
 class GlobalApiExceptionHandler{
 
-  /*
-  @ExceptionHandler(Array(classOf[Exception]))
-  def globalExcpetionHandler(ex: Exception, request: WebRequest): ResponseEntity[ApiError] = {
-    val errorDetails = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage)
-    ex.printStackTrace()
-    new ResponseEntity[ApiError](errorDetails, HttpStatus.INTERNAL_SERVER_ERROR)
-  }
-  */
+//  @ExceptionHandler(Array(classOf[Exception]))
+//  def globalExcpetionHandler(ex: Exception, request: WebRequest): ResponseEntity[ApiError] = {
+//    val errorDetails = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage)
+//    ex.printStackTrace()
+//    new ResponseEntity[ApiError](errorDetails, HttpStatus.INTERNAL_SERVER_ERROR)
+//  }
 }

@@ -1,6 +1,5 @@
 package reward.internal
 
-import com.taobao.api.DefaultTaobaoClient
 import com.taobao.api.request.TbkOrderDetailsGetRequest
 import com.taobao.api.response.TbkOrderDetailsGetResponse
 import org.joda.time.DateTime
@@ -63,7 +62,7 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
     * @param queryType 查询时间类型，1：按照订单淘客创建时间查询，2:按照订单淘客付款时间查询，3:按照订单淘客结算时间查询
     */
   def syncTaobaoOrder(beginTime:DateTime,queryType:Int): Unit ={
-    val client = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
+    val client = taobaoService.getOrCreateTaobaoClient()
     val req = new TbkOrderDetailsGetRequest
     req.setPageSize(100L)
     req.setQueryType(queryType.toLong)

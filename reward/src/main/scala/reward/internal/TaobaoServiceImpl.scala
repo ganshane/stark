@@ -1,12 +1,15 @@
 package reward.internal
 
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
+import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import reward.RewardConstants
+import reward.config.RewardConfig
 import reward.entities.TaobaoPublisherOrder
 import reward.services.TaobaoService
 
@@ -16,7 +19,11 @@ import reward.services.TaobaoService
   * @since 2020-03-14
   */
 @Service
-class TaobaoServiceImpl extends TaobaoService{
+class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
+  private lazy val taobaoClient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
+
+  override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
+
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
     val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId)

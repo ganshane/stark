@@ -1,4 +1,5 @@
 package reward.services
+import com.taobao.api.TaobaoClient
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 
 /**
@@ -7,6 +8,6 @@ import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
   * @since 2020-03-14
   */
 trait TaobaoService {
-
+  def getOrCreateTaobaoClient(): TaobaoClient
   def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit
 }
