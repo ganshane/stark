@@ -42,14 +42,14 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
       //    order.save
       val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime[DateTime].max)
       var maxCreateTime = maxCreateTimeValue.head.asInstanceOf[DateTime]
-      if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(5)
+      if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(30)
       logger.info("sync taobao order with max tkCreateTime ({})", maxCreateTime)
       syncTaobaoOrder(maxCreateTime, 1)
       logger.info("finish to sync taobao order with create time")
 
       val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime[DateTime].max)
       var maxEarningTime = maxEarningTimeValue.head.asInstanceOf[DateTime]
-      if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(5)
+      if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(30)
       logger.info("sync taobao order with max maxEarningTime ({})", maxEarningTime)
       syncTaobaoOrder(maxEarningTime, 3)
       logger.info("finish to sync taobao order with earning time")

@@ -1,5 +1,9 @@
 package reward.internal
 
+import com.aliyuncs.DefaultAcsClient
+import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
+import com.aliyuncs.http.MethodType
+import com.aliyuncs.profile.DefaultProfile
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
 import org.joda.time.DateTime
@@ -21,9 +25,27 @@ import reward.services.TaobaoService
 @Service
 class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
   private lazy val taobaoClient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
+  private lazy val endpoint = "sts.aliyuncs.com"
+  private lazy val roleSessionName = "reward"
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
+
+  override def getOssAccessInfo(): AssumeRoleResponse.Credentials = {
+//    val accessKeyId = "LTAI4Fx8NYk2KYnBLhuTzDe5"
+//    val accessKeySecret = "TQHWw3acq0rZ1mu96wM9WH9o3MtAK6"
+//    val roleArn = "acs:ram::1161114981954871:role/taofenxiang-oss"
+    val profile = DefaultProfile.getProfile("", config.aliyun.id, config.aliyun.secret)
+    // 用profile构造client
+    val client = new DefaultAcsClient(profile)
+    val request = new AssumeRoleRequest
+    request.setSysEndpoint(endpoint)
+    request.setSysMethod(MethodType.POST)
+    request.setRoleArn(config.aliyun.arn)
+    request.setRoleSessionName(roleSessionName)
+
+    client.getAcsResponse(request).getCredentials
+  }
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
     val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId)

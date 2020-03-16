@@ -2,13 +2,14 @@ package reward.pages
 
 import io.swagger.annotations._
 import org.joda.time.DateTime
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities._
-import reward.services.ActiveRecordPageableSupport
+import reward.services.{ActiveRecordPageableSupport, TaobaoService}
 import springfox.documentation.annotations.ApiIgnore
 import stark.activerecord.services.DSL.delete
 
@@ -24,7 +25,13 @@ import scala.collection.JavaConversions._
 @Api(value="管理功能",description="管理功能",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
 @Validated
 @Secured(Array(RewardConstants.ROLE_ADMIN))
-class AdminController extends ActiveRecordPageableSupport{
+class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRecordPageableSupport{
+
+  @GetMapping(Array("/aliyun/oss"))
+  @ApiOperation(value="得到操作阿里云的临时token",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def getOssAccess={
+    taobaoService.getOssAccessInfo()
+  }
 
   @PostMapping(Array("/slide/delete"))
   @ApiOperation(value="删除轮播信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

@@ -24,6 +24,8 @@ class RewardConfig
   var wechat: WechatMpConfig= new WechatMpConfig()
   @XmlElement(name = "taobao")
   var taobao: ApiConfig= _
+  @XmlElement(name = "aliyun")
+  var aliyun: AliyunConfig= _
 }
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DatabaseConfig")
@@ -57,4 +59,10 @@ class ApiConfig{
   var id: String = _
   @XmlAttribute(name = "secret")
   var secret: String = _
+}
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "AliyunConfig")
+class AliyunConfig extends ApiConfig {
+  @XmlAttribute(name = "arn")
+  var arn: String = _
 }
