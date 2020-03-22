@@ -2,6 +2,9 @@ spring:
   jackson:
     property-naming-strategy:   SNAKE_CASE
     default-property-inclusion: NON_NULL
+    parser:
+      ALLOW_SINGLE_QUOTES: true
+      ALLOW_UNQUOTED_FIELD_NAMES: true
 
 logging:
   level:

@@ -1,5 +1,7 @@
 package reward.pages
 
+import com.fasterxml.jackson.core.JsonParseException
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,16 +29,21 @@ import scala.collection.JavaConversions._
 @Validated
 @Secured(Array(RewardConstants.ROLE_ADMIN))
 class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRecordPageableSupport{
+  @Autowired
+  private val objectMapper:ObjectMapper = null
 
   @PostMapping(value=Array("/config/add"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
   @ApiOperation(value="增加配置",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @throws(classOf[JsonParseException])
   def addConfig(
                  @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String,
                  @ApiParam(value="配置的值",required = true) @RequestParam(required = true) value:String
               ):AppConfig={
+//    objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
+    val jsonNode = objectMapper.readTree(value)
     val appConfig = new AppConfig
     appConfig.key = key
-    appConfig.value = value
+    appConfig.value = jsonNode.toPrettyString
     appConfig.createdAt = DateTime.now()
     appConfig.save
   }
