@@ -1,5 +1,6 @@
 package reward.entities
 
+import com.fasterxml.jackson.annotation.JsonRawValue
 import io.swagger.annotations.ApiModel
 import javax.persistence.{Column, Entity, Id, Table}
 import org.joda.time.DateTime
@@ -19,6 +20,7 @@ class AppConfig extends ActiveRecord{
   @Column(name="config_key")
   var key:String = _
   @Column(name="config_value")
+  @JsonRawValue
   var value:String = _
   @Column
   var createdAt:DateTime = _
