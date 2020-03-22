@@ -4,6 +4,7 @@ import io.swagger.annotations._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
+import org.springframework.http.MediaType
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
@@ -27,6 +28,25 @@ import scala.collection.JavaConversions._
 @Secured(Array(RewardConstants.ROLE_ADMIN))
 class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRecordPageableSupport{
 
+  @PostMapping(value=Array("/config/add"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+  @ApiOperation(value="增加配置",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def addConfig(
+                 @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String,
+                 @ApiParam(value="配置的值",required = true) @RequestParam(required = true) value:String
+              ):AppConfig={
+    val appConfig = new AppConfig
+    appConfig.key = key
+    appConfig.value = value
+    appConfig.createdAt = DateTime.now()
+    appConfig.createdAt = DateTime.now()
+    appConfig.save
+  }
+  @PostMapping(Array("/config/delete"))
+  @ApiOperation(value="删除配置信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def deleteAppConfig(
+                       @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String):Unit={
+    delete[AppConfig] where AppConfig.key === key execute
+  }
   @GetMapping(Array("/aliyun/oss"))
   @ApiOperation(value="得到操作阿里云的临时token",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def getOssAccess={
