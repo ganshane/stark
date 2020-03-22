@@ -1,5 +1,7 @@
 package reward.internal
 
+import java.util.concurrent.TimeUnit
+
 import com.taobao.api.request.TbkOrderDetailsGetRequest
 import com.taobao.api.response.TbkOrderDetailsGetResponse
 import org.joda.time.DateTime
@@ -74,6 +76,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
         while(it.hasNext){
           taobaoService.createOrUpdateOrder(it.next)
         }
+        //休息一秒，避免限流
+        Thread.sleep(TimeUnit.SECONDS.toMillis(2))
         if (response.getData.getHasNext) {
           //还有下一页
           req.setPageNo(response.getData.getPageNo + 1)

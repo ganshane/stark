@@ -7,7 +7,7 @@ import io.swagger.annotations.{Api, ApiOperation, ApiParam}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
-import reward.entities.{Announce, Slide}
+import reward.entities.{Announce, AppConfig, Slide}
 import reward.services.TaobaoService
 import stark.activerecord.services.DSL._
 
@@ -19,12 +19,17 @@ import scala.collection.JavaConversions._
   */
 @RestController
 @RequestMapping(Array("/public"))
-@Api(value="公共相关接口",description="公共相关接口")
+@Api(value="公共相关接口",description="公共相关接口",tags=Array("public"))
 @Validated
 class PublicController {
   @Autowired
   private val taobaoService:TaobaoService = null
-  @ApiOperation(value="消息列表")
+  @ApiOperation(value="配置列表",nickname = "config")
+  @GetMapping(Array("/config"))
+  def config():java.util.List[AppConfig]={
+    AppConfig.all.toList
+  }
+  @ApiOperation(value="消息列表",nickname = "annouce")
   @GetMapping(Array("/announces"))
   def announces():java.util.List[Announce]={
     Announce.all.toList

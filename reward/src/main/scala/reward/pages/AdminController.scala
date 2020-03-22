@@ -36,7 +36,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   @PostMapping(Array("/slide/delete"))
   @ApiOperation(value="删除轮播信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def deleteSlide(
-                      @ApiParam(value="ID",required = true) @RequestParam id:Long
+                      @ApiParam(value="ID",required = true,example = "1") @RequestParam id:Long
                     ):Unit={
     delete[Slide] where Slide.id === id execute
   }
@@ -45,7 +45,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   def addSlide(
                    @ApiParam(value="指向URL",required = false) @RequestParam url:String,
                    @ApiParam(value="轮播图片",required = true) @RequestParam img_url:String,
-                   @ApiParam(value="状态") @RequestParam status:Int
+                   @ApiParam(value="状态",example = "1") @RequestParam status:Int
                  ):Slide={
     val slide= new Slide
     slide.imgUrl= img_url
@@ -57,8 +57,8 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   @PostMapping(Array("/slide/status"))
   @ApiOperation(value="消息列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def updateStatus(
-                    @ApiParam(value="ID",required = true) @RequestParam id:Long,
-                    @ApiParam(value="状态",required = true) @RequestParam status:Int ):Slide={
+                    @ApiParam(value="ID",required = true,example = "1") @RequestParam id:Long,
+                    @ApiParam(value="状态",required = true,example = "1") @RequestParam status:Int ):Slide={
     val slideOpt = Slide.findOption(id)
     slideOpt match{
       case Some(slide) =>
@@ -77,7 +77,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   @PostMapping(Array("/announce/delete"))
   @ApiOperation(value="删除系统消息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def deleteAnnounce(
-                   @ApiParam(value="消息的ID",required = true) @RequestParam id:Long
+                   @ApiParam(value="消息的ID",required = true,example = "1") @RequestParam id:Long
                  ):Unit={
     delete[Announce] where Announce.id === id execute
   }

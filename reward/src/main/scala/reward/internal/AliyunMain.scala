@@ -47,7 +47,7 @@ object AliyunMain {
       request.setSysMethod(MethodType.POST)
       request.setRoleArn(roleArn)
       request.setRoleSessionName(roleSessionName)
-      request.setPolicy(policy)
+//      request.setPolicy(policy)
       request.setDurationSeconds(TimeUnit.MINUTES.toSeconds(15))
       val response = client.getAcsResponse(request)
       System.out.println("Expiration: " + response.getCredentials.getExpiration)
