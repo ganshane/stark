@@ -15,7 +15,7 @@ class Migrate_202003221523_CreateAppConfig extends Migration{
   override def up(): Unit = {
     createTable("app_config"){t=>
       t.column("config_key", VarcharType,Limit(50), NotNull, PrimaryKey)
-      t.column("config_value", VarcharType,Limit(250), NotNull)
+      t.column("config_value", ClobType,NotNull)
       t.column("created_at",TimestampType,Nullable)
       t.column("updated_at",TimestampType,Nullable)
     }

@@ -38,7 +38,6 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
     appConfig.key = key
     appConfig.value = value
     appConfig.createdAt = DateTime.now()
-    appConfig.createdAt = DateTime.now()
     appConfig.save
   }
   @PostMapping(Array("/config/delete"))
