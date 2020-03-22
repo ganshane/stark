@@ -39,11 +39,10 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
                  @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String,
                  @ApiParam(value="配置的值",required = true) @RequestParam(required = true) value:String
               ):AppConfig={
-//    objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
     val jsonNode = objectMapper.readTree(value)
     val appConfig = new AppConfig
     appConfig.key = key
-    appConfig.value = jsonNode.toPrettyString
+    appConfig.value = jsonNode.toString
     appConfig.createdAt = DateTime.now()
     appConfig.save
   }
