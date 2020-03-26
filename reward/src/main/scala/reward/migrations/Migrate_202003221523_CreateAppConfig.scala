@@ -19,6 +19,8 @@ class Migrate_202003221523_CreateAppConfig extends Migration{
       t.column("created_at",TimestampType,Nullable)
       t.column("updated_at",TimestampType,Nullable)
     }
+
+//    execute("insert into app_config(config_key,config_value) values('global_config','{''audit_version'':''1.1.0''}'")
   }
 
   /**

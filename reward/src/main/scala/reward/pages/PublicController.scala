@@ -42,17 +42,17 @@ class PublicController {
   }
 
   @PostMapping(value=Array("/tpwd"))
-  @ApiOperation(value="获得淘口令,API见:https://open.taobao.com/api.htm?spm=a219a.7386797.0.0.32e2669a2mpupt&source=search&docId=31127&docType=2")
+  @ApiOperation(value="转链")
   @throws(classOf[ApiException])
   def createTwpd(
                @RequestParam(required = true)
-               @ApiParam(value="口令弹框内容",required = true)
+               @ApiParam(value="内容",required = true)
                text:String,
                @RequestParam(required = true)
-               @ApiParam(value="口令跳转目标页",required = true)
+               @ApiParam(value="目标页",required = true)
                url:String,
                @RequestParam
-               @ApiParam(value="口令弹框logoURL")
+               @ApiParam(value="logoURL")
                logo:String
                ):TbkTpwdCreateResponse.MapData= {
     val req = new TbkTpwdCreateRequest

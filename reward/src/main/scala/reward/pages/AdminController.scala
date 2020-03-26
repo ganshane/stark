@@ -126,7 +126,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
 
 
   @GetMapping(Array("/orders/tbk"))
-  @ApiOperation(value="获取淘宝客中的订单",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiOperation(value="获取订单",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
       value = "抓取的页数(0..N)"),

@@ -89,6 +89,11 @@
 
     <dependency>
       <groupId>com.ganshane.specs</groupId>
+      <artifactId>pop-sdk</artifactId>
+      <version>20200325</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ganshane.specs</groupId>
       <artifactId>taobao-sdk</artifactId>
       <version>20200313</version>
     </dependency>
