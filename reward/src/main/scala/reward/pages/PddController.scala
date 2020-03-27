@@ -88,8 +88,8 @@ class PddController {
               @RequestParam(defaultValue = "0",required = true)
               @ApiParam(value="商品ID",defaultValue = "0",example = "0",required = true)
               itemid:String,
-              @RequestParam(defaultValue = "0")
-              @ApiParam(value="搜索id",defaultValue = "0",example = "0")
+              @RequestParam(defaultValue = "0",required = false)
+              @ApiParam(value="搜索id",defaultValue = "0",example = "0",required = false)
               searchId:String
             ): MockHandankuResponse[HaodankuGoods] ={
     val request = new PddDdkGoodsDetailRequest()
@@ -112,7 +112,6 @@ class PddController {
     data.itemsale = detail.getSalesTip
     data.itemprice = String.valueOf(detail.getMinGroupPrice/100)
     data.shopname = detail.getMallName
-    data.shoptype = "C"
     data.itemendprice = String.valueOf((detail.getMinGroupPrice - detail.getCouponDiscount)/100)
     data.itempic = detail.getGoodsImageUrl
     data.itemid = detail.getGoodsId
@@ -137,12 +136,22 @@ class PddController {
               cid:Int,
               @RequestParam(defaultValue = "0")
               @ApiParam(value="分页使用",defaultValue = "0",example = "0")
-              min_id:Long
+              min_id:Long,
+              @RequestParam(defaultValue = "0")
+              @ApiParam(value="排序",defaultValue = "0",example = "0")
+              sort_type:Int,
+              @RequestParam(required = false)
+              @ApiParam(value="活动类别",example = "[0]",allowMultiple = true,required = false)
+              activity_tags:Array[java.lang.Integer]
             ): MockHandankuResponse[Array[HaodankuGoods]] ={
     val request = new PddDdkGoodsSearchRequest()
     if(!StringUtils.isEmpty(keyword)) request.setKeyword(keyword)
     request.setOptId(optMapping.getOrElse(cid,0).toLong)
     request.setListId(min_id.toString)
+    request.setSortType(sort_type)
+    if(activity_tags != null)
+      request.setActivityTags(activity_tags.toList)
+
     val response = client.syncInvoke(request)
     val list = response.getGoodsSearchResponse.getGoodsList
     val haodankuResponse = new MockHandankuResponse[Array[HaodankuGoods]]
@@ -154,7 +163,7 @@ class PddController {
       goods.itemsale = g.getSalesTip
       goods.itemprice = String.valueOf(g.getMinGroupPrice/100)
       goods.shopname = g.getMallName
-      goods.shoptype = "C"
+      goods.shoptype = g.getMerchantType.toString
       goods.itemendprice = String.valueOf((g.getMinGroupPrice - g.getCouponDiscount)/100)
       goods.itempic = g.getGoodsImageUrl
       goods.itemid = g.getGoodsId
