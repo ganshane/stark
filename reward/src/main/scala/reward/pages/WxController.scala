@@ -4,6 +4,7 @@ import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo
 import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl
 import io.swagger.annotations.{Api, ApiParam}
+import me.chanjar.weixin.common.bean.WxAccessToken
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -63,11 +64,13 @@ class WxController {
           //update user info
           user.nickName= wxUser.getNickName
           user.avatar = wxUser.getAvatarUrl
+          user.unionId = wxUser.getUnionId
           user.save()
         }
         case _ => //没找到则进行注册
           val user= new User
           user.openId= wxUser.getOpenId
+          user.unionId = wxUser.getUnionId
           user.nickName= wxUser.getNickName
           user.avatar = wxUser.getAvatarUrl
           user.createdAt = DateTime.now
@@ -108,5 +111,12 @@ class WxController {
     }
     // 解密
     weixinPopular.getUserService.getPhoneNoInfo(sessionKey, encryptedData, iv)
+  }
+  @GetMapping(Array("/access_token"))
+  def accessToken(): WxAccessToken= {
+    val accessToken = weixinPopular.getAccessToken
+    val token=new WxAccessToken
+    token.setAccessToken(accessToken)
+    token
   }
 }

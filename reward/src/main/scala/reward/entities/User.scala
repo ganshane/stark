@@ -25,6 +25,8 @@ class User extends ActiveRecord{
   @ApiModelProperty(value="微信的用户OpenId",example = "xxxsssxx")
   var openId:String= _
   @Column
+  var unionId:String= _
+  @Column
   var nickName:String= _
   @Column
   var avatar:String= _

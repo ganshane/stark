@@ -108,11 +108,11 @@ class PddController {
 
     val data = new HaodankuGoods
     data.itemtitle = detail.getGoodsName
-    data.couponmoney = String.valueOf(detail.getCouponDiscount/100)
+    data.couponmoney = String.valueOf(detail.getCouponDiscount/100.0)
     data.itemsale = detail.getSalesTip
-    data.itemprice = String.valueOf(detail.getMinGroupPrice/100)
+    data.itemprice = String.valueOf(detail.getMinGroupPrice/100.0)
     data.shopname = detail.getMallName
-    data.itemendprice = String.valueOf((detail.getMinGroupPrice - detail.getCouponDiscount)/100)
+    data.itemendprice = String.valueOf((detail.getMinGroupPrice - detail.getCouponDiscount)/100.0)
     data.itempic = detail.getGoodsImageUrl
     data.itemid = detail.getGoodsId
 
@@ -159,12 +159,12 @@ class PddController {
     val data = list.map(g=>{
       val goods = new HaodankuGoods
       goods.itemtitle = g.getGoodsName
-      goods.couponmoney = String.valueOf(g.getCouponDiscount/100)
+      goods.couponmoney = String.valueOf(g.getCouponDiscount/100.0)
       goods.itemsale = g.getSalesTip
-      goods.itemprice = String.valueOf(g.getMinGroupPrice/100)
+      goods.itemprice = String.valueOf(g.getMinGroupPrice/100.0)
       goods.shopname = g.getMallName
       goods.shoptype = g.getMerchantType.toString
-      goods.itemendprice = String.valueOf((g.getMinGroupPrice - g.getCouponDiscount)/100)
+      goods.itemendprice = String.valueOf((g.getMinGroupPrice - g.getCouponDiscount)/100.0)
       goods.itempic = g.getGoodsImageUrl
       goods.itemid = g.getGoodsId
       goods.search_id = g.getSearchId
