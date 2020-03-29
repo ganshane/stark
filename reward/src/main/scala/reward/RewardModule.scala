@@ -2,11 +2,14 @@ package reward
 
 import java.net.InetAddress
 
+import cn.binarywang.wx.miniapp.api.WxMaService
+import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
+import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl
 import com.fasterxml.jackson.databind.Module
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import javax.sql.DataSource
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
@@ -14,7 +17,7 @@ import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 import reward.config.RewardConfig
-import reward.internal.{UserServiceImpl, StarkConfigFileUtils}
+import reward.internal.{StarkConfigFileUtils, UserServiceImpl}
 import reward.pages.UserController
 import reward.services.ApiSecurity
 import springfox.documentation.builders.ApiInfoBuilder
@@ -44,6 +47,17 @@ object RewardModule{
 })
 @Import(Array(classOf[StarkActiveRecordModule]))
 class RewardModule {
+  @Bean
+  def build(@Autowired rewardConfig: RewardConfig): WxMaService ={
+      val config= new WxMaDefaultConfigImpl()
+      config.setAppid(rewardConfig.wechat.id)
+      config.setSecret(rewardConfig.wechat.secret)
+      //    config.setAppid("wx72d1f13b506075a9")
+      //    config.setSecret("264a825790d4ba9cedf23e87725112ff")
+      val s = new WxMaServiceImpl()
+      s.setWxMaConfig(config)
+    s
+  }
   @Bean
   def buildRewardConfig(@Value(RewardConstants.SERVER_HOME_KEY) serverHome: String): RewardConfig={
     RewardModule.buildRewardConfig(serverHome)
