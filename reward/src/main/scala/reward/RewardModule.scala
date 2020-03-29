@@ -1,6 +1,7 @@
 package reward
 
 import java.net.InetAddress
+import java.util
 
 import cn.binarywang.wx.miniapp.api.WxMaService
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy}
+import org.springframework.http.converter.{BufferedImageHttpMessageConverter, HttpMessageConverter}
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
 import reward.config.RewardConfig
@@ -104,6 +106,10 @@ class RewardModule {
     override def addCorsMappings(registry: CorsRegistry): Unit = {
       registry.addMapping("/**").allowedOrigins("*")
         .allowedMethods("HEAD", "GET", "PUT", "POST", "DELETE", "PATCH")
+    }
+
+    override def configureMessageConverters(converters: util.List[HttpMessageConverter[_]]): Unit = {
+      converters.add(new BufferedImageHttpMessageConverter)
     }
   }
   @Bean

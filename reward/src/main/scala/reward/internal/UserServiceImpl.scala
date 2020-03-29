@@ -18,6 +18,7 @@ import stark.activerecord.services.DSL._
 import stark.utils.services.LoggerSupport
 
 import scala.collection.JavaConversions._
+import scala.util.Random
 
 /**
   * 用户服务类
@@ -142,7 +143,9 @@ class UserServiceImpl extends LoggerSupport with UserService {
     restTemplate.postForEntity(LC_API_BASE_URL+"requestSmsCode",requestEntity,classOf[Void])
   }
   override def generateToken(user:User):String={
-    val keySource=user.phone+user.id+System.currentTimeMillis()
+    val keySource =
+      if(user != null) user.nickName+user.id+System.currentTimeMillis()
+      else System.currentTimeMillis()+""+Random.nextLong()
     DigestUtils.md5DigestAsHex(keySource.getBytes)
   }
   private def createHeaders={

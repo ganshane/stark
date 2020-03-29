@@ -1,10 +1,15 @@
 package reward.pages
 
+import java.awt.image.BufferedImage
+import java.io.FileInputStream
+
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo
 import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl
 import io.swagger.annotations.{Api, ApiParam}
+import javax.imageio.ImageIO
 import me.chanjar.weixin.common.bean.WxAccessToken
+import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -14,6 +19,7 @@ import org.springframework.web.bind.annotation._
 import reward.config.RewardConfig
 import reward.entities.{OnlineUser, User}
 import reward.services.UserService
+import stark.activerecord.services.DSL.delete
 
 /**
   * 操作微信之类的API
@@ -41,13 +47,45 @@ class WxController {
     s.setWxMaConfig(config)
     s
   }
+  @GetMapping(value=Array("/web_login"))
+  def webLogin(): Map[String,String]={
+    //先保存临时token
+    val onlineUser = new OnlineUser
+    onlineUser.token = userService.generateToken(null)
+    onlineUser.createdAt = DateTime.now
+    onlineUser.expiredAt = DateTime.now.plusMinutes(30)
+    onlineUser.save()
+    Map("code"->onlineUser.token)
+  }
+  @GetMapping(value = Array("/qr"),produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  @ResponseBody
+  def qr(@RequestParam @ApiParam(name="code",required = true)code: String):BufferedImage={
+    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(code,"pages/search")
+    val fis = new FileInputStream(file)
+    try {
+      ImageIO.read(fis)
+    }finally{
+      IOUtils.closeQuietly(fis)
+    }
+  }
+  @GetMapping(value = Array("/qr/info"))
+  @throws(classOf[IllegalStateException])
+  def qrInfo(@RequestParam @ApiParam(name="code",required = true)code: String)={
+    val onlineUserOpt = OnlineUser.find_by_token(code).headOption
+    onlineUserOpt match{
+      case Some(ou) => ou
+      case _ => throw new IllegalStateException("not found")
+    }
+  }
 
   @PostMapping(value=Array("/login"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
   def login(@RequestParam @ApiParam(name="code",required = true)code: String,
             @RequestParam @ApiParam(name="signature",required=true) signature: String,
             @RequestParam(name="raw_data") @ApiParam(required=true) rawData: String,
             @RequestParam(name="encrypted_data") @ApiParam(required=true) encryptedData: String,
-            @RequestParam @ApiParam(name="iv",required=true) iv: String)= {
+            @RequestParam @ApiParam(name="iv",required=true) iv: String,
+            @RequestParam(required = false) @ApiParam(name="token",required=false) token: String
+           )= {
     val result = weixinPopular.jsCode2SessionInfo(code)
     val sessionKey = result.getSessionKey
     // 用户信息校验
@@ -78,19 +116,36 @@ class WxController {
       }
     }
 
-    val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
-    onlineUserOpt match{
-      case Some(ou) =>
-        ou.updatedAt= DateTime.now
-        ou.expiredAt = DateTime.now.plusMinutes(30)
-        ou.save()
-      case _ =>
-        val onlineUser = new OnlineUser
-        onlineUser.token = userService.generateToken(user)
-        onlineUser.userId = user.id
-        onlineUser.createdAt = DateTime.now
-        onlineUser.expiredAt = DateTime.now.plusMinutes(30)
-        onlineUser.save()
+    if(token == null) {
+      val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
+      onlineUserOpt match {
+        case Some(ou) =>
+          ou.updatedAt = DateTime.now
+          ou.expiredAt = DateTime.now.plusMinutes(30)
+          ou.save()
+        case _ =>
+          val onlineUser = new OnlineUser
+          onlineUser.token = userService.generateToken(user)
+          onlineUser.userId = user.id
+          onlineUser.createdAt = DateTime.now
+          onlineUser.expiredAt = DateTime.now.plusMinutes(30)
+          onlineUser.save()
+      }
+    }else {
+      val onlineUserOpt = OnlineUser.find_by_token(token).headOption
+      onlineUserOpt match {
+        case Some(ou) =>
+          //删除之前登录的用户
+          delete[OnlineUser] where OnlineUser.userId === user.id execute
+
+          ou.userId = user.id
+          ou.updatedAt = DateTime.now
+          ou.expiredAt = DateTime.now.plusMinutes(30)
+          ou.save()
+        case _ =>
+          throw new IllegalStateException("token not found")
+      }
+
     }
   }
 
