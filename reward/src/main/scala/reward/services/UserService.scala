@@ -1,7 +1,8 @@
 package reward.services
+import cn.binarywang.wx.miniapp.bean.WxMaUserInfo
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.transaction.annotation.Transactional
-import reward.entities.{Consumption, Recharge, User}
+import reward.entities.{Consumption, OnlineUser, Recharge, User}
 
 /**
   *
@@ -20,6 +21,8 @@ trait UserService {
   def sendSmsCode(phone: String): Unit
 
   def generateToken(user: User): String
+
+  def loginUser(wxUser: WxMaUserInfo, parentId:Long,token:String):OnlineUser
 
   /**
     * 定时删除过期用户

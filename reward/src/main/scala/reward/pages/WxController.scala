@@ -17,9 +17,8 @@ import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.config.RewardConfig
-import reward.entities.{OnlineUser, User}
+import reward.entities.OnlineUser
 import reward.services.UserService
-import stark.activerecord.services.DSL.delete
 
 /**
   * 操作微信之类的API
@@ -84,7 +83,8 @@ class WxController {
             @RequestParam(name="raw_data") @ApiParam(required=true) rawData: String,
             @RequestParam(name="encrypted_data") @ApiParam(required=true) encryptedData: String,
             @RequestParam @ApiParam(name="iv",required=true) iv: String,
-            @RequestParam(required = false) @ApiParam(name="token",required=false) token: String
+            @RequestParam(required = false) @ApiParam(name="token",required=false) token: String,
+            @RequestParam(name="parent_id",required = false) @ApiParam(name="parent_id",required=false,example = "1") parentId:Long
            )= {
     val result = weixinPopular.jsCode2SessionInfo(code)
     val sessionKey = result.getSessionKey
@@ -94,59 +94,7 @@ class WxController {
     }
     // 解密用户信息
     val wxUser = weixinPopular.getUserService.getUserInfo(sessionKey, encryptedData, iv)
-    //通过微信用户来找OpenId
-    lazy val user = {
-      val headOpt = User.find_by_openId(wxUser.getOpenId).headOption
-      headOpt match {
-        case Some(user) => {
-          //update user info
-          user.nickName= wxUser.getNickName
-          user.avatar = wxUser.getAvatarUrl
-          user.unionId = wxUser.getUnionId
-          user.save()
-        }
-        case _ => //没找到则进行注册
-          val user= new User
-          user.openId= wxUser.getOpenId
-          user.unionId = wxUser.getUnionId
-          user.nickName= wxUser.getNickName
-          user.avatar = wxUser.getAvatarUrl
-          user.createdAt = DateTime.now
-          user.save()
-      }
-    }
-
-    if(token == null) {
-      val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
-      onlineUserOpt match {
-        case Some(ou) =>
-          ou.updatedAt = DateTime.now
-          ou.expiredAt = DateTime.now.plusMinutes(30)
-          ou.save()
-        case _ =>
-          val onlineUser = new OnlineUser
-          onlineUser.token = userService.generateToken(user)
-          onlineUser.userId = user.id
-          onlineUser.createdAt = DateTime.now
-          onlineUser.expiredAt = DateTime.now.plusMinutes(30)
-          onlineUser.save()
-      }
-    }else {
-      val onlineUserOpt = OnlineUser.find_by_token(token).headOption
-      onlineUserOpt match {
-        case Some(ou) =>
-          //删除之前登录的用户
-          delete[OnlineUser] where OnlineUser.userId === user.id execute
-
-          ou.userId = user.id
-          ou.updatedAt = DateTime.now
-          ou.expiredAt = DateTime.now.plusMinutes(30)
-          ou.save()
-        case _ =>
-          throw new IllegalStateException("token not found")
-      }
-
-    }
+    userService.loginUser(wxUser,parentId,token)
   }
 
   /**

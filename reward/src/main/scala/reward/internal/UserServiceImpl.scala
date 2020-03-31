@@ -3,7 +3,7 @@ package reward.internal
 import java.util.Collections
 
 import cn.binarywang.wx.miniapp.api.WxMaService
-import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage
+import cn.binarywang.wx.miniapp.bean.{WxMaSubscribeMessage, WxMaUserInfo}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
@@ -32,6 +32,92 @@ class UserServiceImpl extends LoggerSupport with UserService {
   private val LC_API_BASE_URL="https://leancloud.cn/1.1/"
   @Autowired
   private val weixinPopular:WxMaService = null
+
+
+  @Transactional
+  override def loginUser(wxUser: WxMaUserInfo, parentId: Long, token: String): OnlineUser = {
+    //通过微信用户来找OpenId
+    lazy val user = {
+      val headOpt = User.find_by_openId(wxUser.getOpenId).headOption
+      headOpt match {
+        case Some(user) => {
+          //update user info
+          user.nickName= wxUser.getNickName
+          user.avatar = wxUser.getAvatarUrl
+          user.unionId = wxUser.getUnionId
+          user.save()
+        }
+        case _ => //没找到则进行注册
+          val user= new User
+          user.openId= wxUser.getOpenId
+          user.unionId = wxUser.getUnionId
+          user.nickName= wxUser.getNickName
+          user.avatar = wxUser.getAvatarUrl
+          user.createdAt = DateTime.now
+          user.save()
+          if(parentId > 0) { //大于0的合理用户
+            //查询爷节点
+            val grandpaOpt = UserRelation
+              .find_by_userId(parentId)
+              .orderBy(UserRelation.level[Int].asc)
+              .limit(1).headOption
+            //保存爷节点关系
+            grandpaOpt match {
+              case Some(grandpa) =>
+                val ur = new UserRelation
+                ur.level = 2
+                ur.userId = user.id
+                ur.parentId = grandpa.userId
+                ur.createdAt = DateTime.now
+                ur.save()
+              case _ =>
+            }
+            //保存父节点关系
+            val ur = new UserRelation
+            ur.level = 1
+            ur.userId = user.id
+            ur.parentId = parentId
+            ur.createdAt = DateTime.now
+            ur.save()
+          }
+
+          user
+      }
+    }
+
+    if(token == null) { //正常用户登录
+      val onlineUserOpt = OnlineUser.find_by_userId(user.id).headOption
+      onlineUserOpt match {
+        case Some(ou) =>
+          ou.updatedAt = DateTime.now
+          ou.expiredAt = DateTime.now.plusMinutes(30)
+          ou.save()
+        case _ =>
+          val onlineUser = new OnlineUser
+          onlineUser.token = generateToken(user)
+          onlineUser.userId = user.id
+          onlineUser.createdAt = DateTime.now
+          onlineUser.expiredAt = DateTime.now.plusMinutes(30)
+          onlineUser.save()
+      }
+    }else {//网站用户登录
+      val onlineUserOpt = OnlineUser.find_by_token(token).headOption
+      onlineUserOpt match {
+        case Some(ou) =>
+          //删除之前登录的用户
+          delete[OnlineUser] where OnlineUser.userId === user.id execute
+
+          ou.userId = user.id
+          ou.updatedAt = DateTime.now
+          ou.expiredAt = DateTime.now.plusMinutes(30)
+          ou.save()
+        case _ =>
+          throw new IllegalStateException("token not found")
+      }
+
+    }
+
+  }
 
   @Transactional
   override def recharge(cardNo:String,cardSecret:String,user:User): Recharge ={
