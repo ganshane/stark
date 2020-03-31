@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import com.taobao.api.ApiException
 import com.taobao.api.request.TbkTpwdCreateRequest
 import com.taobao.api.response.TbkTpwdCreateResponse
-import io.swagger.annotations.{Api, ApiOperation, ApiParam}
+import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.annotation.Secured
@@ -66,8 +66,8 @@ class PublicController {
     coll.toList
   }
   @GetMapping(value=Array("/pid"))
-  @ApiOperation(value="得到PID")
   @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiOperation(value="得到随机PID",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def getPid(@AuthenticationPrincipal user:User):Map[String,String]={
     val pid = pids.poll()
     try{
