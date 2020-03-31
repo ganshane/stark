@@ -84,7 +84,7 @@ class WxController {
             @RequestParam(name="encrypted_data") @ApiParam(required=true) encryptedData: String,
             @RequestParam @ApiParam(name="iv",required=true) iv: String,
             @RequestParam(required = false) @ApiParam(name="token",required=false) token: String,
-            @RequestParam(name="parent_id",required = false) @ApiParam(name="parent_id",required=false,example = "1") parentId:Long
+            @RequestParam(name="parent_id",required = false,defaultValue = "0") @ApiParam(name="parent_id",required=false,example = "1",defaultValue = "0") parentId:Long
            )= {
     val result = weixinPopular.jsCode2SessionInfo(code)
     val sessionKey = result.getSessionKey

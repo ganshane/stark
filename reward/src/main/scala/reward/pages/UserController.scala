@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{OnlineUser, User, UserAmount}
+import reward.entities.{OnlineUser, User, UserAmount, UserRelation}
 import reward.services.UserService
 import stark.activerecord.services.DSL._
 
@@ -66,6 +66,22 @@ class UserController {
         onlineUser.expiredAt = DateTime.now.plusMinutes(30)
         onlineUser.save()
     }
+  }
+  @GetMapping(Array("/son"))
+  @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def son(@AuthenticationPrincipal user:User): List[User]={
+    //等级为1
+    val urs = select[UserRelation] where UserRelation.parentId === user.id and UserRelation.level === 1
+    urs.map(ur=>User.find(ur.userId)).toList
+  }
+  @GetMapping(Array("/grandson"))
+  @ApiOperation(value="得到孙子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def grandson(@AuthenticationPrincipal user:User): List[User]={
+    //等级为1
+    val urs = select[UserRelation] where UserRelation.parentId === user.id and UserRelation.level === 2
+    urs.map(ur=>User.find(ur.userId)).toList
   }
   @PostMapping(Array("/logout"))
   @ApiOperation(value="登出",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
