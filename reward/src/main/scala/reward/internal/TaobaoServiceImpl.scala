@@ -59,9 +59,8 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
     taobaoOrder.save
   }
 
+  private val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMATE)
   def copyProperties(taobaoPublisherOrder: TaobaoPublisherOrder,t:PublisherOrderDto): TaobaoPublisherOrder={
-    val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMATE)
-
     taobaoPublisherOrder.adzoneId = t.getAdzoneId
     taobaoPublisherOrder.adzoneName = t.getAdzoneName
     taobaoPublisherOrder.alimamaRate = t.getAlimamaRate
@@ -69,7 +68,8 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
     taobaoPublisherOrder.alipayTotalPrice = t.getAlipayTotalPrice
     taobaoPublisherOrder.alscId = t.getAlscId
     taobaoPublisherOrder.alscPid = t.getAlscPid
-    taobaoPublisherOrder.clickTime = t.getClickTime
+    if(!StringUtils.isEmpty(t.getClickTime))
+      taobaoPublisherOrder.clickTime = DateTime.parse(t.getClickTime,format)
     taobaoPublisherOrder.depositPrice = t.getDepositPrice
     taobaoPublisherOrder.flowSource = t.getFlowSource
     taobaoPublisherOrder.incomeRate = t.getIncomeRate

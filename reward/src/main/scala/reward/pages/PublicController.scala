@@ -1,13 +1,19 @@
 package reward.pages
 
+import java.util.concurrent.ConcurrentLinkedQueue
+
 import com.taobao.api.ApiException
 import com.taobao.api.request.TbkTpwdCreateRequest
 import com.taobao.api.response.TbkTpwdCreateResponse
 import io.swagger.annotations.{Api, ApiOperation, ApiParam}
+import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
-import reward.entities.{Announce, AppConfig, Slide}
+import reward.RewardConstants
+import reward.entities._
 import reward.services.TaobaoService
 import stark.activerecord.services.DSL._
 
@@ -22,6 +28,25 @@ import scala.collection.JavaConversions._
 @Api(value="公共相关接口",description="公共相关接口",tags=Array("public"))
 @Validated
 class PublicController {
+  private val pids={
+    val queue = new ConcurrentLinkedQueue[String]()
+    queue.add("mm_19052242_1281300405_110017350452")
+    queue.add("mm_19052242_1281300405_110000500297")
+    queue.add("mm_19052242_46684975_1462922473")
+    queue.add("mm_19052242_41320452_173980872")
+    queue.add("mm_19052242_1448550179_110174750498")
+    queue.add("mm_19052242_1448550179_110175550479")
+    queue.add("mm_19052242_1448550179_110176650402")
+    queue.add("mm_19052242_1448550179_110177550353")
+    queue.add("mm_19052242_1448550179_110178450338")
+    queue.add("mm_19052242_1448550179_110178600343")
+    queue.add("mm_19052242_1448550179_110180550239")
+    queue.add("mm_19052242_1448550179_110181700178")
+    queue.add("mm_19052242_1448550179_110182550140")
+    queue.add("mm_19052242_1448550179_110182900162")
+
+    queue
+  }
   @Autowired
   private val taobaoService:TaobaoService = null
   @ApiOperation(value="配置列表",nickname = "config")
@@ -40,7 +65,22 @@ class PublicController {
     val coll = select[Slide] where Slide.status[Int] > 0
     coll.toList
   }
-
+  @GetMapping(value=Array("/pid"))
+  @ApiOperation(value="得到PID")
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def getPid(@AuthenticationPrincipal user:User):Map[String,String]={
+    val pid = pids.poll()
+    try{
+      val tr=new TraceOrder
+      tr.pid = pid
+      tr.user_id = user.id
+      tr.createdAt= DateTime.now
+      tr.save()
+      Map[String,String]("pid"->pid)
+    }finally{
+      pids.offer(pid)
+    }
+  }
   @PostMapping(value=Array("/tpwd"))
   @ApiOperation(value="转链")
   @throws(classOf[ApiException])

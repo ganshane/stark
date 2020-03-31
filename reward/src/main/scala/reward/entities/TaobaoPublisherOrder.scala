@@ -29,7 +29,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="alsc_pid")
   var alscPid:String = _
   @Column(name="click_time")
-  var clickTime:String = _
+  var clickTime:DateTime = _
   @Column(name="deposit_price")
   var depositPrice:String = _
   @Column(name="flow_source")
