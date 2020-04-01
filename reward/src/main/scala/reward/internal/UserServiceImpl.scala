@@ -67,7 +67,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
                 val ur = new UserRelation
                 ur.level = 2
                 ur.userId = user.id
-                ur.parentId = grandpa.userId
+                ur.parentId = grandpa.parentId
                 ur.createdAt = DateTime.now
                 ur.save()
               case _ =>
