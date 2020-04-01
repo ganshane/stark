@@ -6,18 +6,21 @@ import java.io.FileInputStream
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo
 import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl
-import io.swagger.annotations.{Api, ApiParam}
+import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
 import javax.imageio.ImageIO
 import me.chanjar.weixin.common.bean.WxAccessToken
 import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.security.access.annotation.Secured
 import org.springframework.security.authentication.AccountExpiredException
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
+import reward.RewardConstants
 import reward.config.RewardConfig
-import reward.entities.OnlineUser
+import reward.entities.{OnlineUser, User}
 import reward.services.UserService
 
 /**
@@ -76,8 +79,22 @@ class WxController {
       case _ => throw new IllegalStateException("not found")
     }
   }
+  @GetMapping(value = Array("/promotion/qr"),produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  @ResponseBody
+  @ApiOperation(value="得到自己的推广码",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def promotionQr(@AuthenticationPrincipal user:User): BufferedImage ={
+    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(user.id.toString,"pages/search")
+    val fis = new FileInputStream(file)
+    try {
+      ImageIO.read(fis)
+    }finally{
+      IOUtils.closeQuietly(fis)
+    }
+  }
 
   @PostMapping(value=Array("/login"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
+  @throws(classOf[Throwable])
   def login(@RequestParam @ApiParam(name="code",required = true)code: String,
             @RequestParam @ApiParam(name="signature",required=true) signature: String,
             @RequestParam(name="raw_data") @ApiParam(required=true) rawData: String,

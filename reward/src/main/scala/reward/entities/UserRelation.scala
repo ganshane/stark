@@ -1,7 +1,6 @@
 package reward.entities
 
-import com.fasterxml.jackson.annotation.JsonIgnore
-import javax.persistence.{Column, Entity, Id, Table}
+import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
@@ -14,8 +13,8 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 @Table(name = "user_relation")
 class UserRelation extends ActiveRecord{
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
-  @JsonIgnore
   var id:Long= _
   var level:Int= _
   var userId:Long=_
