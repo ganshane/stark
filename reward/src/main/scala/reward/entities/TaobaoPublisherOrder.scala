@@ -123,7 +123,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   var totalCommissionRate:String = _
   @Id
   @Column(name="trade_id")
-  var tradeId:String = _
+  var tradeId:Long= _
   @Column(name="trade_parent_id")
   var tradeParentId:String = _
   @Column(name="unid")

@@ -91,7 +91,7 @@ class H2DatabaseAdapter(override val schemaNameOpt: Option[String])
       .append(quoteTableName(schemaNameOpt, columnDefinition.getTableName))
       .append(" MODIFY COLUMN ")
       .append(quoteColumnName(columnDefinition.getColumnName))
-      .append(columnDefinition.toSql)
+      .append(" "+columnDefinition.toSql)
       .toString
   }
 

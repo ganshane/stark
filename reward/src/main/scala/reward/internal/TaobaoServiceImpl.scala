@@ -48,7 +48,7 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
   }
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
-    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId)
+    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId.toLong)
     val taobaoOrder = taobaoOrderOpt match{
       case Some(taobaoOrderEntity) =>
         copyProperties(taobaoOrderEntity,originOrder)
@@ -56,7 +56,7 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
         copyProperties(new TaobaoPublisherOrder,originOrder)
     }
     taobaoOrder.save()
-    val tradeId = taobaoOrder.tradeId.toLong
+    val tradeId = taobaoOrder.tradeId
     val userOrderOption = UserOrder.find_by_tradeId(tradeId).headOption
     userOrderOption match {
       case Some(x) => //已经有订单匹配
@@ -136,8 +136,9 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
     taobaoPublisherOrder.tkTotalRate = t.getTkTotalRate
     taobaoPublisherOrder.totalCommissionFee = t.getTotalCommissionFee
     taobaoPublisherOrder.totalCommissionRate = t.getTotalCommissionRate
-    if(StringUtils.isEmpty(taobaoPublisherOrder.tradeId))
-      taobaoPublisherOrder.tradeId = t.getTradeId
+    //主键
+    taobaoPublisherOrder.tradeId = t.getTradeId.toLong
+
     taobaoPublisherOrder.tradeParentId = t.getTradeParentId
     taobaoPublisherOrder.unid = t.getUnid
 

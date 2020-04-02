@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{OnlineUser, User, UserAmount, UserRelation}
+import reward.entities._
 import reward.services.UserService
 import stark.activerecord.services.DSL._
 
@@ -66,6 +66,13 @@ class UserController {
         onlineUser.expiredAt = DateTime.now.plusMinutes(30)
         onlineUser.save()
     }
+  }
+  @GetMapping(Array("/orders"))
+  @ApiOperation(value="得到自己的订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def orders(@AuthenticationPrincipal user:User): List[TaobaoPublisherOrder]={
+    val uos = UserOrder where UserOrder.userId === user.id  orderBy UserOrder.traceTime[DateTime].desc
+    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId)).toList
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
