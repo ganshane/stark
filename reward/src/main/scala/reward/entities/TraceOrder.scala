@@ -17,7 +17,7 @@ class TraceOrder extends ActiveRecord{
   @Column
   @JsonIgnore
   var id:Long= _
-  var user_id:Long = _
+  var userId:Long = _
   var pid:String = _
   var createdAt:DateTime= _
 }

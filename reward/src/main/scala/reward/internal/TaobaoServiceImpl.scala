@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
-import reward.entities.TaobaoPublisherOrder
+import reward.entities.{TaobaoPublisherOrder, TraceOrder, UserOrder}
 import reward.services.TaobaoService
 
 /**
@@ -55,8 +55,25 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
       case _ =>
         copyProperties(new TaobaoPublisherOrder,originOrder)
     }
-    println(taobaoOrder.tkCreateTime,taobaoOrder.totalCommissionRate)
-    taobaoOrder.save
+    taobaoOrder.save()
+    val tradeId = taobaoOrder.tradeId.toLong
+    val userOrderOption = UserOrder.find_by_tradeId(tradeId).headOption
+    userOrderOption match {
+      case Some(x) => //已经有订单匹配
+      case None =>
+        val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
+        val coll = TraceOrder where TraceOrder.pid === pid and TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy TraceOrder.createdAt[DateTime].desc limit 1
+        coll.headOption match {
+          case Some(traceOrder) =>
+            val userOrder = new UserOrder
+            userOrder.clickTime = taobaoOrder.clickTime
+            userOrder.traceTime = traceOrder.createdAt
+            userOrder.userId = traceOrder.userId
+            userOrder.tradeId = tradeId
+            userOrder.save()
+          case _ =>
+        }
+    }
   }
 
   private val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMATE)

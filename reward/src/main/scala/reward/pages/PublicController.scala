@@ -54,7 +54,7 @@ class PublicController {
     try{
       val tr=new TraceOrder
       tr.pid = pid
-      tr.user_id = user.id
+      tr.userId = user.id
       tr.createdAt= DateTime.now
       tr.save()
       Map[String,String]("pid"->pid)

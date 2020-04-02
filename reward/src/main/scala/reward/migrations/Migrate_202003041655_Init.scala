@@ -22,7 +22,7 @@ class Migrate_202003041655_Init extends Migration{
         alter table user change nick_name nick_name varchar(50) character set utf8mb4   collate utf8mb4_unicode_ci ;
        */
       t.column("nick_name", VarcharType,Limit(50), Nullable)
-      t.column("avatar", VarcharType, Limit(200), Nullable,Unique)
+      t.column("avatar", VarcharType, Limit(200), Nullable)
       t.column("relation_id", VarcharType, Limit(30), Nullable)
       t.column("invitation_id", VarcharType, Limit(20), Nullable)
       t.column("alipay", VarcharType, Limit(50))
