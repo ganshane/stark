@@ -18,7 +18,7 @@ object Condition{
 
   private def findFieldPath[T](name:String):Path[T]={
     if(DSL.joinContext.value != null){
-      DSL.joinContext.value.joinRoot.get(name)
+      DSL.joinContext.value.join.get(name)
     }else{
       DSL.dslContext.value.root.get(name)
     }

@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities._
+import reward.entities.{UserOrder, _}
 import reward.services.UserService
 import stark.activerecord.services.DSL._
 
@@ -68,11 +68,16 @@ class UserController {
     }
   }
   @GetMapping(Array("/orders"))
-  @ApiOperation(value="得到自己的订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiOperation(value="得到自己以及下属客户订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
   def orders(@AuthenticationPrincipal user:User): List[TaobaoPublisherOrder]={
-    val uos = UserOrder where UserOrder.userId === user.id  orderBy UserOrder.traceTime[DateTime].desc
-    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId)).toList
+    //复杂订单查询
+    val uos = UserOrder.where
+      .join[UserRelation](UserOrder.userRelation)(UserRelation.parentId===user.id)
+      .or(UserOrder.userId===user.id)
+      .orderBy(UserOrder.traceTime[DateTime].desc)
+
+    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo.userId)).toList
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

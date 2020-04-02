@@ -11,7 +11,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "user_relation")
-class UserRelation extends ActiveRecord{
+class UserRelation extends ActiveRecord with Serializable{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column

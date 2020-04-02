@@ -29,7 +29,7 @@ object DSL {
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])
   //Join Query Context
-  private[activerecord] case class JoinQueryContext(joinRoot:Path[_])
+  private[activerecord] case class JoinQueryContext(joinRoot:Path[_],join:Join[_,_])
 
   /**
     *  select method
@@ -126,9 +126,10 @@ class ConditionClause[R](implicit val context: QueryContext) extends ConditionsG
     }
     this
   }
-  def join[F](field:Field[F])(fun: =>Condition):this.type={
+  def join[F](field:Field[F],joinType: JoinType=JoinType.LEFT)(fun: =>Condition):this.type={
     DSL.dslContext.withValue(context){
-      val joinContext = JoinQueryContext(context.root.get(field.fieldName))
+      val join = context.root.join(field.fieldName,joinType)
+      val joinContext = JoinQueryContext(context.root.get(field.fieldName),join)
       DSL.joinContext.withValue(joinContext) {
         val currentCondition = fun
         condition = Some(condition.fold(currentCondition) { p => context.builder.and(Array[Predicate](p, currentCondition): _*) })

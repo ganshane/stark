@@ -17,6 +17,9 @@ class UserOrder extends ActiveRecord{
   @Column
   var id:Long= _
   var userId:Long=_
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
+  var userRelation:UserRelation =_
   var tradeId:Long=_
   var traceTime:DateTime=_
   var clickTime:DateTime=_

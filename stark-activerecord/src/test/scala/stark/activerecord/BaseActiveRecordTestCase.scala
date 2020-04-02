@@ -95,6 +95,12 @@ class ModelB extends ActiveRecord{
   var id:Int = _
   var name:String = _
 
+  var testId:Int=_
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "testId",insertable = false,updatable = false)
+  var testTableJoin:ModelA = _
+
   @ManyToOne
   @JoinColumn(name="model_a_id")
   var modelA:ModelA = _

@@ -22,9 +22,13 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelA.save
     val modelB = new ModelB
     modelB.modelA = modelA
+    modelB.testId = modelA.id
     modelB.save
 
     val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 1234)
+    Assert.assertEquals(1,query2.size)
+
+    val query3 = ModelB.where.join[ModelA](ModelB.testTableJoin)(ModelA.i === 22222)
     Assert.assertEquals(1,query2.size)
   }
   @Test

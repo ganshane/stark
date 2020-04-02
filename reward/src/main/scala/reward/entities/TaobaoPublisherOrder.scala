@@ -1,7 +1,7 @@
 package reward.entities
 
 import io.swagger.annotations.ApiModelProperty
-import javax.persistence.{Column, Entity, Id, Table}
+import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
@@ -129,6 +129,13 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="unid")
   var unid:String = _
 
+  @Transient
+  var userId:Long= _
+  @Transient
+  def setUserId(userId:Long): this.type ={
+    this.userId = userId
+    this
+  }
 
 }
 
