@@ -132,8 +132,16 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Transient
   var userId:Long= _
   @Transient
-  def setUserId(userId:Long): this.type ={
-    this.userId = userId
+  var level:Int = _
+  @Transient
+  def setUserId(userOrder:UserOrder,user:User): this.type ={
+    this.userId = userOrder.userId
+    if(this.userId == user.id){
+      this.level = 0
+    }else {
+      val relations = UserRelation where UserRelation.parentId === user.id and UserRelation.userId===userOrder.userId
+      relations.foreach(x=>this.level=x.level)
+    }
     this
   }
 

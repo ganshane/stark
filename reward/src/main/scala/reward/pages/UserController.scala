@@ -77,7 +77,7 @@ class UserController {
       .or(UserOrder.userId===user.id)
       .orderBy(UserOrder.traceTime[DateTime].desc)
 
-    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo.userId)).toList
+    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo,user)).toList
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
