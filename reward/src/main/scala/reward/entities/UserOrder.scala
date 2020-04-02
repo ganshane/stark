@@ -11,15 +11,15 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "user_order")
-class UserOrder extends ActiveRecord{
+class UserOrder extends ActiveRecord with Serializable{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
   var id:Long= _
   var userId:Long=_
-  @ManyToOne(fetch = FetchType.LAZY)
+  @OneToMany(fetch = FetchType.LAZY)
   @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
-  var userRelation:UserRelation =_
+  var userRelation:java.util.List[UserRelation] =_
   var tradeId:Long=_
   var traceTime:DateTime=_
   var clickTime:DateTime=_

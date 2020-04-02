@@ -84,7 +84,7 @@ class WxController {
   @ApiOperation(value="得到自己的推广码",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
   def promotionQr(@AuthenticationPrincipal user:User): BufferedImage ={
-    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(user.id.toString,"pages/search")
+    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(user.id.toString,"pages/me/promotion")
     val fis = new FileInputStream(file)
     try {
       ImageIO.read(fis)

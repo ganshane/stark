@@ -73,7 +73,7 @@ class UserController {
   def orders(@AuthenticationPrincipal user:User): List[TaobaoPublisherOrder]={
     //复杂订单查询
     val uos = UserOrder.where
-      .join[UserRelation](UserOrder.userRelation)(UserRelation.parentId===user.id)
+      .join[java.util.List[UserRelation]](UserOrder.userRelation)(UserRelation.parentId===user.id)
       .or(UserOrder.userId===user.id)
       .orderBy(UserOrder.traceTime[DateTime].desc)
 
