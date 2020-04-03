@@ -86,6 +86,7 @@ class RewardModule {
     hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
     hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
     hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+    hikariConfig.setMinimumIdle(5)
     hikariConfig.setMaximumPoolSize(15)
 
 
