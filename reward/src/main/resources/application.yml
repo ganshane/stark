@@ -17,3 +17,6 @@ logging:
       springframework:
         security: DEBUG
         web: WARN
+      hibernate:
+        SQL: debug
+
