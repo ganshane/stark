@@ -51,7 +51,7 @@ trait SystemEnvDetectorSupport {
     val it = l.iterator()
     while (it.hasNext) {
       val entry = it.next()
-      logger.info("{}={}", entry.k, entry.v)
+      logger.info("{}={}", Array[Object](entry.k, entry.v))
     }
     try {
       val runtimemxBean = ManagementFactory.getRuntimeMXBean
