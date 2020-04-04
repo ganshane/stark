@@ -2,7 +2,7 @@ package reward.services
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.transaction.annotation.Transactional
-import reward.entities.{Consumption, OnlineUser, Recharge, User}
+import reward.entities.{OnlineUser, Recharge, User}
 
 /**
   *
@@ -13,8 +13,6 @@ trait UserService {
 
   @Transactional
   def recharge(cardNo: String, cardSecret: String, user: User): Recharge
-  @Transactional
-  def consume(amount:Int, itemId:String, itemImg:String, itemLink:String,user: User): Consumption
 
   def verifySmsCode(phone: String, code: String)
 

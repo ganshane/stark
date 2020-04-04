@@ -3,7 +3,7 @@ package reward.internal
 import java.util.Collections
 
 import cn.binarywang.wx.miniapp.api.WxMaService
-import cn.binarywang.wx.miniapp.bean.{WxMaSubscribeMessage, WxMaUserInfo}
+import cn.binarywang.wx.miniapp.bean.WxMaUserInfo
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import reward.entities._
-import reward.services.UserService
+import reward.services.{UserService, WxService}
 import stark.activerecord.services.DSL._
 import stark.utils.services.LoggerSupport
 
@@ -32,6 +32,8 @@ class UserServiceImpl extends LoggerSupport with UserService {
   private val LC_API_BASE_URL="https://leancloud.cn/1.1/"
   @Autowired
   private val weixinPopular:WxMaService = null
+  @Autowired
+  private val wxService:WxService= null
 
 
   @Transactional
@@ -140,7 +142,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case Some(ua) =>
         ua.rechargeAmount += cardInDb.amount
         ua.lastRecharge = cardInDb.activatedAt
-        ua.save
+        ua.save()
       case _ =>
         val ua = new UserAmount
         ua.id = user.id
@@ -148,71 +150,10 @@ class UserServiceImpl extends LoggerSupport with UserService {
         ua.lastRecharge = cardInDb.activatedAt
         ua.save()
     }
-    try {
-      //发送消息
-      val subscribeMessage = WxMaSubscribeMessage.builder()
-        .templateId("G_qb5ozVYiGv632EnIYe_S42xKR7vT9ATSfvYoWHujQ")
-        .data(List(
-          new WxMaSubscribeMessage.Data("phrase1", "充值"),
-          new WxMaSubscribeMessage.Data("amount2", String.valueOf(cardInDb.amount)),
-          new WxMaSubscribeMessage.Data("time3", DateTime.now().toString("YYYY-MM-dd HH:mm")),
-          new WxMaSubscribeMessage.Data("amount4.", String.valueOf((userAmount.rechargeAmount - userAmount.consumptionAmount) / 100.0)),
-          new WxMaSubscribeMessage.Data("thing5", "充值")
-        ))
-        .toUser(user.openId)
-        .page("pages/discount/discountCard")
-      weixinPopular.getMsgService.sendSubscribeMsg(subscribeMessage.build())
-    }catch{
-      case e: Throwable =>
-        logger.error(e.getMessage,e)
-    }
+
+    wxService.sendRechargeMessage(user.openId,userAmount,cardInDb.amount)
 
     cardInDb
-  }
-
-
-  @Transactional
-  override def consume(amount: Int, itemId: String, itemImg: String, itemLink: String, user: User): Consumption = {
-    val consumption = new Consumption
-    consumption.userId = user.id
-    consumption.amount = amount
-    consumption.createdAt = DateTime.now
-
-    val userAmountOpt = UserAmount.findOption(user.id)
-    val userAmount = userAmountOpt match{
-      case Some(ua) =>
-        val balance=ua.rechargeAmount-ua.consumptionAmount
-        if(consumption.amount > balance)
-          throw new IllegalStateException("用户余额不足，余额为%s,需要金额为:%s".format(balance,consumption.amount))
-        consumption.createdAt = ua.lastConsume
-        consumption.save
-
-        ua.consumptionAmount += consumption.amount
-        ua.lastConsume = DateTime.now()
-        ua.save
-      case _ =>
-        throw new IllegalStateException("用户余额不足，余额为0")
-    }
-    try {
-      //发送消息
-      val subscribeMessage = WxMaSubscribeMessage.builder()
-        .templateId("G_qb5ozVYiGv632EnIYe_S42xKR7vT9ATSfvYoWHujQ")
-        .data(List(
-          new WxMaSubscribeMessage.Data("phrase1", "消费"),
-          new WxMaSubscribeMessage.Data("amount2", String.valueOf(amount/100.0)),
-          new WxMaSubscribeMessage.Data("time3", DateTime.now().toString("YYYY-MM-dd HH:mm")),
-          new WxMaSubscribeMessage.Data("amount4.", String.valueOf((userAmount.rechargeAmount - userAmount.consumptionAmount) / 100.0)),
-          new WxMaSubscribeMessage.Data("thing5", "消费")
-        ))
-        .toUser(user.openId)
-        .page("pages/discount/discountCard")
-      weixinPopular.getMsgService.sendSubscribeMsg(subscribeMessage.build())
-    }catch{
-      case e: Throwable =>
-        logger.error(e.getMessage,e)
-    }
-
-    consumption
   }
 
   override def verifySmsCode(phone:String,code: String)= {

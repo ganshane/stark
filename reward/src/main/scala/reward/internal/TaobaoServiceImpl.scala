@@ -6,8 +6,8 @@ import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
-import org.joda.time.{DateTime, Minutes}
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, Minutes}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +16,8 @@ import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.TraceOrder.TraceOrderStatus
 import reward.entities._
-import reward.services.TaobaoService
+import reward.services.{TaobaoService, WxService}
+import stark.utils.services.LoggerSupport
 
 /**
   *
@@ -24,10 +25,14 @@ import reward.services.TaobaoService
   * @since 2020-03-14
   */
 @Service
-class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
+class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   private lazy val taobaoClient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
   private lazy val endpoint = "sts.aliyuncs.com"
   private lazy val roleSessionName = "reward"
+  @Autowired
+  private val config:RewardConfig  = null
+  @Autowired
+  private val wxService:WxService= null
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
@@ -104,7 +109,8 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
               userAmount.consumptionAmount += traceOrder.couponAmount
               userAmount.lastConsume = DateTime.now
               userAmount.save()
-
+              val user = User.find(traceOrder.userId)
+              wxService.sendConsumptionMessage(user.openId,userAmount,traceOrder.couponAmount)
             }
           case _ =>
         }
