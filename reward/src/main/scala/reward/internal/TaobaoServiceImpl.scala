@@ -6,7 +6,7 @@ import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, Minutes}
 import org.joda.time.format.DateTimeFormat
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
+import reward.entities.TraceOrder.TraceOrderStatus
 import reward.entities.{TaobaoPublisherOrder, TraceOrder, UserOrder}
 import reward.services.TaobaoService
 
@@ -59,18 +60,29 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
     val tradeId = taobaoOrder.tradeId
     val userOrderOption = UserOrder.find_by_tradeId(tradeId).headOption
     userOrderOption match {
-      case Some(x) => //已经有订单匹配
+      case Some(_) => //已经有订单匹配
       case None =>
         val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
-        val coll = TraceOrder where TraceOrder.pid === pid and TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy TraceOrder.createdAt[DateTime].desc limit 1
+        val coll = TraceOrder where
+          TraceOrder.pid === pid and
+          TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
+          TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
+          TraceOrder.createdAt[DateTime].desc limit 1
         coll.headOption match {
           case Some(traceOrder) =>
-            val userOrder = new UserOrder
-            userOrder.clickTime = taobaoOrder.clickTime
-            userOrder.traceTime = traceOrder.createdAt
-            userOrder.userId = traceOrder.userId
-            userOrder.tradeId = tradeId
-            userOrder.save()
+            val minutesDiff = Minutes.minutesBetween(taobaoOrder.clickTime,traceOrder.createdAt).getMinutes
+            if(minutesDiff < 10) { //当拷贝二维码后，十分钟还未进入手机淘宝的，则忽略
+              val userOrder = new UserOrder
+              userOrder.clickTime = taobaoOrder.clickTime
+              userOrder.traceTime = traceOrder.createdAt
+              userOrder.userId = traceOrder.userId
+              userOrder.tradeId = tradeId
+              userOrder.save()
+              //同时还要更新trace_order表示这条数据已经使用
+              traceOrder.status = TraceOrderStatus.DETECTED
+              traceOrder.detectedTime = DateTime.now()
+              traceOrder.save()
+            }
           case _ =>
         }
     }

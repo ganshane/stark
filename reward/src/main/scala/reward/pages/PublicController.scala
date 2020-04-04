@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
+import reward.entities.TraceOrder.TraceOrderStatus
 import reward.entities._
 import reward.services.TaobaoService
 import stark.activerecord.services.DSL._
@@ -56,6 +57,7 @@ class PublicController {
       tr.pid = pid
       tr.userId = user.id
       tr.createdAt= DateTime.now
+      tr.status = TraceOrderStatus.NEW
       tr.save()
       Map[String,String]("pid"->pid)
     }finally{
