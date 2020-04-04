@@ -50,7 +50,11 @@ class PublicController {
   @GetMapping(value=Array("/pid"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="得到随机PID",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  def getPid(@AuthenticationPrincipal user:User):Map[String,String]={
+  def getPid(@AuthenticationPrincipal user:User,
+             @RequestParam(required = false,defaultValue = "100")
+             @ApiParam(value="优惠券金额,单位为分",required = false,example="100",defaultValue = "100")
+             coupon_amount:Int
+            ):Map[String,String]={
     val pid = pids.poll()
     try{
       val tr=new TraceOrder
@@ -58,6 +62,7 @@ class PublicController {
       tr.userId = user.id
       tr.createdAt= DateTime.now
       tr.status = TraceOrderStatus.NEW
+      tr.couponAmount = coupon_amount
       tr.save()
       Map[String,String]("pid"->pid)
     }finally{

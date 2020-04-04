@@ -1,5 +1,6 @@
 package reward.entities
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
@@ -122,7 +123,6 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="total_commission_rate")
   var totalCommissionRate:String = _
   @Id
-  @Column(name="trade_id")
   var tradeId:Long= _
   @Column(name="trade_parent_id")
   var tradeParentId:String = _
@@ -130,8 +130,10 @@ class TaobaoPublisherOrder extends ActiveRecord{
   var unid:String = _
 
   @Transient
+  @JsonProperty
   var userId:Long= _
   @Transient
+  @JsonProperty
   var level:Int = _
   @Transient
   def setUserId(userOrder:UserOrder,user:User): this.type ={

@@ -176,9 +176,6 @@ class UserServiceImpl extends LoggerSupport with UserService {
     val consumption = new Consumption
     consumption.userId = user.id
     consumption.amount = amount
-    consumption.itemId = itemId
-    consumption.itemImg = itemImg
-    consumption.itemLink = itemLink
     consumption.createdAt = DateTime.now
 
     val userAmountOpt = UserAmount.findOption(user.id)

@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.TraceOrder.TraceOrderStatus
-import reward.entities.{TaobaoPublisherOrder, TraceOrder, UserOrder}
+import reward.entities._
 import reward.services.TaobaoService
 
 /**
@@ -82,6 +82,29 @@ class TaobaoServiceImpl(@Autowired config:RewardConfig) extends TaobaoService{
               traceOrder.status = TraceOrderStatus.DETECTED
               traceOrder.detectedTime = DateTime.now()
               traceOrder.save()
+              //更新消费记录
+              val consumption = new Consumption
+              consumption.createdAt=DateTime.now()
+              consumption.amount=traceOrder.couponAmount
+              consumption.tradeId = taobaoOrder.tradeId
+              consumption.userId = traceOrder.userId
+              consumption.save()
+              //更新用户余额
+              val userAmountOpt = UserAmount.findOption(traceOrder.userId)
+              val userAmount = userAmountOpt match{
+                case Some(ua) => ua
+                case _ =>
+                  val ua = new UserAmount
+                  ua.id = traceOrder.userId
+                  ua.rechargeAmount = 0
+                  ua.consumptionAmount = 0
+                  ua
+              }
+
+              userAmount.consumptionAmount += traceOrder.couponAmount
+              userAmount.lastConsume = DateTime.now
+              userAmount.save()
+
             }
           case _ =>
         }

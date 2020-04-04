@@ -14,7 +14,6 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 @Table(name = "user_amount")
 class UserAmount extends ActiveRecord{
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     @JsonIgnore
     var id:Long= _
     @Column

@@ -20,6 +20,8 @@ class TraceOrder extends ActiveRecord{
   var id:Long= _
   var userId:Long = _
   var pid:String = _
+  //优惠券金额
+  var couponAmount:Int = _
   var createdAt:DateTime= _
   @Convert(converter = classOf[TraceOrderStatusToIntegerConverter])
   var status:TraceOrderStatus.Type = _

@@ -3,13 +3,12 @@ package reward.pages
 import io.swagger.annotations._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
-import org.springframework.http.MediaType
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{Consumption, User}
+import reward.entities.{Consumption, TaobaoPublisherOrder, User}
 import reward.services.{ActiveRecordPageableSupport, UserService}
 import springfox.documentation.annotations.ApiIgnore
 
@@ -29,6 +28,7 @@ class ConsumptionController extends ActiveRecordPageableSupport{
   @Autowired
   private val userService:UserService = null
 
+  /*
   @ApiOperation(value="消费",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @PostMapping(value=Array("/add"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
   def add(
@@ -47,6 +47,7 @@ class ConsumptionController extends ActiveRecordPageableSupport{
              @AuthenticationPrincipal user:User): Consumption ={
     userService.consume(amount,itemId,itemImg,itemLink,user)
   }
+  */
   @GetMapping(Array("/list"))
   @ApiOperation(value="消费记录列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(
@@ -59,6 +60,9 @@ class ConsumptionController extends ActiveRecordPageableSupport{
   ))
   def list(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
     val coll=Consumption.find_by_userId(user.id)
+    coll.foreach(c=>{
+      TaobaoPublisherOrder.findOption(c.tradeId).foreach(o=>c.order=o)
+    })
     pageActiveRecordsByPageable(coll,pageable)
   }
 }

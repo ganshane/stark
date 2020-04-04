@@ -1,5 +1,6 @@
 package reward.entities
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -21,12 +22,10 @@ class Consumption extends ActiveRecord{
   @Column
   var amount:Int= _
   @Column
-  var itemId:String = _
-  @Column
-  var itemImg:String = _
-  @Column
-  var itemLink:String = _
-  @Column
+  var tradeId:Long= _
+  @JsonInclude(JsonInclude.Include.NON_EMPTY)
+  @Transient
+  var order:TaobaoPublisherOrder =_
   var createdAt:DateTime = _
 }
 
