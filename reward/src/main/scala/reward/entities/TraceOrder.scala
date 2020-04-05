@@ -15,7 +15,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 @Table(name = "trace_order")
 class TraceOrder extends ActiveRecord{
   @Id
-  @Column
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   @JsonIgnore
   var id:Long= _
   var userId:Long = _

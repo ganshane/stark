@@ -4,7 +4,7 @@ import org.apache.commons.logging.LogFactory
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
-import org.springframework.security.authentication.{AuthenticationProvider, UsernamePasswordAuthenticationToken}
+import org.springframework.security.authentication.{AuthenticationCredentialsNotFoundException, AuthenticationProvider, UsernamePasswordAuthenticationToken}
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -48,8 +48,8 @@ class ApiSecurity extends WebSecurityConfigurerAdapter{
           }
           new UsernamePasswordAuthenticationToken(user,user,roles)
         }else {
-//          throw new AuthenticationCredentialsNotFoundException("用户未找到,重新登录")
-          logger.debug("user not found")
+          throw new AuthenticationCredentialsNotFoundException("用户未找到,重新登录")
+//          logger.debug("user not found")
           authentication
         }
       }
