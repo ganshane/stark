@@ -7,14 +7,17 @@ import cn.binarywang.wx.miniapp.api.WxMaService
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl
 import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl
 import com.fasterxml.jackson.databind.Module
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import javax.sql.DataSource
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory
 import org.springframework.context.annotation.{Bean, ComponentScan, Import, Lazy}
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.http.converter.{BufferedImageHttpMessageConverter, HttpMessageConverter}
 import org.springframework.scheduling.annotation.EnableScheduling
 import org.springframework.web.servlet.config.annotation.{CorsRegistry, WebMvcConfigurer}
@@ -59,6 +62,15 @@ class RewardModule {
       val s = new WxMaServiceImpl()
       s.setWxMaConfig(config)
     s
+  }
+  //避免js中的long精度丢失
+  @Bean
+  def buildJackson2ObjectMapperBuilderCustomizer:Jackson2ObjectMapperBuilderCustomizer= {
+    new Jackson2ObjectMapperBuilderCustomizer(){
+      override def customize(jacksonObjectMapperBuilder: Jackson2ObjectMapperBuilder): Unit = {
+        jacksonObjectMapperBuilder.serializerByType(classOf[Long], ToStringSerializer.instance).serializerByType(java.lang.Long.TYPE, ToStringSerializer.instance)
+      }
+    }
   }
   @Bean
   def buildRewardConfig(@Value(RewardConstants.SERVER_HOME_KEY) serverHome: String): RewardConfig={

@@ -1,5 +1,6 @@
 package reward.entities
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.persistence._
@@ -23,6 +24,7 @@ class UserOrder extends ActiveRecord with Serializable{
 //  @OneToMany(fetch = FetchType.LAZY)
 //  @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
 //  var userRelation:java.util.List[UserRelation] =_
+  @JsonProperty
   var tradeId:Long=_
 
   var traceTime:DateTime=_
@@ -39,6 +41,7 @@ object UserOrder extends ActiveRecordInstance[UserOrder]{
     val objectMapper = new ObjectMapper()
     val order = new UserOrder
     order.id=123
+    order.tradeId = 929024384375848670L
     order.withdrawStatus = UserWithdraw.WithdrawResult.CAN_APPLY
     objectMapper.writeValue(System.out,order)
   }

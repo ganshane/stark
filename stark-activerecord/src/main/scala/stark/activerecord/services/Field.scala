@@ -24,6 +24,7 @@ object Field {
   implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)
   implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)
   implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)
+  implicit def wrapEnumerationField[T <: Enumeration#Value](field: Field[T]):EnumerationField[T]= new EnumerationField(field)
 }
 trait Field[T] extends SelectionField{
   val fieldName:String
@@ -144,5 +145,19 @@ class DateTimeField(field:Field[DateTime]){
   }
   def <(value:DateTime):Condition={
     Condition.lt(field,value)
+  }
+}
+class EnumerationField[T<: Enumeration#Value](field:Field[T]){
+  def >(value:T):Condition={
+    Condition.gt(field,value)
+  }
+  def >=(value:T):Condition={
+    Condition.ge(field,value)
+  }
+  def <(value:T):Condition={
+    Condition.lt(field,value)
+  }
+  def <= (value:T):Condition={
+    Condition.le(field,value)
   }
 }

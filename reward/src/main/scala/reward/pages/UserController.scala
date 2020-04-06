@@ -98,8 +98,10 @@ class UserController extends ActiveRecordPageableSupport{
               status:Int,
               @AuthenticationPrincipal user:User,
               @ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
-    val uos = if(status > -1) {
+    val uos = if(status == WithdrawResult.CAN_APPLY.id) {
       UserOrder where UserOrder.userId === user.id and UserOrder.withdrawStatus === WithdrawResult(status) orderBy UserOrder.traceTime[DateTime].desc
+    }else if(status >= WithdrawResult.APPLY.id){
+      UserOrder where UserOrder.userId === user.id and UserOrder.withdrawStatus[WithdrawResult.Type] >= WithdrawResult(status) orderBy UserOrder.traceTime[DateTime].desc
     }else{
       UserOrder where UserOrder.userId === user.id orderBy UserOrder.traceTime[DateTime].desc
     }

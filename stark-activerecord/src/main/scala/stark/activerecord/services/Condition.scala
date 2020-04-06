@@ -1,7 +1,6 @@
 package stark.activerecord.services
 
 import javax.persistence.criteria.{Path, Predicate}
-import org.joda.time.DateTime
 import stark.activerecord.services.Condition._
 
 import scala.language.implicitConversions
@@ -43,28 +42,43 @@ object Condition{
   }
   def gt[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
-      DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),value.asInstanceOf[Number])
+      value match{
+        case v:Number =>
+          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)
+        case other:Comparable[Any] =>
+          DSL.dslContext.value.builder.greaterThan(findFieldPath(field.fieldName),other)
+      }
     )
   }
   def ge[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
-      DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),value.asInstanceOf[Number])
+      value match{
+        case v:Number =>
+          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)
+        case other:Comparable[Any] =>
+          val expression:Path[Comparable[Any]] = findFieldPath(field.fieldName) //.as(classOf[T])
+          DSL.dslContext.value.builder.greaterThanOrEqualTo(expression,other)
+      }
     )
   }
   def lt[T](field:Field[T],value:T): Condition={
-    new PredicateCondition({
-      value match{
+    new PredicateCondition(
+      value match {
         case v:Number =>
           DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)
-        case v:DateTime=>
-          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),v)
+        case other:Comparable[Any] =>
+          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),other)
       }
-    }
     )
   }
   def le[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
-      DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),value.asInstanceOf[Number])
+      value match {
+        case v: Number =>
+          DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)
+        case other: Comparable[Any] =>
+          DSL.dslContext.value.builder.lessThanOrEqualTo(findFieldPath(field.fieldName), other)
+      }
     )
   }
   def notNull[T](field:Field[T]):Condition={
