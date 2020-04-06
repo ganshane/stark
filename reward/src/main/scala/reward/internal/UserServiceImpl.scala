@@ -4,14 +4,18 @@ import java.util.Collections
 
 import cn.binarywang.wx.miniapp.api.WxMaService
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
+import org.springframework.http.{HttpEntity, HttpHeaders, HttpStatus, MediaType}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.server.ResponseStatusException
+import reward.RewardConstants
+import reward.entities.AppConfig.CommissionConfig
 import reward.entities._
 import reward.services.{UserService, WxService}
 import stark.activerecord.services.DSL._
@@ -34,7 +38,63 @@ class UserServiceImpl extends LoggerSupport with UserService {
   private val weixinPopular:WxMaService = null
   @Autowired
   private val wxService:WxService= null
+  @Autowired
+  private val objectMapper:ObjectMapper = null
 
+  @Transactional
+  override def withdraw(userOrderId:Long,currentUser: User): UserWithdraw ={
+    //1.检测是否已经存在提现记录
+    val userWithdrawOpt = UserWithdraw.find_by_userOrderId_and_userId(userOrderId,currentUser.id).headOption
+    if(userWithdrawOpt.isDefined)
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"已经提现过，请勿重复操作")
+    //2.检测订单是否存在
+    val userOrderOpt = UserOrder.findOption(userOrderId)
+    val userOrder = userOrderOpt match{
+      case Some(ua) => ua
+      case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"订单未找到")
+    }
+    //3.检测原始订单状态
+    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(userOrder.tradeId)
+    val taobaoOrder = taobaoOrderOpt match{
+      case Some(to) =>
+        // see https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
+        // 3 已付佣金
+        if(to.tkStatus != RewardConstants.TK_PAID_STATUS){
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"订单尚不能提现")
+        }
+        to
+      case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"原始订单未找到")
+    }
+    //4.检测是否存在对应佣金配置
+    val commissionConfigOpt= AppConfig.find_by_key("commission_config").headOption
+    val commissionConfig = commissionConfigOpt match{
+      case Some(cc) =>
+        objectMapper.readValue(cc.value,classOf[CommissionConfig])
+      case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"佣金配置未找到")
+    }
+    val rate = userOrder.level match {
+      case 0 => commissionConfig.level_0
+      case 1=> commissionConfig.level_1
+      case 2=> commissionConfig.level_2
+      case _ =>throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"错误的用户等级")
+    }
+    //5.申请提现
+    val userWithdraw = new UserWithdraw
+    userWithdraw.amount = (rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
+    userWithdraw.level = userOrder.level
+    //红包订单ID,原始订单ID和当前用户的id
+    userWithdraw.redPackId="%s%010d".format(userOrder.tradeId,currentUser.id)
+    userWithdraw.sendResult = UserWithdraw.WithdrawResult.APPLY
+    userWithdraw.userId = currentUser.id
+    userWithdraw.userOrderId = userOrderId
+    userWithdraw.applyTime = DateTime.now()
+    userWithdraw.save()
+    //6.更新UserOrder的体现状态
+    userOrder.withdrawStatus = userWithdraw.sendResult
+    userOrder.save()
+
+    userWithdraw
+  }
 
   @Transactional
   override def loginUser(wxUser: WxMaUserInfo, parentId: Long, token: String): OnlineUser = {

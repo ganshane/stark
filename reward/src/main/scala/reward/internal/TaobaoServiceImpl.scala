@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.TraceOrder.TraceOrderStatus
+import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
 import reward.services.{TaobaoService, WxService}
 import stark.utils.services.LoggerSupport
@@ -55,17 +56,27 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
     val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId.toLong)
-    val taobaoOrder = taobaoOrderOpt match{
+    val (taobaoOrder,updateStatus) = taobaoOrderOpt match{
       case Some(taobaoOrderEntity) =>
-        copyProperties(taobaoOrderEntity,originOrder)
+        val status = originOrder.getTkStatus == RewardConstants.TK_PAID_STATUS && taobaoOrderEntity.tkStatus != RewardConstants.TK_PAID_STATUS
+        (copyProperties(taobaoOrderEntity,originOrder),status)
       case _ =>
-        copyProperties(new TaobaoPublisherOrder,originOrder)
+        (copyProperties(new TaobaoPublisherOrder,originOrder),false)
     }
     taobaoOrder.save()
     val tradeId = taobaoOrder.tradeId
     val userOrderOption = UserOrder.find_by_tradeId(tradeId).headOption
     userOrderOption match {
       case Some(_) => //已经有订单匹配
+        if(updateStatus){
+          //如果佣金已经被支付，则需要调整提现状态
+          UserOrder.find_by_tradeId(tradeId).foreach(uo=>{
+            if(uo.withdrawStatus == WithdrawResult.UNAPPLY){
+              uo.withdrawStatus = WithdrawResult.CAN_APPLY
+              uo.save()
+            }
+          })
+        }
       case None =>
         val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
         val coll = TraceOrder where
@@ -82,7 +93,22 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
               userOrder.traceTime = traceOrder.createdAt
               userOrder.userId = traceOrder.userId
               userOrder.tradeId = tradeId
+              userOrder.level = 0
+              userOrder.withdrawStatus = if(taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS) WithdrawResult.CAN_APPLY else WithdrawResult.UNAPPLY
               userOrder.save()
+
+              { //增加父以及爷订单
+                UserRelation.find_by_userId(traceOrder.userId).foreach(ur=>{
+                  val order = new UserOrder
+                  order.clickTime = taobaoOrder.clickTime
+                  order.traceTime = traceOrder.createdAt
+                  order.userId = ur.parentId
+                  order.tradeId = tradeId
+                  order.level = ur.level
+                  order.withdrawStatus = userOrder.withdrawStatus
+                  order.save()
+                })
+              }
               //同时还要更新trace_order表示这条数据已经使用
               traceOrder.status = TraceOrderStatus.DETECTED
               traceOrder.detectedTime = DateTime.now()

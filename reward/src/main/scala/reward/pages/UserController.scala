@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
+import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities.{UserOrder, _}
 import reward.services.{ActiveRecordPageableSupport, UserService}
 import springfox.documentation.annotations.ApiIgnore
@@ -28,6 +29,17 @@ class UserController extends ActiveRecordPageableSupport{
 
   @Autowired
   private var userService:UserService = _
+  @PostMapping(Array("/withdraw"))
+  @ApiOperation(value="提现",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  def withdraw(
+             @ApiParam(name="user_order_id",value="用户订单ID",required=true)
+             @RequestParam(name="user_order_id",required = true)
+             userOrderId:Long,
+             @AuthenticationPrincipal user:User
+              ): UserWithdraw ={
+    userService.withdraw(userOrderId,user)
+  }
 
   @PostMapping(Array("/login"))
   @ApiOperation(value="登录")
@@ -80,14 +92,19 @@ class UserController extends ActiveRecordPageableSupport{
     new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
-  def orders(@AuthenticationPrincipal user:User,@ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
-    //复杂订单查询
-    val uos = UserOrder.where
-      .join[java.util.List[UserRelation]](UserOrder.userRelation)(UserRelation.parentId===user.id)
-      .or(UserOrder.userId===user.id)
-      .orderBy(UserOrder.traceTime[DateTime].desc)
+  def orders(
+              @ApiParam(name="status",value="提现状态",required=false,example="0")
+              @RequestParam(name="status",required = false,defaultValue = "-1")
+              status:Int,
+              @AuthenticationPrincipal user:User,
+              @ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
+    val uos = if(status > -1) {
+      UserOrder where UserOrder.userId === user.id and UserOrder.withdrawStatus === WithdrawResult(status) orderBy UserOrder.traceTime[DateTime].desc
+    }else{
+      UserOrder where UserOrder.userId === user.id orderBy UserOrder.traceTime[DateTime].desc
+    }
 
-    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo,user))
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

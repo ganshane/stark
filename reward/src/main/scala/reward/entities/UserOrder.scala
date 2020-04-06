@@ -1,7 +1,10 @@
 package reward.entities
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.persistence._
 import org.joda.time.DateTime
+import reward.entities.UserWithdraw.WithdrawResultConverter
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -17,11 +20,29 @@ class UserOrder extends ActiveRecord with Serializable{
   @Column
   var id:Long= _
   var userId:Long=_
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
-  var userRelation:java.util.List[UserRelation] =_
+//  @OneToMany(fetch = FetchType.LAZY)
+//  @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
+//  var userRelation:java.util.List[UserRelation] =_
   var tradeId:Long=_
+
   var traceTime:DateTime=_
   var clickTime:DateTime=_
+
+  //两个字段为冗余字段，方便查询
+  var level:Int = _
+  @Convert(converter = classOf[WithdrawResultConverter])
+  @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
+  var withdrawStatus:UserWithdraw.WithdrawResult.Type =_
 }
-object UserOrder extends ActiveRecordInstance[UserOrder]
+object UserOrder extends ActiveRecordInstance[UserOrder]{
+  def main(args: Array[String]): Unit = {
+    val objectMapper = new ObjectMapper()
+    val order = new UserOrder
+    order.id=123
+    order.withdrawStatus = UserWithdraw.WithdrawResult.CAN_APPLY
+    objectMapper.writeValue(System.out,order)
+  }
+}
+
+
+

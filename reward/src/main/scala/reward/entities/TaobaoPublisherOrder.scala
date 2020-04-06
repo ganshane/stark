@@ -8,6 +8,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
   *
+  * https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
   * @since 2020-03-13
   */
@@ -113,6 +114,9 @@ class TaobaoPublisherOrder extends ActiveRecord{
   var tkOrderRole:java.lang.Long = _
   @Column(name="tk_paid_time")
   var tkPaidTime:DateTime= _
+  /*
+      已付款：指订单已付款，但还未确认收货 已收货：指订单已确认收货，但商家佣金未支付 已结算：指订单已确认收货，且商家佣金已支付成功 已失效：指订单关闭/订单佣金小于0.01元，订单关闭主要有：1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
+   */
   @Column(name="tk_status")
   @ApiModelProperty(example = "1")
   var tkStatus:java.lang.Long = _
@@ -131,22 +135,12 @@ class TaobaoPublisherOrder extends ActiveRecord{
 
   @Transient
   @JsonProperty
-  var userId:Long= _
+  var userOrder:UserOrder= _
   @Transient
-  @JsonProperty
-  var level:Int = _
-  @Transient
-  def setUserId(userOrder:UserOrder,user:User): this.type ={
-    this.userId = userOrder.userId
-    if(this.userId == user.id){
-      this.level = 0
-    }else {
-      val relations = UserRelation where UserRelation.parentId === user.id and UserRelation.userId===userOrder.userId
-      relations.foreach(x=>this.level=x.level)
-    }
+  def setUserOrder(userOrder: UserOrder): this.type ={
+    this.userOrder = userOrder
     this
   }
-
 }
 
 object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]

@@ -2,7 +2,7 @@ package reward.services
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.transaction.annotation.Transactional
-import reward.entities.{OnlineUser, Recharge, User}
+import reward.entities.{OnlineUser, Recharge, User, UserWithdraw}
 
 /**
   *
@@ -10,6 +10,7 @@ import reward.entities.{OnlineUser, Recharge, User}
   * @since 2020-03-12
   */
 trait UserService {
+  def withdraw(userOrderId:Long,currentUser: User): UserWithdraw
 
   @Transactional
   def recharge(cardNo: String, cardSecret: String, user: User): Recharge

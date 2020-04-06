@@ -28,4 +28,10 @@ class AppConfig extends ActiveRecord{
   var updatedAt:DateTime = _
 
 }
-object AppConfig extends ActiveRecordInstance[AppConfig]
+object AppConfig extends ActiveRecordInstance[AppConfig]{
+  class CommissionConfig{
+    var level_0:Int = _
+    var level_1:Int = _
+    var level_2:Int = _
+  }
+}

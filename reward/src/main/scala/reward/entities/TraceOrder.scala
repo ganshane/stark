@@ -1,6 +1,7 @@
 package reward.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.TraceOrder.{TraceOrderStatus, TraceOrderStatusToIntegerConverter}
@@ -24,25 +25,17 @@ class TraceOrder extends ActiveRecord{
   var couponAmount:Int = _
   var createdAt:DateTime= _
   @Convert(converter = classOf[TraceOrderStatusToIntegerConverter])
+  @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
   var status:TraceOrderStatus.Type = _
   var detectedTime:DateTime = _
 }
 object TraceOrder extends ActiveRecordInstance[TraceOrder]{
+
   object TraceOrderStatus extends Enumeration {
     type Type = Value
     val NEW:Type= Value(0)
     val DETECTED:Type= Value(1)
   }
-
-  class TraceOrderStatusToIntegerConverter extends AttributeConverter[TraceOrderStatus.Type,Integer]{
-    override def convertToDatabaseColumn(x: TraceOrderStatus.Type): Integer = x.id
-
-    override def convertToEntityAttribute(y: Integer): TraceOrderStatus.Type ={
-      if(y == null) TraceOrderStatus.NEW
-      else TraceOrderStatus(y)
-    }
-  }
-
-
+  class TraceOrderStatusToIntegerConverter extends ScalaEnumerationConverter[TraceOrderStatus.type](TraceOrderStatus)
 }
 
