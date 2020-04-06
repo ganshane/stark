@@ -4,13 +4,15 @@ import io.swagger.annotations._
 import javax.validation.constraints.Size
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.{UserOrder, _}
-import reward.services.UserService
+import reward.services.{ActiveRecordPageableSupport, UserService}
+import springfox.documentation.annotations.ApiIgnore
 import stark.activerecord.services.DSL._
 
 /**
@@ -22,7 +24,7 @@ import stark.activerecord.services.DSL._
 @RequestMapping(Array("/user"))
 @Api(value="用户相关接口",description="用户相关接口")
 @Validated
-class UserController {
+class UserController extends ActiveRecordPageableSupport{
 
   @Autowired
   private var userService:UserService = _
@@ -70,14 +72,22 @@ class UserController {
   @GetMapping(Array("/orders"))
   @ApiOperation(value="得到自己以及下属客户订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
-  def orders(@AuthenticationPrincipal user:User): List[TaobaoPublisherOrder]={
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def orders(@AuthenticationPrincipal user:User,@ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
     //复杂订单查询
     val uos = UserOrder.where
       .join[java.util.List[UserRelation]](UserOrder.userRelation)(UserRelation.parentId===user.id)
       .or(UserOrder.userId===user.id)
       .orderBy(UserOrder.traceTime[DateTime].desc)
 
-    uos.map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo,user)).toList
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserId(uo,user))
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

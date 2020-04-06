@@ -60,9 +60,9 @@ class ConsumptionController extends ActiveRecordPageableSupport{
   ))
   def list(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
     val coll=Consumption.find_by_userId(user.id)
-    coll.foreach(c=>{
+    pageActiveRecordsByPageable(coll,pageable).map(c=>{
       TaobaoPublisherOrder.findOption(c.tradeId).foreach(o=>c.order=o)
+      c
     })
-    pageActiveRecordsByPageable(coll,pageable)
   }
 }
