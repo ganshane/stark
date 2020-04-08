@@ -59,6 +59,20 @@ class WxController {
     onlineUser.save()
     Map("code"->onlineUser.token)
   }
+  @GetMapping(value = Array("/qr/custom"),produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  @ResponseBody
+  def qr(
+          @RequestParam @ApiParam(name="page",required = true)page: String,
+          @RequestParam @ApiParam(name="scene",required = true)scene: String
+        ):BufferedImage={
+    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(scene,page)
+    val fis = new FileInputStream(file)
+    try {
+      ImageIO.read(fis)
+    }finally{
+      IOUtils.closeQuietly(fis)
+    }
+  }
   @GetMapping(value = Array("/qr"),produces = Array(MediaType.IMAGE_JPEG_VALUE))
   @ResponseBody
   def qr(@RequestParam @ApiParam(name="code",required = true)code: String):BufferedImage={
