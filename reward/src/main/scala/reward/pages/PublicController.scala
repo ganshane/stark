@@ -62,8 +62,8 @@ class PublicController {
   @ResponseBody
   def qr(
           @RequestParam(required=true)
-          @ApiParam(value="url",required = true)
-          url:String,
+          @ApiParam(value="二维码内容",required = true)
+          content:String,
           @RequestParam(required=false)
           @ApiParam(value="logo_url",required = false)
           logo_url:String,
@@ -83,12 +83,12 @@ class PublicController {
     val writer = new QRCodeWriter
     val hints = new util.Hashtable[EncodeHintType, Any]()
     // 指定纠错等级
-    hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L)
+    hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H)
     // 指定编码格式
     hints.put(EncodeHintType.CHARACTER_SET, "UTF-8")
     hints.put(EncodeHintType.MARGIN, 1); //设置白边
     val config = new MatrixToImageConfig(fgColor, bgColor)
-    val bitMatrix = writer.encode(url, BarcodeFormat.QR_CODE, width, height, hints)
+    val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, width, height, hints)
 
     val image = MatrixToImageWriter.toBufferedImage(bitMatrix, config)
     // Initialize combined image// Initialize combined image
