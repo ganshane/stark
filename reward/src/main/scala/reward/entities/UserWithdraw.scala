@@ -35,10 +35,11 @@ object UserWithdraw extends ActiveRecordInstance[UserWithdraw]{
   object WithdrawResult extends Enumeration{
     type Type=Value
     val UNAPPLY:Type=Value(0)
-    val CAN_APPLY:Type=Value(1)
-    val APPLY:Type=Value(2)
-    val SUCCESS:Type=Value(3)
-    val FAIL:Type=Value(4)
+    val PRE_APPLY:Type=Value(1)
+    val CAN_APPLY:Type=Value(2)
+    val APPLY:Type=Value(3)
+    val SUCCESS:Type=Value(4)
+    val FAIL:Type=Value(5)
   }
   class WithdrawResultConverter extends ScalaEnumerationConverter[WithdrawResult.type](WithdrawResult)
 }

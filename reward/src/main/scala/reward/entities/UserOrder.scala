@@ -30,7 +30,11 @@ class UserOrder extends ActiveRecord with Serializable{
   var traceTime:DateTime=_
   var clickTime:DateTime=_
 
-  //两个字段为冗余字段，方便查询
+  //对应提取的费用
+  var preFee:Int = _
+  var fee:Int = _
+
+  //以下字段为冗余字段，方便查询
   var level:Int = _
   @Convert(converter = classOf[WithdrawResultConverter])
   @JsonSerialize(using=classOf[ScalaEnumerationSerializer])

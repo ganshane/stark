@@ -26,11 +26,17 @@ class Migrate_202004090910_AddUserStatistic extends Migration{
       t.column("total_withdraw_amount",BigintType,Default(0))
 
       t.column("pre_order_num",IntegerType,Default(0))
+      t.column("withdraw_order_num",IntegerType,Default(0))
       t.column("total_order_num",IntegerType,Default(0))
 
       t.column("level1_team_num",IntegerType,Default(0))
       t.column("level2_team_num",IntegerType,Default(0))
     }
+
+    alterColumn("taobao_publisher_order","pub_share_fee",IntegerType,Default(0))
+    alterColumn("taobao_publisher_order","pub_share_pre_fee",IntegerType,Default(0))
+    addColumn("user_order","pre_fee",IntegerType,Comment("预估费用"))
+    addColumn("user_order","fee",IntegerType,Comment("实际提现费用"))
   }
 
   /**

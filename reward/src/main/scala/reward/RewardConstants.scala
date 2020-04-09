@@ -24,4 +24,8 @@ object RewardConstants {
   //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
   //see tk_status
   final val TK_PAID_STATUS =3
+  final val ORDER_PAID_STATUS =12
+  final val ORDER_CLOSED_STATUS=13
+
+  final val COMMISSION_CONFIG_KEY="commission_config"
 }

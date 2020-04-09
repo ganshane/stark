@@ -15,7 +15,6 @@ import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 import reward.RewardConstants
-import reward.entities.AppConfig.CommissionConfig
 import reward.entities._
 import reward.services.{UserService, WxService}
 import stark.activerecord.services.DSL._
@@ -78,10 +77,10 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"原始订单未找到")
     }
     //4.检测是否存在对应佣金配置
-    val commissionConfigOpt= AppConfig.find_by_key("commission_config").headOption
+    val commissionConfigOpt= AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
     val commissionConfig = commissionConfigOpt match{
       case Some(cc) =>
-        objectMapper.readValue(cc.value,classOf[CommissionConfig])
+        cc.readAsCommissionConfig(objectMapper)
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"佣金配置未找到")
     }
     val rate = userOrder.level match {

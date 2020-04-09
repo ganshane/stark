@@ -4,6 +4,7 @@ import com.aliyuncs.DefaultAcsClient
 import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
 import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
 import org.joda.time.format.DateTimeFormat
@@ -14,10 +15,11 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
+import reward.entities.AppConfig.CommissionConfig
 import reward.entities.TraceOrder.TraceOrderStatus
 import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
-import reward.services.{TaobaoService, WxService}
+import reward.services.{TaobaoService, UserService, WxService}
 import stark.utils.services.LoggerSupport
 
 /**
@@ -34,6 +36,10 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   private val config:RewardConfig  = null
   @Autowired
   private val wxService:WxService= null
+  @Autowired
+  private val userService:UserService = null
+  @Autowired
+  private val objectMapper:ObjectMapper = null
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
@@ -53,93 +59,138 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
 
     client.getAcsResponse(request).getCredentials
   }
+  private def saveUserStatisticFromNewOrder(userOrder: UserOrder): Unit ={
+    //更新用户状态
+    val us = userService.getOrCreateUserStatistic(userOrder.userId)
+    if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY) {
+      us.withdrawAmount = userOrder.fee
+      us.withdrawOrderNum += 1
+    }else if(userOrder.withdrawStatus != WithdrawResult.UNAPPLY){
+      us.preWithdrawAmount += userOrder.preFee
+      us.preOrderNum += 1
+    }
+    us.save()
+  }
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
+    val newStatus = originOrder.getTkStatus
+    var oldStatus = newStatus
     val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId.toLong)
-    val (taobaoOrder,updateStatus) = taobaoOrderOpt match{
+    val taobaoOrder = taobaoOrderOpt match{
       case Some(taobaoOrderEntity) =>
-        val status = originOrder.getTkStatus == RewardConstants.TK_PAID_STATUS && taobaoOrderEntity.tkStatus != RewardConstants.TK_PAID_STATUS
-        (copyProperties(taobaoOrderEntity,originOrder),status)
+        oldStatus = taobaoOrderEntity.tkStatus
+        copyProperties(taobaoOrderEntity,originOrder)
       case _ =>
-        (copyProperties(new TaobaoPublisherOrder,originOrder),false)
+        copyProperties(new TaobaoPublisherOrder,originOrder)
     }
     taobaoOrder.save()
     val tradeId = taobaoOrder.tradeId
-    val userOrderOption = UserOrder.find_by_tradeId(tradeId).headOption
-    userOrderOption match {
-      case Some(_) => //已经有订单匹配
-        if(updateStatus){
+    val userOrders = UserOrder.find_by_tradeId(tradeId)
+    val appConfigOpt = AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
+    val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
+    if(userOrders.nonEmpty) { //已经有订单匹配
+      if(newStatus != oldStatus &&
+        (newStatus == RewardConstants.TK_PAID_STATUS || newStatus == RewardConstants.ORDER_CLOSED_STATUS)
+      ) { //状态发生变化才进行处理
+        userOrders.foreach(uo => {
           //如果佣金已经被支付，则需要调整提现状态
-          UserOrder.find_by_tradeId(tradeId).foreach(uo=>{
-            if(uo.withdrawStatus == WithdrawResult.UNAPPLY){
-              uo.withdrawStatus = WithdrawResult.CAN_APPLY
-              uo.save()
-            }
-          })
-        }
-      case None =>
-        val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
-        val coll = TraceOrder where
-          TraceOrder.pid === pid and
-          TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
-          TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
-          TraceOrder.createdAt[DateTime].desc limit 1
-        coll.headOption match {
-          case Some(traceOrder) =>
-            val minutesDiff = Minutes.minutesBetween(taobaoOrder.clickTime,traceOrder.createdAt).getMinutes
-            if(minutesDiff < 10) { //当拷贝二维码后，十分钟还未进入手机淘宝的，则忽略
-              val userOrder = new UserOrder
-              userOrder.clickTime = taobaoOrder.clickTime
-              userOrder.traceTime = traceOrder.createdAt
-              userOrder.userId = traceOrder.userId
-              userOrder.tradeId = tradeId
-              userOrder.level = 0
-              userOrder.withdrawStatus = if(taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS) WithdrawResult.CAN_APPLY else WithdrawResult.UNAPPLY
-              userOrder.save()
+          if (newStatus == RewardConstants.TK_PAID_STATUS) {
+            //新状态发生变化
+            //收到佣金
+            uo.withdrawStatus == WithdrawResult.CAN_APPLY
+            uo.fee = commissionConfig.findCommissionRate(uo.level) * taobaoOrder.pubShareFee/100
+            uo.save()
 
-              { //增加父以及爷订单
-                UserRelation.find_by_userId(traceOrder.userId).foreach(ur=>{
-                  val order = new UserOrder
-                  order.clickTime = taobaoOrder.clickTime
-                  order.traceTime = traceOrder.createdAt
-                  order.userId = ur.parentId
-                  order.tradeId = tradeId
-                  order.level = ur.level
-                  order.withdrawStatus = userOrder.withdrawStatus
-                  order.save()
-                })
-              }
-              //同时还要更新trace_order表示这条数据已经使用
-              traceOrder.status = TraceOrderStatus.DETECTED
-              traceOrder.detectedTime = DateTime.now()
-              traceOrder.save()
-              //更新消费记录
-              val consumption = new Consumption
-              consumption.createdAt=DateTime.now()
-              consumption.amount=traceOrder.couponAmount
-              consumption.tradeId = taobaoOrder.tradeId
-              consumption.userId = traceOrder.userId
-              consumption.save()
-              //更新用户余额
-              val userAmountOpt = UserStatistic.findOption(traceOrder.userId)
-              val userAmount = userAmountOpt match{
-                case Some(ua) => ua
-                case _ =>
-                  val ua = new UserStatistic
-                  ua.userId = traceOrder.userId
-                  ua.rechargeAmount = 0
-                  ua.consumptionAmount = 0
-                  ua
-              }
+            val us = userService.getOrCreateUserStatistic(uo.userId)
+            us.preOrderNum -= 1
+            us.withdrawOrderNum += 1
+            us.preWithdrawAmount -= uo.preFee
+            us.withdrawAmount += uo.fee
+            us.save()
 
-              userAmount.consumptionAmount += traceOrder.couponAmount
-              userAmount.lastConsume = DateTime.now
-              userAmount.save()
-              val user = User.find(traceOrder.userId)
-              wxService.sendConsumptionMessage(user.openId,userAmount,traceOrder.couponAmount)
+          } else if (newStatus == RewardConstants.ORDER_CLOSED_STATUS ) {
+            //订单关闭
+            val us = userService.getOrCreateUserStatistic(uo.userId)
+            us.preOrderNum -= 1
+            us.preWithdrawAmount -= uo.preFee
+            us.save()
+
+            uo.withdrawStatus == WithdrawResult.UNAPPLY
+            uo.preFee = 0
+            uo.fee=0
+            uo.save()
+          }
+        })
+      }
+    }else { //新的订单数据过来
+      val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
+      val coll = TraceOrder where
+        TraceOrder.pid === pid and
+        TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
+        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
+        TraceOrder.createdAt[DateTime].desc limit 1
+      coll.headOption match {
+        case Some(traceOrder) =>
+          val minutesDiff = Minutes.minutesBetween(taobaoOrder.clickTime,traceOrder.createdAt).getMinutes
+          if(minutesDiff < 10) { //当拷贝二维码后，十分钟还未进入手机淘宝的，则忽略
+            val userOrder = new UserOrder
+            userOrder.clickTime = taobaoOrder.clickTime
+            userOrder.traceTime = traceOrder.createdAt
+            userOrder.userId = traceOrder.userId
+            userOrder.tradeId = tradeId
+            userOrder.level = 0
+            userOrder.preFee = commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubSharePreFee /100
+            userOrder.withdrawStatus =
+              if(taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS)
+                WithdrawResult.CAN_APPLY
+              else if(newStatus == RewardConstants.ORDER_CLOSED_STATUS)
+                WithdrawResult.UNAPPLY
+              else WithdrawResult.PRE_APPLY
+
+            if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY)
+              userOrder.fee=commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubShareFee /100
+            userOrder.save()
+
+            saveUserStatisticFromNewOrder(userOrder)
+
+            { //增加父以及爷订单
+              UserRelation.find_by_userId(traceOrder.userId).foreach(ur=>{
+                val order = new UserOrder
+                order.clickTime = taobaoOrder.clickTime
+                order.traceTime = traceOrder.createdAt
+                order.userId = ur.parentId
+                order.tradeId = tradeId
+                order.level = ur.level
+                order.withdrawStatus = userOrder.withdrawStatus
+                userOrder.preFee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubSharePreFee /100
+                if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY)
+                  userOrder.fee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubShareFee /100
+                order.save()
+
+                saveUserStatisticFromNewOrder(order)
+              })
             }
-          case _ =>
-        }
+            //同时还要更新trace_order表示这条数据已经使用
+            traceOrder.status = TraceOrderStatus.DETECTED
+            traceOrder.detectedTime = DateTime.now()
+            traceOrder.save()
+            //更新消费记录
+            val consumption = new Consumption
+            consumption.createdAt=DateTime.now()
+            consumption.amount=traceOrder.couponAmount
+            consumption.tradeId = taobaoOrder.tradeId
+            consumption.userId = traceOrder.userId
+            consumption.save()
+            //更新用户余额
+            val us = userService.getOrCreateUserStatistic(traceOrder.userId)
+            us.consumptionAmount += traceOrder.couponAmount
+            us.lastConsume = DateTime.now
+            us.save()
+            val user = User.find(traceOrder.userId)
+            wxService.sendConsumptionMessage(user.openId,us,traceOrder.couponAmount)
+          }
+        case _ =>
+      }
     }
   }
 
@@ -167,8 +218,8 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     taobaoPublisherOrder.orderType = t.getOrderType
     taobaoPublisherOrder.payPrice = t.getPayPrice
     taobaoPublisherOrder.pubId = t.getPubId
-    taobaoPublisherOrder.pubShareFee = t.getPubShareFee
-    taobaoPublisherOrder.pubSharePreFee = t.getPubSharePreFee
+    taobaoPublisherOrder.pubShareFee = (t.getPubShareFee.toDouble * 100).intValue()
+    taobaoPublisherOrder.pubSharePreFee = (t.getPubSharePreFee.toDouble*100).intValue()
     taobaoPublisherOrder.pubShareRate = t.getPubShareRate
     taobaoPublisherOrder.refundTag = t.getRefundTag
     taobaoPublisherOrder.relationId = t.getRelationId

@@ -62,9 +62,9 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @ApiModelProperty(example = "1")
   var pubId:java.lang.Long = _
   @Column(name="pub_share_fee")
-  var pubShareFee:String = _
+  var pubShareFee:Int= _
   @Column(name="pub_share_pre_fee")
-  var pubSharePreFee:String = _
+  var pubSharePreFee:Int= _
   @Column(name="pub_share_rate")
   var pubShareRate:String = _
   @Column(name="refund_tag")
