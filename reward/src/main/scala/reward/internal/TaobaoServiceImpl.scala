@@ -121,12 +121,12 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
               consumption.userId = traceOrder.userId
               consumption.save()
               //更新用户余额
-              val userAmountOpt = UserAmount.findOption(traceOrder.userId)
+              val userAmountOpt = UserStatistic.findOption(traceOrder.userId)
               val userAmount = userAmountOpt match{
                 case Some(ua) => ua
                 case _ =>
-                  val ua = new UserAmount
-                  ua.id = traceOrder.userId
+                  val ua = new UserStatistic
+                  ua.userId = traceOrder.userId
                   ua.rechargeAmount = 0
                   ua.consumptionAmount = 0
                   ua

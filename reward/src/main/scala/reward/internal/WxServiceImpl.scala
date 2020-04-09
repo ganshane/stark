@@ -5,7 +5,7 @@ import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import reward.entities.UserAmount
+import reward.entities.UserStatistic
 import reward.services.WxService
 import stark.utils.services.LoggerSupport
 
@@ -20,7 +20,7 @@ import scala.collection.JavaConversions._
 class WxServiceImpl extends WxService with LoggerSupport{
   @Autowired
   private val weixinPopular:WxMaService = null
-  def sendConsumptionMessage(openId:String,userAmount: UserAmount,amount:Int): Unit ={
+  def sendConsumptionMessage(openId:String, userAmount: UserStatistic, amount:Int): Unit ={
     try {
       //发送消息
       val subscribeMessage = WxMaSubscribeMessage.builder()
@@ -40,7 +40,7 @@ class WxServiceImpl extends WxService with LoggerSupport{
         logger.error(e.getMessage,e)
     }
   }
-  def sendRechargeMessage(openId:String,userAmount: UserAmount,amount:Int): Unit ={
+  def sendRechargeMessage(openId:String, userAmount: UserStatistic, amount:Int): Unit ={
     try {
       //发送消息
       val subscribeMessage = WxMaSubscribeMessage.builder()

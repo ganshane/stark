@@ -134,7 +134,10 @@ class UserController extends ActiveRecordPageableSupport{
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="得到当前用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def info(@AuthenticationPrincipal user:User): User={
-    UserAmount.findOption(user.id).foreach(user.balance= _)
+    UserStatistic.findOption(user.id).foreach(s=>{
+      user.balance= s
+      user.statistic = s
+    })
     user
   }
   @PostMapping(Array("/info"))

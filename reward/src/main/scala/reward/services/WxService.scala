@@ -1,6 +1,6 @@
 package reward.services
 
-import reward.entities.UserAmount
+import reward.entities.UserStatistic
 
 /**
   * 和微信相关的操作
@@ -9,6 +9,6 @@ import reward.entities.UserAmount
   * @since 2020-04-04
   */
 trait WxService {
-  def sendConsumptionMessage(openId:String,userAmount: UserAmount,amount:Int): Unit
-  def sendRechargeMessage(openId:String,userAmount: UserAmount,amount:Int): Unit
+  def sendConsumptionMessage(openId:String, userAmount: UserStatistic, amount:Int): Unit
+  def sendRechargeMessage(openId:String, userAmount: UserStatistic, amount:Int): Unit
 }

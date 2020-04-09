@@ -11,11 +11,11 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   * @since 2020-03-12
   */
 @Entity
-@Table(name = "user_amount")
-class UserAmount extends ActiveRecord{
+@Table(name = "user_statistic")
+class UserStatistic extends ActiveRecord{
     @Id
     @JsonIgnore
-    var id:Long= _
+    var userId:Long= _
     @Column
     var rechargeAmount:Long= _
     @Column
@@ -25,5 +25,13 @@ class UserAmount extends ActiveRecord{
     @Column
     var lastConsume:DateTime = _
 
+    var preWithdrawAmount:Long = _ //预估可提现金额
+    var withdrawAmount:Long = _ //可提现金额
+    var totalWithdrawAmount:Long = _ //已经提现金额
+    var preOrderNum:Int = _
+    var totalOrderNum:Int = _
+    var level1TeamNum:Int = _
+    var level2TeamNum:Int = _
+
 }
-object UserAmount extends ActiveRecordInstance[UserAmount]
+object UserStatistic extends ActiveRecordInstance[UserStatistic]

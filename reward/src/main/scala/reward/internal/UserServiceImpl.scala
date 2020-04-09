@@ -197,15 +197,15 @@ class UserServiceImpl extends LoggerSupport with UserService {
         throw new UnsupportedOperationException("卡未找到")
     }
 
-    val userAmountOpt = UserAmount.findOption(user.id)
+    val userAmountOpt = UserStatistic.findOption(user.id)
     val userAmount = userAmountOpt match{
       case Some(ua) =>
         ua.rechargeAmount += cardInDb.amount
         ua.lastRecharge = cardInDb.activatedAt
         ua.save()
       case _ =>
-        val ua = new UserAmount
-        ua.id = user.id
+        val ua = new UserStatistic
+        ua.userId = user.id
         ua.rechargeAmount += cardInDb.amount
         ua.lastRecharge = cardInDb.activatedAt
         ua.save()

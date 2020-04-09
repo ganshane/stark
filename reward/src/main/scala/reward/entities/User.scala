@@ -46,7 +46,9 @@ class User extends ActiveRecord{
   var updatedAt:DateTime = _
 
   @Transient
-  var balance:UserAmount = _
+  var balance:UserStatistic = _
+  @Transient
+  var statistic:UserStatistic = _
 }
 
 object User extends ActiveRecordInstance[User]{
