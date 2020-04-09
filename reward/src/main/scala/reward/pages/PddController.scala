@@ -136,7 +136,7 @@ class PddController {
               cid:Int,
               @RequestParam(defaultValue = "0")
               @ApiParam(value="分页使用",defaultValue = "0",example = "0")
-              min_id:Long,
+              min_id:String,
               @RequestParam(defaultValue = "0")
               @ApiParam(value="排序",defaultValue = "0",example = "0")
               sort_type:Int,
@@ -147,7 +147,7 @@ class PddController {
     val request = new PddDdkGoodsSearchRequest()
     if(!StringUtils.isEmpty(keyword)) request.setKeyword(keyword)
     request.setOptId(optMapping.getOrElse(cid,0).toLong)
-    request.setListId(min_id.toString)
+    request.setListId(min_id)
     request.setSortType(sort_type)
     if(activity_tags != null)
       request.setActivityTags(activity_tags.toList)
