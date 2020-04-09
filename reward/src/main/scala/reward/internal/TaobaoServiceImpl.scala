@@ -63,12 +63,14 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     //更新用户状态
     val us = userService.getOrCreateUserStatistic(userOrder.userId)
     if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY) {
-      us.withdrawAmount = userOrder.fee
+      us.withdrawAmount += userOrder.fee
       us.withdrawOrderNum += 1
     }else if(userOrder.withdrawStatus != WithdrawResult.UNAPPLY){
       us.preWithdrawAmount += userOrder.preFee
       us.preOrderNum += 1
     }
+    //写入总订单数
+    us.totalOrderNum += 1
     us.save()
   }
   @Transactional
@@ -97,14 +99,14 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
           if (newStatus == RewardConstants.TK_PAID_STATUS) {
             //新状态发生变化
             //收到佣金
-            uo.withdrawStatus == WithdrawResult.CAN_APPLY
+            uo.withdrawStatus = WithdrawResult.CAN_APPLY
             uo.fee = commissionConfig.findCommissionRate(uo.level) * taobaoOrder.pubShareFee/100
             uo.save()
 
             val us = userService.getOrCreateUserStatistic(uo.userId)
+            us.preWithdrawAmount -= uo.preFee
             us.preOrderNum -= 1
             us.withdrawOrderNum += 1
-            us.preWithdrawAmount -= uo.preFee
             us.withdrawAmount += uo.fee
             us.save()
 
@@ -115,7 +117,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             us.preWithdrawAmount -= uo.preFee
             us.save()
 
-            uo.withdrawStatus == WithdrawResult.UNAPPLY
+            uo.withdrawStatus = WithdrawResult.UNAPPLY
             uo.preFee = 0
             uo.fee=0
             uo.save()
@@ -139,16 +141,17 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             userOrder.userId = traceOrder.userId
             userOrder.tradeId = tradeId
             userOrder.level = 0
-            userOrder.preFee = commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubSharePreFee /100
             userOrder.withdrawStatus =
-              if(taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS)
+              if (taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS){
+                userOrder.fee=commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubShareFee /100
                 WithdrawResult.CAN_APPLY
-              else if(newStatus == RewardConstants.ORDER_CLOSED_STATUS)
+              }else if(newStatus == RewardConstants.ORDER_CLOSED_STATUS) {
                 WithdrawResult.UNAPPLY
-              else WithdrawResult.PRE_APPLY
+              }else {
+                userOrder.preFee = commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubSharePreFee /100
+                WithdrawResult.PRE_APPLY
+              }
 
-            if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY)
-              userOrder.fee=commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubShareFee /100
             userOrder.save()
 
             saveUserStatisticFromNewOrder(userOrder)
@@ -162,9 +165,11 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
                 order.tradeId = tradeId
                 order.level = ur.level
                 order.withdrawStatus = userOrder.withdrawStatus
-                userOrder.preFee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubSharePreFee /100
-                if(userOrder.withdrawStatus == WithdrawResult.CAN_APPLY)
-                  userOrder.fee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubShareFee /100
+                if(order.withdrawStatus == WithdrawResult.CAN_APPLY)
+                  order.fee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubShareFee /100
+                else if(order.withdrawStatus != WithdrawResult.UNAPPLY){
+                  order.preFee = commissionConfig.findCommissionRate(order.level) * taobaoOrder.pubSharePreFee /100
+                }
                 order.save()
 
                 saveUserStatisticFromNewOrder(order)
