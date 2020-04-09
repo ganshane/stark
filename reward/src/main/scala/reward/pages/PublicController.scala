@@ -77,7 +77,7 @@ class PublicController {
           @ApiParam(name="fg_color",value="前景色",required = false,defaultValue = "-1",example = "-1")
           fgColor:Int,
           @RequestParam(name="bg_color",required=false,defaultValue="-1500093")
-          @ApiParam(name="bg_color",value="背景色",required = false,defaultValue = "-1500093",example = "-150009")
+          @ApiParam(name="bg_color",value="背景色",required = false,defaultValue = "-1500093",example = "-1500093")
           bgColor:Int
         ): BufferedImage = {
     val writer = new QRCodeWriter
