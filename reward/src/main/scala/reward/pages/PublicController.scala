@@ -74,10 +74,10 @@ class PublicController {
           @ApiParam(value="高度",required = false,defaultValue = "300",example = "300")
           height:Int,
           @RequestParam(name="fg_color",required=false,defaultValue="-1")
-          @ApiParam(name="fg_color",value="前景色",required = false,defaultValue = "-1",example = "300")
+          @ApiParam(name="fg_color",value="前景色",required = false,defaultValue = "-1",example = "-1")
           fgColor:Int,
           @RequestParam(name="bg_color",required=false,defaultValue="-1500093")
-          @ApiParam(name="bg_color",value="背景色",required = false,defaultValue = "-1500093",example = "300")
+          @ApiParam(name="bg_color",value="背景色",required = false,defaultValue = "-1500093",example = "-150009")
           bgColor:Int
         ): BufferedImage = {
     val writer = new QRCodeWriter
