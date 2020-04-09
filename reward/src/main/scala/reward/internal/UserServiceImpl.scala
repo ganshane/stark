@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.{HttpEntity, HttpHeaders, HttpStatus, MediaType}
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.annotation.{Propagation, Transactional}
 import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
@@ -40,6 +40,18 @@ class UserServiceImpl extends LoggerSupport with UserService {
   private val wxService:WxService= null
   @Autowired
   private val objectMapper:ObjectMapper = null
+
+
+  @Transactional(propagation = Propagation.MANDATORY)
+  override def getOrCreateUserStatistic(userId: Long): UserStatistic = {
+    UserStatistic.findOption(userId) match{
+      case Some(us) => us
+      case _ =>
+        val us = new UserStatistic
+        us.userId = userId
+        us.save()
+    }
+  }
 
   @Transactional
   override def withdraw(userOrderId:Long,currentUser: User): UserWithdraw ={
@@ -120,9 +132,8 @@ class UserServiceImpl extends LoggerSupport with UserService {
           if(parentId > 0) { //大于0的合理用户
             //查询爷节点
             val grandpaOpt = UserRelation
-              .find_by_userId(parentId)
-              .orderBy(UserRelation.level[Int].asc)
-              .limit(1).headOption
+              .find_by_userId_and_level(parentId,1)
+              .headOption
             //保存爷节点关系
             grandpaOpt match {
               case Some(grandpa) =>
@@ -132,6 +143,10 @@ class UserServiceImpl extends LoggerSupport with UserService {
                 ur.parentId = grandpa.parentId
                 ur.createdAt = DateTime.now
                 ur.save()
+                //爷节点的团队统计数据
+                val grandpaUserStatistic = getOrCreateUserStatistic(ur.parentId)
+                grandpaUserStatistic.level2TeamNum += 1
+                grandpaUserStatistic.save()
               case _ =>
             }
             //保存父节点关系
@@ -141,6 +156,10 @@ class UserServiceImpl extends LoggerSupport with UserService {
             ur.parentId = parentId
             ur.createdAt = DateTime.now
             ur.save()
+            //父节点的团队统计数据
+            val parentUserStatistic = getOrCreateUserStatistic(ur.parentId)
+            parentUserStatistic.level1TeamNum += 1
+            parentUserStatistic.save()
           }
 
           user
