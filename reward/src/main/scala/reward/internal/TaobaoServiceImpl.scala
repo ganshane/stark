@@ -1,6 +1,7 @@
 package reward.internal
 
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 import com.aliyun.oss.OSSClientBuilder
 import com.aliyun.oss.common.utils.BinaryUtil
@@ -45,6 +46,9 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   private val userService:UserService = null
   @Autowired
   private val objectMapper:ObjectMapper = null
+  private var credential: AssumeRoleResponse.Credentials = null
+  private val CREDENTIAL_EXPIRED_DURATION=TimeUnit.HOURS.toSeconds(1) //最大一小时
+  private var credentialExpiredTime = 0L
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
@@ -66,16 +70,10 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000)
 //    policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir)
 
-    val profile = DefaultProfile.getProfile("", config.aliyun.id, config.aliyun.secret)
-    // 用profile构造client
-    val acsClient = new DefaultAcsClient(profile)
-    val request = new AssumeRoleRequest
-    request.setSysEndpoint(endpoint)
-    request.setSysMethod(MethodType.POST)
-    request.setRoleArn(config.aliyun.arn)
-    request.setRoleSessionName(roleSessionName)
-    val acsResponse = acsClient.getAcsResponse(request)
-    val ossClient = new OSSClientBuilder().build(endpointHost, acsResponse.getCredentials.getAccessKeyId,acsResponse.getCredentials.getAccessKeySecret,acsResponse.getCredentials.getSecurityToken)
+    if(this.credentialExpiredTime < System.currentTimeMillis()){
+      this.initCredential()
+    }
+    val ossClient = new OSSClientBuilder().build(endpointHost, this.credential.getAccessKeyId,credential.getAccessKeySecret,credential.getSecurityToken)
 
     val postPolicy = ossClient.generatePostPolicy(expiration, policyConds)
     val binaryData = postPolicy.getBytes("utf-8")
@@ -83,8 +81,8 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     val postSignature = ossClient.calculatePostSignature(postPolicy)
 
     val respMap = new java.util.HashMap[String,Any]
-    respMap.put("accessid", acsResponse.getCredentials.getAccessKeyId)
-    respMap.put("token",acsResponse.getCredentials.getSecurityToken)
+    respMap.put("accessid", credential.getAccessKeyId)
+    respMap.put("token",credential.getSecurityToken)
     respMap.put("policy", encodedPolicy)
     respMap.put("signature", postSignature)
     respMap.put("dir", dir)
@@ -93,6 +91,10 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     // respMap.put("expire", formatISO8601Date(expiration));
 
     respMap
+  }
+  private def initCredential(): Unit ={
+    this.credential = getOssAccessInfo()
+    this.credentialExpiredTime = System.currentTimeMillis() + CREDENTIAL_EXPIRED_DURATION * 1000L - TimeUnit.MINUTES.toMillis(5)
   }
 
   override def getOssAccessInfo(): AssumeRoleResponse.Credentials = {
@@ -107,8 +109,10 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     request.setSysMethod(MethodType.POST)
     request.setRoleArn(config.aliyun.arn)
     request.setRoleSessionName(roleSessionName)
+    request.setDurationSeconds(CREDENTIAL_EXPIRED_DURATION)
+    val response = client.getAcsResponse(request)
 
-    client.getAcsResponse(request).getCredentials
+    response.getCredentials
   }
   private def saveUserStatisticFromNewOrder(userOrder: UserOrder): Unit ={
     //更新用户状态

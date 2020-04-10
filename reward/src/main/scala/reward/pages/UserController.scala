@@ -1,6 +1,7 @@
 package reward.pages
 
 import io.swagger.annotations._
+import javax.transaction.Transactional
 import javax.validation.constraints.Size
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
@@ -161,17 +162,19 @@ class UserController extends ActiveRecordPageableSupport{
   @PostMapping(Array("/receiving_qr"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="更新用户收款码信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Transactional
   def addReceivingQR(
-                @RequestParam(value="收款码",required=true)
+                @RequestParam(required=true)
                 @ApiParam(value="收款码",required=true)
                 url:String,
-                @AuthenticationPrincipal user:User): User={
+                @AuthenticationPrincipal currentUser:User): User={
 
+    val user = User.find(currentUser.id)
     user.receivingQR=url
     user.updatedAt = DateTime.now
-
     //更新用户信息
     user.save()
+    info(user)
   }
   /*
   @PostMapping(Array("/info"))
