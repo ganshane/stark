@@ -58,6 +58,7 @@ class PublicController {
     val coll = select[Slide] where Slide.status[Int] > 0
     coll.toList
   }
+
   @PostMapping(value = Array("/qr"),produces = Array(MediaType.IMAGE_JPEG_VALUE))
   @ResponseBody
   def qr(

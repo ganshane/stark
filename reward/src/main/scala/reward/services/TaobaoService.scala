@@ -9,6 +9,7 @@ import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
   * @since 2020-03-14
   */
 trait TaobaoService {
+  def getJsClientAccessInfo():java.util.HashMap[String,Any]
   def getOssAccessInfo(): AssumeRoleResponse.Credentials
   def getOrCreateTaobaoClient(): TaobaoClient
   def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit

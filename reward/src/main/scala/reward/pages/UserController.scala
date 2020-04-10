@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation._
 import reward.RewardConstants
 import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities.{UserOrder, _}
-import reward.services.{ActiveRecordPageableSupport, UserService}
+import reward.services.{ActiveRecordPageableSupport, TaobaoService, UserService}
 import springfox.documentation.annotations.ApiIgnore
+import stark.activerecord.services.Condition
 import stark.activerecord.services.DSL._
+
+import scala.collection.JavaConversions._
 
 /**
   * 用户相关的控制器
@@ -26,6 +29,8 @@ import stark.activerecord.services.DSL._
 @Api(value="用户相关接口",description="用户相关接口")
 @Validated
 class UserController extends ActiveRecordPageableSupport{
+  @Autowired
+  private val taobaoService:TaobaoService = null
 
   @Autowired
   private var userService:UserService = _
@@ -93,17 +98,23 @@ class UserController extends ActiveRecordPageableSupport{
       value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
   ))
   def orders(
-              @ApiParam(name="status",value="提现状态",required=false,example="0")
-              @RequestParam(name="status",required = false,defaultValue = "-1")
-              status:Int,
+              @ApiParam(name="status",allowMultiple=true,value="提现状态",required=false)
+              @RequestParam(name="status",required = false)
+              status:java.util.List[Integer],
               @AuthenticationPrincipal user:User,
               @ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
-    val uos = if(status == WithdrawResult.CAN_APPLY.id) {
-      UserOrder where UserOrder.userId === user.id and UserOrder.withdrawStatus === WithdrawResult(status) orderBy UserOrder.traceTime[DateTime].desc
-    }else if(status >= WithdrawResult.APPLY.id){
-      UserOrder where UserOrder.userId === user.id and UserOrder.withdrawStatus[WithdrawResult.Type] >= WithdrawResult(status) orderBy UserOrder.traceTime[DateTime].desc
-    }else{
-      UserOrder where UserOrder.userId === user.id orderBy UserOrder.traceTime[DateTime].desc
+    val uos = UserOrder where UserOrder.userId === user.id
+    if(status != null&&status.size > 0) {
+      uos.and({
+        var condition:Condition  = null
+        status.foreach(s => {
+          if(condition == null)
+            condition = UserOrder.withdrawStatus === WithdrawResult(s)
+          else
+            condition = condition.or(UserOrder.withdrawStatus === WithdrawResult(s))
+        })
+        condition
+      })
     }
 
     pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
@@ -140,6 +151,29 @@ class UserController extends ActiveRecordPageableSupport{
     })
     user
   }
+  @GetMapping(Array("/aliyun/oss"))
+//  @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiOperation(value="得到操作阿里云的临时token")//,authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def getOssAccess={
+    taobaoService.getJsClientAccessInfo()
+//    taobaoService.getOssAccessInfo()
+  }
+  @PostMapping(Array("/receiving_qr"))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiOperation(value="更新用户收款码信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def addReceivingQR(
+                @RequestParam(value="收款码",required=true)
+                @ApiParam(value="收款码",required=true)
+                url:String,
+                @AuthenticationPrincipal user:User): User={
+
+    user.receivingQR=url
+    user.updatedAt = DateTime.now
+
+    //更新用户信息
+    user.save()
+  }
+  /*
   @PostMapping(Array("/info"))
   @Secured(Array(RewardConstants.ROLE_USER))
   @ApiOperation(value="更新用户信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -156,6 +190,7 @@ class UserController extends ActiveRecordPageableSupport{
     //更新用户信息
     user.save()
   }
+  */
 
   @PostMapping(Array("/sendSms"))
   @ApiOperation(value="发送短信验证码")

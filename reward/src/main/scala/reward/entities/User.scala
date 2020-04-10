@@ -38,6 +38,8 @@ class User extends ActiveRecord{
   var alipay:String = _
   @Column
   var alipayName:String = _
+  @Column(name="receiving_qr_url")
+  var receivingQR:String = _
   @Column
   var isAdmin:Int= _
   @Column

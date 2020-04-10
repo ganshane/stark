@@ -52,11 +52,11 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
                        @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String):Unit={
     delete[AppConfig] where AppConfig.key === key execute
   }
-  @GetMapping(Array("/aliyun/oss"))
-  @ApiOperation(value="得到操作阿里云的临时token",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  def getOssAccess={
-    taobaoService.getOssAccessInfo()
-  }
+//  @GetMapping(Array("/aliyun/oss"))
+//  @ApiOperation(value="得到操作阿里云的临时token",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+//  def getOssAccess={
+//    taobaoService.getOssAccessInfo()
+//  }
 
   @PostMapping(Array("/slide/delete"))
   @ApiOperation(value="删除轮播信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
