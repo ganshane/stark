@@ -153,8 +153,8 @@ class UserController extends ActiveRecordPageableSupport{
     user
   }
   @GetMapping(Array("/aliyun/oss"))
-//  @Secured(Array(RewardConstants.ROLE_USER))
-  @ApiOperation(value="得到操作阿里云的临时token")//,authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiOperation(value="得到操作阿里云的临时token",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def getOssAccess={
     taobaoService.getJsClientAccessInfo()
 //    taobaoService.getOssAccessInfo()

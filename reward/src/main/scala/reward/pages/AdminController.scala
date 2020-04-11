@@ -11,6 +11,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
+import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
 import reward.services.{ActiveRecordPageableSupport, TaobaoService}
 import springfox.documentation.annotations.ApiIgnore
@@ -52,11 +53,38 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
                        @ApiParam(value="配置的KEY",required = true) @RequestParam(required = true) key:String):Unit={
     delete[AppConfig] where AppConfig.key === key execute
   }
-//  @GetMapping(Array("/aliyun/oss"))
-//  @ApiOperation(value="得到操作阿里云的临时token",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-//  def getOssAccess={
-//    taobaoService.getOssAccessInfo()
-//  }
+  @GetMapping(Array("/orders/detail"))
+  @ApiOperation(value="通过user_order_id来获取订单详细信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def detail(
+              @ApiParam(value="user_order_id",required = true,example = "1") @RequestParam(name="user_order_id") userOrderId:Long
+              ): Option[TaobaoPublisherOrder]={
+    UserOrder findOption userOrderId map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+  }
+  @GetMapping(Array("/orders/tbk"))
+  @ApiOperation(value="得到订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def orders(
+              @ApiParam(name="status",allowMultiple=true,value="提现状态",required=false)
+              @RequestParam(name="status",required = false)
+              status:java.util.List[Integer],
+              @ApiIgnore pageable: Pageable): List[TaobaoPublisherOrder]={
+    val uos = UserOrder where
+
+    if(status != null&&status.size > 0) {
+        status.foreach(s => {
+            uos.or(UserOrder.withdrawStatus === WithdrawResult(s))
+        })
+    }
+
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+  }
 
   @PostMapping(Array("/slide/delete"))
   @ApiOperation(value="删除轮播信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -125,19 +153,6 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   }
 
 
-  @GetMapping(Array("/orders/tbk"))
-  @ApiOperation(value="获取订单",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
-  @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
-      value = "抓取的页数(0..N)"),
-    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
-      value = "每页多少条记录."),
-    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
-      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
-  ))
-  def listTaobao(@ApiIgnore pageable: Pageable):java.util.List[TaobaoPublisherOrder]={
-    pageActiveRecordsByPageable(TaobaoPublisherOrder.all,pageable)
-  }
   @GetMapping(Array("/users"))
   @ApiOperation(value="获取所有用户列表",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @ApiImplicitParams(Array(

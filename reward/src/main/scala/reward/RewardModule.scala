@@ -57,6 +57,8 @@ class RewardModule {
       val config= new WxMaDefaultConfigImpl()
       config.setAppid(rewardConfig.wechat.id)
       config.setSecret(rewardConfig.wechat.secret)
+    config.setToken("asdf")
+    config.setAesKey("3KkVxHz9JuGYQJ2YRTnXccI6CHaVa0MLsjlfQrxxBUc")
       //    config.setAppid("wx72d1f13b506075a9")
       //    config.setSecret("264a825790d4ba9cedf23e87725112ff")
       val s = new WxMaServiceImpl()
