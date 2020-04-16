@@ -78,12 +78,52 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
     val uos = UserOrder where
 
     if(status != null&&status.size > 0) {
-        status.foreach(s => {
-            uos.or(UserOrder.withdrawStatus === WithdrawResult(s))
-        })
+      status.foreach(s => {
+        uos.or(UserOrder.withdrawStatus === WithdrawResult(s))
+      })
     }
 
     pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+  }
+  @GetMapping(Array("/withdraws"))
+  @ApiOperation(value="得到用户的申请打款列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def withdraws(
+                @ApiParam(name="status",allowMultiple=true,value="提现状态",required=false)
+                @RequestParam(name="status",required = false)
+                status:java.util.List[Integer],
+                @ApiIgnore pageable: Pageable): List[UserWithdraw]={
+    val uw = UserWithdraw.where
+    if(status != null&&status.size > 0) {
+      status.foreach(s => {
+        uw.or(UserWithdraw.sendResult === WithdrawResult(s))
+      })
+    }
+    pageActiveRecordsByPageable(uw,pageable)
+  }
+  @GetMapping(Array("/withdraw"))
+  @ApiOperation(value="针对某条申请进行提现",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def doWithdraw(
+                @ApiParam(name="id",value="ID",required = true,example = "1")
+                @RequestParam id:Long):UserWithdraw ={
+    val uw = UserWithdraw.find(id)
+    uw.successTime = DateTime.now()
+    uw.sendResult = UserWithdraw.WithdrawResult.SUCCESS
+    uw.save()
+  }
+  @GetMapping(Array("/user/info"))
+  @ApiOperation(value="得到用户信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def userInfo(
+                @ApiParam(name="id",value="ID",required = true,example = "1")
+                @RequestParam id:Long):User={
+    User.find(id)
   }
 
   @PostMapping(Array("/slide/delete"))

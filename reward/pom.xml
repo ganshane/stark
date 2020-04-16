@@ -100,6 +100,11 @@
     </dependency>
     <dependency>
       <groupId>com.ganshane.specs</groupId>
+      <artifactId>jd-cps-client</artifactId>
+      <version>2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.ganshane.specs</groupId>
       <artifactId>taobao-sdk</artifactId>
       <version>20200313</version>
     </dependency>

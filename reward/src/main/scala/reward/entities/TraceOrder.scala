@@ -2,6 +2,7 @@ package reward.entities
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.TraceOrder.{TraceOrderStatus, TraceOrderStatusToIntegerConverter}
@@ -20,6 +21,9 @@ class TraceOrder extends ActiveRecord{
   @JsonIgnore
   var id:Long= _
   var userId:Long = _
+  @Column(name="item_id")
+  @ApiModelProperty(example = "1")
+  var itemId:java.lang.Long = _
   var pid:String = _
   //优惠券金额
   var couponAmount:Int = _
