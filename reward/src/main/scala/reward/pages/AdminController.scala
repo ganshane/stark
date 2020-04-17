@@ -6,10 +6,11 @@ import io.swagger.annotations._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
-import org.springframework.http.MediaType
+import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.security.access.annotation.Secured
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
+import org.springframework.web.server.ResponseStatusException
 import reward.RewardConstants
 import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
@@ -45,7 +46,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
     appConfig.key = key
     appConfig.value = jsonNode.toString
     appConfig.createdAt = DateTime.now()
-    appConfig.save
+    appConfig.save()
   }
   @PostMapping(Array("/config/delete"))
   @ApiOperation(value="删除配置信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -57,8 +58,8 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   @ApiOperation(value="通过user_order_id来获取订单详细信息",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def detail(
               @ApiParam(value="user_order_id",required = true,example = "1") @RequestParam(name="user_order_id") userOrderId:Long
-              ): Option[TaobaoPublisherOrder]={
-    UserOrder findOption userOrderId map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+              ): TaobaoPublisherOrder={
+    UserOrder findOption userOrderId map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo)) getOrElse(throw new ResponseStatusException(HttpStatus.NOT_FOUND))
   }
   @GetMapping(Array("/orders/tbk"))
   @ApiOperation(value="得到订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

@@ -149,8 +149,8 @@ class PublicController {
              @RequestParam(required = false,defaultValue = "100")
              @ApiParam(value="优惠券金额,单位为分",required = false,example="100",defaultValue = "100")
              coupon_amount:Int,
-             @RequestParam(required = false,defaultValue = "0")
-             @ApiParam(value="对应的商品ID",required = false,example="100")
+             @RequestParam(required = true)
+             @ApiParam(value="对应的商品ID",required = true)
              itemid:Long
             ):Map[String,String]={
     val pid = pids.poll()

@@ -181,9 +181,12 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
       }
     }else { //新的订单数据过来
       val pid = "mm_%s_%s_%s".format(taobaoOrder.pubId, taobaoOrder.siteId, taobaoOrder.adzoneId)
-      //TODO 增加对订单对应的itemid的查询
+      /**
+        * 通过淘宝的pid itemid clickTime 来进行定位
+        */
       val coll = TraceOrder where
         TraceOrder.pid === pid and
+        TraceOrder.itemId === taobaoOrder.itemId and
         TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
         TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
         TraceOrder.createdAt[DateTime].desc limit 1
