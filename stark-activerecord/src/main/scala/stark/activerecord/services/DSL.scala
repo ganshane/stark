@@ -22,9 +22,9 @@ object DSL {
   private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)
   private[activerecord] val joinContext = new scala.util.DynamicVariable[JoinQueryContext](null)
   //Execute Query type
-  type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause
+  type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause with UtilSupport
   //Selection Query
-  type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause
+  type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport
 
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])
@@ -139,9 +139,9 @@ class ConditionClause[R](implicit val context: QueryContext) extends ConditionsG
   }
   override private[activerecord] def conditionOpt: Option[Predicate] = condition
 }
-class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with GroupByClause{
+class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with UtilSupport with GroupByClause{
   private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]
-  def where:DSLSelectionQuery[T,R]=new ConditionClause[T] with LimitClause with Fetch[R] with OrderByClause with GroupByClause
+  def where:DSLSelectionQuery[T,R]=new ConditionClause[T] with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport
   def apply(f:SelectionField*):this.type={
     DSL.dslContext.withValue(context){
       if(f.nonEmpty) {
@@ -188,7 +188,7 @@ class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteS
 class DeleteStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T]{}
 
 sealed abstract class AbstractExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter with Execute[T] with LimitClause{
-  def where:DSLExecuteQuery[T]=new ConditionClause[T] with Execute[T] with LimitClause
+  def where:DSLExecuteQuery[T]=new ConditionClause[T] with Execute[T] with LimitClause with UtilSupport
 }
 private[activerecord] trait GroupByClause{
   val context:QueryContext
@@ -197,17 +197,34 @@ private[activerecord] trait GroupByClause{
     this
   }
 }
+private[activerecord] trait UtilSupport{
+  val context:QueryContext
+  def getPath(paths: String*):Path[_] ={
+    var path:Path[_] = context.root
+
+    paths.foreach(p=>{
+      path = path.get(p)
+    })
+
+    path
+  }
+}
 private[activerecord] trait OrderByClause {
+  this:UtilSupport=>
   val context:QueryContext
   def orderBy[T](field: Field[T]): this.type ={
     orderBy(field.asc)
     this
   }
   def orderBy[T](field: SortField[T]): this.type ={
+    val fieldPaths = field.field.fieldName.split("\\.")
+    val finalPath =
+      if(fieldPaths.isEmpty) getPath(field.field.fieldName)
+      else getPath(fieldPaths:_*)
     if(field.isAsc)
-      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(context.root.get(field.field.fieldName)))
+      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(finalPath))
     else
-      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.desc(context.root.get(field.field.fieldName)))
+      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.desc(finalPath))
     this
   }
 }
