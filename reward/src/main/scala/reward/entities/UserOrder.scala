@@ -1,10 +1,11 @@
 package reward.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.{JsonProperty, JsonUnwrapped}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import javax.persistence._
 import org.joda.time.DateTime
+import reward.entities.TraceOrder.{CommerceType, CommerceTypeToIntegerConverter}
 import reward.entities.UserWithdraw.WithdrawResultConverter
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
@@ -24,8 +25,15 @@ class UserOrder extends ActiveRecord with Serializable{
 //  @OneToMany(fetch = FetchType.LAZY)
 //  @JoinColumn(name="userId",referencedColumnName = "userId",insertable = false,updatable = false)
 //  var userRelation:java.util.List[UserRelation] =_
-  @JsonProperty
-  var tradeId:Long=_
+//  @JsonProperty
+//  var tradeId:Long=_
+//  @Column(name="order_type")
+//  @Convert(converter = classOf[OrderTypeToIntegerConverter])
+//  @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
+//  var orderType:OrderType.Type=_
+  @Embedded
+  @JsonUnwrapped
+  var tradeOrder:CommerceOrder = _
 
   var traceTime:DateTime=_
   var clickTime:DateTime=_
@@ -40,12 +48,28 @@ class UserOrder extends ActiveRecord with Serializable{
   @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
   var withdrawStatus:UserWithdraw.WithdrawResult.Type =_
 }
+
+@Embeddable
+class CommerceOrder{
+  def this(tradeId:Long,commerceType:CommerceType.Type){
+    this()
+    this.tradeId  = tradeId
+    this.commerceType = commerceType
+  }
+  @Column(name="trade_id")
+  @JsonProperty
+  var tradeId:Long = _
+  @Column(name="commerce_type")
+  @Convert(converter = classOf[CommerceTypeToIntegerConverter])
+  @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
+  var commerceType:CommerceType.Type=_
+}
 object UserOrder extends ActiveRecordInstance[UserOrder]{
   def main(args: Array[String]): Unit = {
     val objectMapper = new ObjectMapper()
     val order = new UserOrder
     order.id=123
-    order.tradeId = 929024384375848670L
+    order.tradeOrder = new CommerceOrder(929024384375848670L,CommerceType.TAOBAO)
     order.withdrawStatus = UserWithdraw.WithdrawResult.CAN_APPLY
     objectMapper.writeValue(System.out,order)
   }

@@ -65,7 +65,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"订单未找到")
     }
     //3.检测原始订单状态
-    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(userOrder.tradeId)
+    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(userOrder.tradeOrder.tradeId)
     val taobaoOrder = taobaoOrderOpt match{
       case Some(to) =>
         // see https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
@@ -94,7 +94,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
     userWithdraw.amount = (rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
     userWithdraw.level = userOrder.level
     //红包订单ID,原始订单ID和当前用户的id
-    userWithdraw.redPackId="%s%010d".format(userOrder.tradeId,currentUser.id)
+    userWithdraw.redPackId="%s%010d".format(userOrder.tradeOrder.tradeId,currentUser.id)
     userWithdraw.sendResult = UserWithdraw.WithdrawResult.APPLY
     userWithdraw.userId = currentUser.id
     userWithdraw.userOrderId = userOrderId

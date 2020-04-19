@@ -59,7 +59,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   def detail(
               @ApiParam(value="user_order_id",required = true,example = "1") @RequestParam(name="user_order_id") userOrderId:Long
               ): TaobaoPublisherOrder={
-    UserOrder findOption userOrderId map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo)) getOrElse(throw new ResponseStatusException(HttpStatus.NOT_FOUND))
+    UserOrder findOption userOrderId map(uo=>TaobaoPublisherOrder.find(uo.tradeOrder.tradeId).setUserOrder(uo)) getOrElse(throw new ResponseStatusException(HttpStatus.NOT_FOUND))
   }
   @GetMapping(Array("/orders/tbk"))
   @ApiOperation(value="得到订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -84,7 +84,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
       })
     }
 
-    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeOrder.tradeId).setUserOrder(uo))
   }
   @GetMapping(Array("/withdraws"))
   @ApiOperation(value="得到用户的申请打款列表",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))

@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils
 import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.AppConfig.CommissionConfig
-import reward.entities.TraceOrder.TraceOrderStatus
+import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
 import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
 import reward.services.{TaobaoService, UserService, WxService}
@@ -142,7 +142,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     }
     taobaoOrder.save()
     val tradeId = taobaoOrder.tradeId
-    val userOrders = UserOrder.find_by_tradeId(tradeId)
+    val userOrders = UserOrder.find_by_tradeOrder(new CommerceOrder(tradeId,CommerceType.TAOBAO))
     val appConfigOpt = AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
     if(userOrders.nonEmpty) { //已经有订单匹配
@@ -186,7 +186,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
         */
       val coll = TraceOrder where
         TraceOrder.pid === pid and
-        TraceOrder.itemId === taobaoOrder.itemId and
+        TraceOrder.item === new CommerceItem(taobaoOrder.itemId,CommerceType.TAOBAO) and
         TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
         TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
         TraceOrder.createdAt[DateTime].desc limit 1
@@ -198,7 +198,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             userOrder.clickTime = taobaoOrder.clickTime
             userOrder.traceTime = traceOrder.createdAt
             userOrder.userId = traceOrder.userId
-            userOrder.tradeId = tradeId
+            userOrder.tradeOrder= new CommerceOrder(tradeId,CommerceType.TAOBAO)
             userOrder.level = 0
             userOrder.withdrawStatus =
               if (taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS){
@@ -221,7 +221,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
                 order.clickTime = taobaoOrder.clickTime
                 order.traceTime = traceOrder.createdAt
                 order.userId = ur.parentId
-                order.tradeId = tradeId
+                order.tradeOrder = new CommerceOrder(tradeId,CommerceType.TAOBAO)
                 order.level = ur.level
                 order.withdrawStatus = userOrder.withdrawStatus
                 if(order.withdrawStatus == WithdrawResult.CAN_APPLY)

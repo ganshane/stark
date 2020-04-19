@@ -24,7 +24,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.TraceOrder.TraceOrderStatus
+import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
 import reward.entities._
 import reward.services.TaobaoService
 import stark.activerecord.services.DSL._
@@ -158,7 +158,7 @@ class PublicController {
       val tr=new TraceOrder
       tr.pid = pid
       tr.userId = user.id
-      tr.itemId = itemid
+      tr.item = new CommerceItem(itemid,CommerceType.TAOBAO)
       tr.createdAt= DateTime.now
       tr.status = TraceOrderStatus.NEW
       tr.couponAmount = coupon_amount

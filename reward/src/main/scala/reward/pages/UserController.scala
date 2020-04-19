@@ -118,7 +118,7 @@ class UserController extends ActiveRecordPageableSupport{
       })
     }
 
-    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeId).setUserOrder(uo))
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>TaobaoPublisherOrder.find(uo.tradeOrder.tradeId).setUserOrder(uo))
   }
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
