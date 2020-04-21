@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import stark.utils.services.LoggerSupport
 
 /**
-  *
+  * https://union.jd.com/openplatform/api/10419
   * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
   * @since 2020-04-19
   */

@@ -151,21 +151,24 @@ class PublicController {
              coupon_amount:Int,
              @RequestParam(required = true)
              @ApiParam(value="对应的商品ID",required = true)
-             itemid:Long
+             itemid:Long,
+             @RequestParam(required = false,defaultValue="1")
+             @ApiParam(value="订单类别，1,taobao 2.jd 3.pdd",required = false,defaultValue = "1")
+             commerce_type:Int
             ):Map[String,String]={
-    val pid = pids.poll()
+    val pid = pids(commerce_type).poll()
     try{
       val tr=new TraceOrder
       tr.pid = pid
       tr.userId = user.id
-      tr.item = new CommerceItem(itemid,CommerceType.TAOBAO)
+      tr.item = new CommerceItem(itemid,CommerceType(commerce_type))
       tr.createdAt= DateTime.now
       tr.status = TraceOrderStatus.NEW
       tr.couponAmount = coupon_amount
       tr.save()
       Map[String,String]("pid"->pid)
     }finally{
-      pids.offer(pid)
+      pids(commerce_type).offer(pid)
     }
   }
   @PostMapping(value=Array("/tpwd"))
@@ -190,7 +193,7 @@ class PublicController {
     if(response.isSuccess) response.getData
     else throw new ApiException(response.getMsg+" "+response.getSubMsg)
   }
-  private val pids= {
+  private val pids:Map[Int,util.Queue[String]]= {
 
     val queue = new ConcurrentLinkedQueue[String]()
     queue.add("mm_19052242_1448550179_110185950001")
@@ -394,6 +397,6 @@ class PublicController {
     queue.add("mm_19052242_46684975_1462922473")
     queue.add("mm_19052242_41320452_173980872")
 
-    queue
+    Map(1->queue)
   }
 }
