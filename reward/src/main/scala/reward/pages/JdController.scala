@@ -229,9 +229,23 @@ class HaojingkeItem {
   def setTaobaoImageString(picurls:String): Unit ={
     this.taobao_image_str = picurls
   }
+  @JsonProperty
+  @JsonAlias(Array("commission"))
+  def setCommission(commision:String): Unit ={
+    this.commissionStr = commision
+  }
+
+  @JsonProperty("tkmoney")
+  def getTkmoney:Int={
+    if(this.commissionStr != null)
+      (this.commissionStr.toDouble * 100).intValue()
+    else 0
+  }
 
   @JsonProperty("taobao_image")
   def taobao_image:Array[String] = taobao_image_str.split(",")  // goods_gallery_urls
   @JsonIgnore
   private var taobao_image_str=""
+  @JsonIgnore
+  private var commissionStr:String = _
 }
