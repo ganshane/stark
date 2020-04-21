@@ -4,13 +4,21 @@ import java.{lang, util}
 
 import com.pdd.pop.sdk.common.util.JsonUtil
 import com.pdd.pop.sdk.http.PopHttpClient
-import com.pdd.pop.sdk.http.api.request.{PddDdkGoodsDetailRequest, PddDdkGoodsPromotionUrlGenerateRequest, PddDdkGoodsSearchRequest, PddGoodsOptGetRequest}
+import com.pdd.pop.sdk.http.api.request._
 import com.pdd.pop.sdk.http.api.response.PddDdkGoodsPromotionUrlGenerateResponse
-import io.swagger.annotations.{Api, ApiOperation, ApiParam}
+import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.annotation.Secured
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.util.StringUtils
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
+import reward.RewardConstants
+import reward.entities.TraceOrder.CommerceType
+import reward.entities.User
+import reward.services.TraceOrderService
 
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 /**
   *
@@ -24,7 +32,7 @@ import scala.collection.JavaConversions._
 class PddController {
   private val clientId="869872c316ea408fb16b61b0fcdccc0b"
   private val clientSecret="7735676a0bcc5b42cf26d428b2ef1616041f90f5"
-  private val pid = "9959558_132231707"
+//  private val pid = "9959558_132231707"
   private val client = new PopHttpClient(clientId, clientSecret)
   private val optMapping:Map[Int,Int]=Map(
     11  ->  1,
@@ -44,23 +52,56 @@ class PddController {
     16 -> 3175,
     17 -> 11263
   )
+
+  @Autowired
+  private val traceOrderService:TraceOrderService =  null
   def opts(): Unit ={
     val request = new PddGoodsOptGetRequest
     request.setParentOptId(0)
     val response = client.syncInvoke(request)
     System.out.println(JsonUtil.transferToJson(response))
   }
+  def createPromotionId: Unit ={
+    val geRequest = new PddDdkGoodsPidGenerateRequest
+    geRequest.setNumber(100L)
+    client.syncInvoke(geRequest)
+    loopGetAllPid().foreach(println)
+  }
+  @tailrec
+  private def loopGetAllPid(page:Int=1,pageSize:Int=100,data:List[String]=List()): List[String]={
+    val request = new PddDdkGoodsPidQueryRequest
+    request.setPage(page)
+    request.setPageSize(pageSize)
+    val response = client.syncInvoke(request)
+    if(response.getErrorResponse == null) {
+      val pidResponse = response.getPIdQueryResponse
+      val list = pidResponse.getPIdList.toList.map(_.getPId)
+      if(list.size < pageSize){
+        data ::: list
+      }else{
+        loopGetAllPid(page+1,pageSize,data ::: list )
+      }
+    }else{
+      throw new RuntimeException("query pid excepiton,msg:"+response.getErrorResponse.getErrorMsg)
+    }
+  }
 
   @GetMapping(Array("/promotion"))
-  @ApiOperation(value="多多进宝推广链接生成")
+  @ApiOperation(value="多多进宝推广链接生成",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
   def promotion(
-              @RequestParam(defaultValue = "0",required = true)
-              @ApiParam(value="商品ID",required = true)
-              itemid:String,
-              @RequestParam(defaultValue = "0")
-              @ApiParam(value="搜索id",defaultValue = "0",example = "0")
-              search_id:String
+               @AuthenticationPrincipal user:User,
+               @RequestParam(required = false,defaultValue = "100")
+               @ApiParam(value="优惠券金额,单位为分",required = false,example="100",defaultValue = "100")
+               coupon_amount:Int,
+               @RequestParam(required = true)
+               @ApiParam(value="对应的商品ID",required = true)
+               itemid:Long,
+               @RequestParam(defaultValue = "0")
+               @ApiParam(value="搜索id",defaultValue = "0",example = "0")
+               search_id:String
             )  ={
+    val pid = traceOrderService.getPid(user,coupon_amount,itemid,CommerceType.PDD)
     val request = new PddDdkGoodsPromotionUrlGenerateRequest
     request.setPId(pid)
     val ids = new util.ArrayList[java.lang.Long]()
@@ -99,7 +140,9 @@ class PddController {
     request.setGoodsIdList(ids)
 
     request.setSearchId(searchId)
-    request.setPid(pid)
+    //TODO PID必须？？？？
+//    request.setPid(pid)
+
 
     val response = client.syncInvoke(request)
     val haodankuResponse = new MockHandankuResponse[HaodankuGoods]

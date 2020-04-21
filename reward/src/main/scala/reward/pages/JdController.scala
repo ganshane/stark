@@ -4,9 +4,14 @@ import java.{lang, util}
 
 import com.fasterxml.jackson.annotation.{JsonAlias, JsonIgnore, JsonIgnoreProperties, JsonProperty}
 import io.swagger.annotations.{Api, ApiOperation, ApiParam}
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.client.RestTemplate
+import reward.entities.TraceOrder.CommerceType
+import reward.entities.User
+import reward.services.TraceOrderService
 
 /**
   *
@@ -18,7 +23,9 @@ import org.springframework.web.client.RestTemplate
 @Api(value="京东",description="京东",tags=Array("jd"))
 @Validated
 class JdController {
-  val restTemplate = new RestTemplate()
+  private val restTemplate = new RestTemplate()
+  @Autowired
+  private val traceOrderService:TraceOrderService = null
   private val  apiKey = "0309abc560348702"
   private val categoryMapping:Map[Int,Int]=Map(
     11  ->  1320,
@@ -52,18 +59,23 @@ class JdController {
   @GetMapping(Array("/promotion"))
   @ApiOperation(value="多多进宝推广链接生成")
   def promotion(
-                 @RequestParam(defaultValue = "0",required = true)
-                 @ApiParam(value="商品ID",required = true)
-                 itemid:String,
+                 @AuthenticationPrincipal user:User,
+                 @RequestParam(required = false,defaultValue = "100")
+                 @ApiParam(value="优惠券金额,单位为分",required = false,example="100",defaultValue = "100")
+                 coupon_amount:Int,
+                 @RequestParam(required = true)
+                 @ApiParam(value="对应的商品ID",required = true)
+                 itemid:Long,
                  @RequestParam(required = false)
                  @ApiParam(value="优惠券链接地址",required =false)
                  couponurl:String
                )  ={
 
+    val pid = traceOrderService.getPid(user,coupon_amount,itemid,CommerceType.JD)
     var url="http://api-gw.haojingke.com/index.php/v1/api/jd/getunionurl"
     url += "?apikey="+apiKey
     url+="&goods_id="+itemid
-    url+="&positionid=3000688743"
+    url+="&positionid="+pid
     url+= "&type=1"
     if(couponurl != null)
       url+="&couponurl="+couponurl
@@ -109,9 +121,9 @@ class JdController {
     url+="&iscoupon=1"
     url+="&pageindex="+min_id
     url+="&pagesize=50"
-    println(url)
+//    println(url)
 
-    println(restTemplate.getForObject(url,classOf[String]))
+//    println(restTemplate.getForObject(url,classOf[String]))
     val response = restTemplate.getForObject(url,classOf[HaojingkeResponse])
     val haodankuResponse = new MockHandankuResponse[Array[HaojingkeItem]]
     haodankuResponse.data = response.data.data
@@ -147,8 +159,8 @@ object JdController {
     val head = response.data.head
 
     controller.detail(head.itemid.toString)
-    val promotionResponse = controller.promotion(head.itemid.toString,head.couponurl)
-    println(promotionResponse.data)
+//    val promotionResponse = controller.promotion(head.itemid.toString,head.couponurl)
+//    println(promotionResponse.data)
 
 
 //    val client = new DefaultJdClient("https://router.jd.com/api","", "190562315b06c899931ed8d341aafc47", "0415c3ed82df420f8c700732e7ae0c1b")
