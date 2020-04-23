@@ -158,7 +158,7 @@ class PddController {
     data.itemendprice = String.valueOf((detail.getMinGroupPrice - detail.getCouponDiscount)/100.0)
     data.itempic = detail.getGoodsImageUrl
     data.itemid = detail.getGoodsId
-    data.tkrate = detail.getPromotionRate
+    data.tkrates = (detail.getPromotionRate/10).intValue()
 
     data.start_time = detail.getCouponStartTime
     data.end_time = detail.getCouponEndTime
@@ -212,7 +212,7 @@ class PddController {
       goods.itempic = g.getGoodsImageUrl
       goods.itemid = g.getGoodsId
       goods.search_id = g.getSearchId
-      goods.tkrate = g.getPromotionRate
+      goods.tkrates = (g.getPromotionRate/10).intValue()
 
       goods
     }).toArray
@@ -237,7 +237,7 @@ class HaodankuGoods{
   var itempic:String = _ //goods_image_url
   var itemid:lang.Long = _  // goods_id
   var tkmoney:lang.Long = _  // goods_id
-  var tkrate:lang.Long = _  // goods_id
+  var tkrates:Int = _  // goods_id
 
   var start_time:Long = _ //coupon_start_time
   var end_time:Long = _ //coupon_end_time

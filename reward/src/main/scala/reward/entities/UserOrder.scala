@@ -3,6 +3,7 @@ package reward.entities
 import com.fasterxml.jackson.annotation.{JsonProperty, JsonUnwrapped}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.TraceOrder.{CommerceType, CommerceTypeToIntegerConverter}
@@ -67,6 +68,10 @@ class CommerceOrder{
 object UserOrder extends ActiveRecordInstance[UserOrder]{
   def main(args: Array[String]): Unit = {
     val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+
+//    objectMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+//    objectMapper.configure(SerializationFeature.EAGER_SERIALIZER_FETCH, false)
     val order = new UserOrder
     order.id=123
     order.tradeOrder = new CommerceOrder(929024384375848670L,CommerceType.TAOBAO)

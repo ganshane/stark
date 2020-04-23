@@ -9,6 +9,11 @@ import reward.entities.User
   * @since 2020-04-21
   */
 trait TraceOrderService {
+  def savePid(pid:String,user:User,
+             coupon_amount:Int,
+             itemid:Long,
+             commerce_type:CommerceType.Type
+            )
   def getPid(user:User,
              coupon_amount:Int,
              itemid:Long,

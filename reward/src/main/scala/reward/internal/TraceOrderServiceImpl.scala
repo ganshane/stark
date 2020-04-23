@@ -3,12 +3,14 @@ package reward.internal
 import java.util
 import java.util.concurrent.ConcurrentLinkedQueue
 
+import javax.transaction.Transactional
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import reward.entities.TraceOrder.CommerceType.Type
 import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
 import reward.entities.{TraceOrder, User}
-import reward.services.{PddService, TraceOrderService}
+import reward.services.{JdService, PddService, TraceOrderService}
 
 /**
   * 针对订单同步跟踪的处理方法
@@ -20,13 +22,11 @@ import reward.services.{PddService, TraceOrderService}
 class TraceOrderServiceImpl extends TraceOrderService{
   @Autowired
   private val pddService:PddService = null
-  def getPid(user:User,
-             coupon_amount:Int,
-             itemid:Long,
-             commerce_type:CommerceType.Type
-            ):String={
-    val pid = pids(commerce_type).poll()
-    try{
+  @Autowired
+  private val jdService:JdService = null
+
+  @Transactional
+  override def savePid(pid: String, user: User, coupon_amount: Int, itemid: Long, commerce_type: Type): Unit = {
       val tr=new TraceOrder
       tr.pid = pid
       tr.userId = user.id
@@ -35,6 +35,16 @@ class TraceOrderServiceImpl extends TraceOrderService{
       tr.status = TraceOrderStatus.NEW
       tr.couponAmount = coupon_amount
       tr.save()
+  }
+
+  def getPid(user:User,
+             coupon_amount:Int,
+             itemid:Long,
+             commerce_type:CommerceType.Type
+            ):String={
+    val pid = pids(commerce_type).poll()
+    try{
+      this.savePid(pid,user,coupon_amount,itemid,commerce_type)
 
       pid
     }finally{
@@ -246,11 +256,11 @@ class TraceOrderServiceImpl extends TraceOrderService{
 
 
     val jdPids = new ConcurrentLinkedQueue[String]
-    jdPids.offer("3000688743")
+
     Map(
       CommerceType.TAOBAO->queue,
-      CommerceType.PDD->pddService.queryAllPids(),
-      CommerceType.JD -> jdPids
+      CommerceType.PDD->pddService.queryAllPids()
+//      CommerceType.JD -> jdService.queryAllPids()
     )
 
   }

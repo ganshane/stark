@@ -19,7 +19,18 @@ object Condition{
     if(DSL.joinContext.value != null){
       DSL.joinContext.value.join.get(name)
     }else{
-      DSL.dslContext.value.root.get(name)
+      val fieldPaths = name.split("\\.")
+      var path:Path[_] = DSL.dslContext.value.root
+
+      if(fieldPaths.isEmpty) {
+        path=path.get(name)
+      }
+      else{
+        fieldPaths.foreach(p => {
+          path = path.get(p)
+        })
+      }
+      path.asInstanceOf[Path[T]]
     }
   }
   def eq[T](field:Field[T],value:T): Condition ={
