@@ -92,10 +92,12 @@ class JdController {
     val headOption = where.toList.headOption
     val pid = headOption match{
       case Some(tr) => tr.pid
-      case _ => jdService.createPidByUserId(user.id)
+      case _ =>
+        val jdPid=jdService.createPidByUserId(user.id)
+        traceOrderService.savePid(jdPid,user,coupon_amount,itemid,CommerceType.JD)
+        jdPid
     }
 
-    traceOrderService.savePid(pid,user,coupon_amount,itemid,CommerceType.JD)
 
     val url = "http://api.web.21ds.cn/jingdong/doItemCpsUrl?"
     val material="https://item.jd.com/"+itemid+".html"

@@ -9,5 +9,6 @@ import com.pdd.pop.sdk.http.PopHttpClient
   */
 trait PddService {
   def queryAllPids(): java.util.Queue[String]
+  def createPidByUserId(userId:Long):String
   def getClient():PopHttpClient
 }

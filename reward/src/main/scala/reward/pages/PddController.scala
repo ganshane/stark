@@ -15,8 +15,9 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import reward.RewardConstants
 import reward.entities.TraceOrder.CommerceType
-import reward.entities.User
-import reward.services.TraceOrderService
+import reward.entities.{TraceOrder, User}
+import reward.services.{PddService, TraceOrderService}
+import stark.activerecord.services.DSL
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
@@ -55,6 +56,8 @@ class PddController {
 
   @Autowired
   private val traceOrderService:TraceOrderService =  null
+  @Autowired
+  private val pddService:PddService=  null
   def opts(): Unit ={
     val request = new PddGoodsOptGetRequest
     request.setParentOptId(0)
@@ -101,7 +104,17 @@ class PddController {
                @ApiParam(value="搜索id",defaultValue = "0",example = "0")
                search_id:String
             )  ={
-    val pid = traceOrderService.getPid(user,coupon_amount,itemid,CommerceType.PDD)
+    val where = TraceOrder where DSL.column("item.commerceType") === CommerceType.PDD and
+      TraceOrder.userId === user.id limit 1
+    val headOption = where.toList.headOption
+    val pid = headOption match{
+      case Some(tr) => tr.pid
+      case _ =>
+        val pddPid=pddService.createPidByUserId(user.id)
+        traceOrderService.savePid(pddPid,user,coupon_amount,itemid,CommerceType.PDD)
+        pddPid
+    }
+
     val request = new PddDdkGoodsPromotionUrlGenerateRequest
     request.setPId(pid)
     val ids = new util.ArrayList[java.lang.Long]()
@@ -116,7 +129,6 @@ class PddController {
     val haodankuResponse = new MockHandankuResponse[util.List[PddDdkGoodsPromotionUrlGenerateResponse.GoodsPromotionUrlGenerateResponseGoodsPromotionUrlListItem]]
     haodankuResponse.code = 1
     haodankuResponse.data = urls
-
 
 
     haodankuResponse

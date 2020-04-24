@@ -4,7 +4,7 @@ import java.util
 import java.util.concurrent.ConcurrentLinkedQueue
 
 import com.pdd.pop.sdk.http.PopHttpClient
-import com.pdd.pop.sdk.http.api.request.PddDdkGoodsPidQueryRequest
+import com.pdd.pop.sdk.http.api.request.{PddDdkGoodsPidGenerateRequest, PddDdkGoodsPidQueryRequest}
 import org.springframework.stereotype.Service
 import reward.services.PddService
 
@@ -30,6 +30,17 @@ class PddServiceImpl extends PddService{
   }
 
   override def getClient(): PopHttpClient = client
+
+
+  override def createPidByUserId(userId: Long): String = {
+    val request= new PddDdkGoodsPidGenerateRequest
+    request.setNumber(1L)
+    val response = client.syncInvoke(request)
+    val errorResponse = response.getErrorResponse
+      if(errorResponse != null)
+        throw new RuntimeException(errorResponse.getErrorMsg)
+    response.getPIdGenerateResponse.getPIdList.get(0).getPId
+  }
 
   @tailrec
   private def loopGetAllPid(page:Int=1,pageSize:Int=100,data:List[String]=List()): List[String]={
