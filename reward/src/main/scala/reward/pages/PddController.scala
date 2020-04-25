@@ -2,6 +2,7 @@ package reward.pages
 
 import java.{lang, util}
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.pdd.pop.sdk.common.util.JsonUtil
 import com.pdd.pop.sdk.http.PopHttpClient
 import com.pdd.pop.sdk.http.api.request._
@@ -93,14 +94,14 @@ class PddController {
   @ApiOperation(value="多多进宝推广链接生成",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
   def promotion(
-               @AuthenticationPrincipal user:User,
-               @RequestParam(required = false,defaultValue = "100")
+                 @AuthenticationPrincipal user:User,
+                 @RequestParam(required = false,defaultValue = "100")
                @ApiParam(value="优惠券金额,单位为分",required = false,example="100",defaultValue = "100")
                coupon_amount:Int,
-               @RequestParam(required = true)
+                 @RequestParam(required = true)
                @ApiParam(value="对应的商品ID",required = true)
-               itemid:Long,
-               @RequestParam(defaultValue = "0")
+               item_id:Long,
+                 @RequestParam(defaultValue = "0")
                @ApiParam(value="搜索id",defaultValue = "0",example = "0")
                search_id:String
             )  ={
@@ -111,14 +112,14 @@ class PddController {
       case Some(tr) => tr.pid
       case _ =>
         val pddPid=pddService.createPidByUserId(user.id)
-        traceOrderService.savePid(pddPid,user,coupon_amount,itemid,CommerceType.PDD)
+        traceOrderService.savePid(pddPid,user,coupon_amount,item_id,CommerceType.PDD)
         pddPid
     }
 
     val request = new PddDdkGoodsPromotionUrlGenerateRequest
     request.setPId(pid)
     val ids = new util.ArrayList[java.lang.Long]()
-    ids.add(itemid.toLong)
+    ids.add(item_id.toLong)
     request.setGoodsIdList(ids)
     request.setSearchId(search_id)
     request.setGenerateWeApp(true)
@@ -140,7 +141,7 @@ class PddController {
   def detail(
               @RequestParam(defaultValue = "0",required = true)
               @ApiParam(value="商品ID",defaultValue = "0",example = "0",required = true)
-              itemid:String,
+              item_id:String,
               @RequestParam(defaultValue = "0",required = false)
               @ApiParam(value="搜索id",defaultValue = "0",example = "0",required = false)
               searchId:String
@@ -148,7 +149,7 @@ class PddController {
     val request = new PddDdkGoodsDetailRequest()
 
     val ids = new util.ArrayList[java.lang.Long]()
-    ids.add(itemid.toLong)
+    ids.add(item_id.toLong)
     request.setGoodsIdList(ids)
 
     request.setSearchId(searchId)
@@ -165,6 +166,7 @@ class PddController {
     data.itemtitle = detail.getGoodsName
     data.couponmoney = String.valueOf(detail.getCouponDiscount/100.0)
     data.itemsale = detail.getSalesTip
+    data.itemTextsale= detail.getSalesTip
     data.itemprice = String.valueOf(detail.getMinGroupPrice/100.0)
     data.shopname = detail.getMallName
     data.itemendprice = String.valueOf((detail.getMinGroupPrice - detail.getCouponDiscount)/100.0)
@@ -204,6 +206,7 @@ class PddController {
     if(!StringUtils.isEmpty(keyword)) request.setKeyword(keyword)
     request.setOptId(optMapping.getOrElse(cid,0).toLong)
     request.setListId(min_id)
+    request.setWithCoupon(true)
     request.setSortType(sort_type)
     if(activity_tags != null)
       request.setActivityTags(activity_tags.toList)
@@ -217,6 +220,7 @@ class PddController {
       goods.itemtitle = g.getGoodsName
       goods.couponmoney = String.valueOf(g.getCouponDiscount/100.0)
       goods.itemsale = g.getSalesTip
+      goods.itemTextsale= g.getSalesTip
       goods.itemprice = String.valueOf(g.getMinGroupPrice/100.0)
       goods.shopname = g.getMallName
       goods.shoptype = g.getMerchantType.toString
@@ -239,21 +243,38 @@ class MockHandankuResponse[T] {
   var data:T= _
 }
 class HaodankuGoods{
+  @JsonProperty("item_title")
   var itemtitle:String = _  //goods_name
+  @JsonProperty("coupon_money")
   var couponmoney:String = _ //coupon_discount
+  @JsonProperty("item_sale")
   var itemsale:String = _  //sales_tip
+  @JsonProperty("item_text_sale")
+  var itemTextsale:String = _  //sales_tip
+  @JsonProperty("item_price")
   var itemprice:String = _  //min_group_price
+  @JsonProperty("shop_name")
   var shopname:String = _  // mall_name
+  @JsonProperty("shop_type")
   var shoptype:String=_ // merchant_type
+  @JsonProperty("item_endprice")
   var itemendprice:String = _  // 需要通过优惠券进行计算
+  @JsonProperty("item_pic")
   var itempic:String = _ //goods_image_url
+  @JsonProperty("item_id")
   var itemid:lang.Long = _  // goods_id
+  @JsonProperty("commission_money")
   var tkmoney:lang.Long = _  // goods_id
+  @JsonProperty("commission_rate")
   var tkrates:Int = _  // goods_id
 
+  @JsonProperty("coupon_start_time")
   var start_time:Long = _ //coupon_start_time
+  @JsonProperty("coupon_end_time")
   var end_time:Long = _ //coupon_end_time
+  @JsonProperty("item_desc")
   var itemdesc:String = _  // goods_desc
+  @JsonProperty("item_images")
   var taobao_image:Array[String] = _  // goods_gallery_urls
 
   //增加字段

@@ -81,10 +81,10 @@ class JdController {
                  coupon_amount:Int,
                  @RequestParam(required = true)
                  @ApiParam(value="对应的商品ID",required = true)
-                 itemid:Long,
+                 item_id:Long,
                  @RequestParam(required = false)
                  @ApiParam(value="优惠券链接地址",required =false)
-                 couponurl:String
+                 coupon_url:String
                )  ={
 
     val where = TraceOrder where DSL.column("item.commerceType") === CommerceType.JD and
@@ -94,19 +94,19 @@ class JdController {
       case Some(tr) => tr.pid
       case _ =>
         val jdPid=jdService.createPidByUserId(user.id)
-        traceOrderService.savePid(jdPid,user,coupon_amount,itemid,CommerceType.JD)
+        traceOrderService.savePid(jdPid,user,coupon_amount,item_id,CommerceType.JD)
         jdPid
     }
 
 
     val url = "http://api.web.21ds.cn/jingdong/doItemCpsUrl?"
-    val material="https://item.jd.com/"+itemid+".html"
+    val material="https://item.jd.com/"+item_id+".html"
     val parameters = Map(
       "apkey" -> MYQ_AP_KEY,
       "key_id"->MYQ_JD_CONNECT_KEY,
       "materialId"->material,
       "positionId"->pid,
-      "couponUrl"->URLDecoder.decode(couponurl,"UTF-8")
+      "couponUrl"->URLDecoder.decode(coupon_url,"UTF-8")
     )
 
     // 准备参数

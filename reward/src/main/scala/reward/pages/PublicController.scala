@@ -21,6 +21,7 @@ import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
+import org.springframework.web.client.RestTemplate
 import reward.RewardConstants
 import reward.entities.TraceOrder.CommerceType
 import reward.entities._
@@ -40,12 +41,23 @@ import scala.collection.JavaConversions._
 class PublicController {
   @Autowired
   private val taobaoService:TaobaoService = null
+  private val restTemplate:RestTemplate=new RestTemplate()
   @Autowired
   private val traceOrderService:TraceOrderService= null
   @ApiOperation(value="配置列表",nickname = "config")
   @GetMapping(Array("/config"))
   def config():java.util.List[AppConfig]={
     AppConfig.all.toList
+  }
+  @ApiOperation(value="预抓取")
+  @GetMapping(Array("/pre"))
+  def pre(
+           @RequestParam(required=false)
+           @ApiParam(value="code",required = false)
+           code:String
+         )={
+    val classifies=restTemplate.getForObject("https://v2.api.haodanku.com/super_classify/apikey/gofanli",classOf[String])
+    Map("config"->AppConfig.all.toList,"classifies"->classifies)
   }
   @ApiOperation(value="消息列表",nickname = "annouce")
   @GetMapping(Array("/announces"))
