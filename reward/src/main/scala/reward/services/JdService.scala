@@ -2,6 +2,7 @@ package reward.services
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.jd.open.api.sdk.JdClient
+import jd.union.open.order.query.response.{OrderResp, SkuInfo}
 
 /**
   *
@@ -9,6 +10,9 @@ import com.jd.open.api.sdk.JdClient
   * @since 2020-04-21
   */
 trait JdService {
+  def createOrUpdateOrder(order: OrderResp, sku: SkuInfo): Unit
+
+
   def getClient(): JdClient
   def queryAllPids(): java.util.Queue[String]
   def createPidByUserId(userId:Long):String

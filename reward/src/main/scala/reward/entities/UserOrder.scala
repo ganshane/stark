@@ -55,34 +55,34 @@ class UserOrder extends ActiveRecord with Serializable{
 
   @Transient
   @JsonProperty("order")
-  var taobaoOrder:TaobaoPublisherOrder = _
-  @Transient
-  @JsonProperty("order")
-  var jdOrder:JdOrder= _
-  @Transient
-  @JsonProperty("order")
-  var pddOrder:PddOrder = _
+  var order:AnyRef= _
+//  @Transient
+//  @JsonProperty("order")
+//  var jdOrder:JdOrder= _
+//  @Transient
+//  @JsonProperty("order")
+//  var pddOrder:PddOrder = _
   @Transient
   def setTaobaoOrder(taobaoPublisherOrder: TaobaoPublisherOrder): this.type ={
-    this.taobaoOrder = taobaoPublisherOrder
+    this.order= taobaoPublisherOrder
     this
   }
   @Transient
   def setJdOrder(jdOrderInfo: JdOrder): this.type ={
-    this.jdOrder= jdOrderInfo
+    this.order= jdOrderInfo
     this
   }
   @Transient
   def setPddOrder(pddOrder: PddOrder): this.type ={
-    this.pddOrder= pddOrder
+    this.order= pddOrder
     this
   }
   def initCommerceOrder: this.type = {
     tradeOrder.commerceType match {
       case CommerceType.TAOBAO =>
         setTaobaoOrder(TaobaoPublisherOrder.find(tradeOrder.tradeId))
-      //        case CommerceType.JD =>
-      //          uo.setJdOrder(JdOrder.find(uo.tradeOrder.tradeId))
+      case CommerceType.JD =>
+        setJdOrder(JdOrder.find(tradeOrder.tradeId))
       case CommerceType.PDD =>
         setPddOrder(PddOrder.find(tradeOrder.tradeId))
       case other =>

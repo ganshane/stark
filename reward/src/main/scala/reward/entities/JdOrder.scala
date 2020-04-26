@@ -1,6 +1,7 @@
 package reward.entities
 
-import javax.persistence.{Embeddable, EmbeddedId, Entity, Table}
+import com.fasterxml.jackson.annotation.JsonProperty
+import javax.persistence._
 import org.joda.time.DateTime
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
@@ -10,28 +11,42 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   * @since 2020-04-19
   */
 @Entity
-@Table(name = "jd_order_info")
+@Table(name = "jd_order")
 class JdOrder extends ActiveRecord{
-  @EmbeddedId
-  var tradeId:JdOrderInfoPK = _
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column
+  var id:Long= _
+  @JsonProperty("trade_parent_id")
+  var orderId:Long = _
+  @JsonProperty("item_id")
+  var skuId:Long = _
+  @JsonProperty("tb_paid_time")
   var finishTime:DateTime= _
   var orderTime:DateTime= _
 
+  @JsonProperty("alipay_total_price")
   var actualCosPrice :Int = _
+  @JsonProperty("pub_share_fee")
   var actualFee :Int = _
+  @JsonProperty("pub_share_rate")
   var commissionRate:Int = _
   var estimateCosPrice :Int = _
+  @JsonProperty("pub_share_pre_fee")
   var estimateFee :Int = _
   var finalRate :Int = _
   var cid1:Long = _
   var frozenSkuNum:Long = _
   var pid :String = _
   var positionId :Long = _
+  @JsonProperty("item_price")
   var price :Int = _
   var cid2 :Long = _
   var siteId :Long = _
 
+  @JsonProperty("item_title")
   var skuName :String = _
+  @JsonProperty("item_num")
   var skuNum :Long = _
   var skuReturnNum :Long = _
   var subSideRate :Int = _
@@ -39,40 +54,27 @@ class JdOrder extends ActiveRecord{
   var cid3 :Long = _
   var unionAlias :String = _
   var unionTag :String = _
-  var unionTrafficGroup :String = _
-  var validCode :String = _
+  var unionTrafficGroup :Int= _
+  var validCode :Int= _
   var subUnionId :String = _
-  var traceType :String = _
+  var traceType :Int= _
   var payMonth :String = _
   var popId :Long = _
   var ext1 :String = _
   var cpActId :Long = _
-  var unionRole :String = _
+  var unionRole :Int= _
   var giftCouponKey :String = _
   var giftCouponOcsAmount :Int = _
 
-  var updatedAt:DateTime = _
-}
-object JdOrder extends ActiveRecordInstance[JdOrder]
-@Embeddable
-class JdOrderInfoPK extends Serializable {
-  var orderId:Long = _
-  var skuId:Long = _
-  def this(orderId:Long,skuId:Long){
-    this()
-    this.orderId = orderId
-    this.skuId = skuId
-  }
-  override def hashCode(): Int = {
-    (orderId + skuId).hashCode()
+  @JsonProperty("order_type")
+  @Transient
+  var orderType="jd"
+  @JsonProperty("item_img")
+  @Transient
+  def getItemImg:String={
+    "https://misc.360buyimg.com/jdf/1.0.0/unit/global-header/5.0.0/i/jdlogo-201708-@2x.png"
   }
 
-  override def equals(obj: scala.Any): Boolean = {
-    obj match {
-      case objPk: JdOrderInfoPK =>
-        return objPk.orderId == orderId && objPk.skuId == skuId
-      case _ =>
-    }
-    false
-  }
+//  var updatedAt:DateTime = _
 }
+object JdOrder extends ActiveRecordInstance[JdOrder]

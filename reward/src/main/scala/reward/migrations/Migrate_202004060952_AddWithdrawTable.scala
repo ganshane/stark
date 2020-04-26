@@ -17,7 +17,6 @@ class Migrate_202004060952_AddWithdrawTable extends Migration{
     addColumn("user_order","level",IntegerType,Comment("等级"))
     addColumn("user_order","withdraw_status",IntegerType,Comment("提现状态"))
     alterColumn("user_order","trade_id",BigintType, NotNull,Comment("订单ID"))
-    addIndex("user_order",Array("user_id","trade_id"),Unique)
 
     createTable("user_withdraw",Comment("用户提现记录")){t=>
       t.column("id",BigintType,AutoIncrement,PrimaryKey)

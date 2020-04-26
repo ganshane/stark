@@ -35,5 +35,9 @@ object RewardConstants {
   final val PDD_ORDER_STATUS_FAIL_AUDIT=4
   final val PDD_ORDER_STATUS_CLOSED=5
 
+  final val JD_ORDER_STATUS_PAID=16
+  final val JD_ORDER_STATUS_FAIL=14
+  final val JD_ORDER_STATUS_CLOSED=17
+
   final val COMMISSION_CONFIG_KEY="commission_config"
 }

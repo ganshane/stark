@@ -5,14 +5,15 @@ import java.util.concurrent.TimeUnit
 import com.pdd.pop.sdk.http.api.request.PddDdkOrderListIncrementGetRequest
 import com.taobao.api.request.TbkOrderDetailsGetRequest
 import com.taobao.api.response.TbkOrderDetailsGetResponse
+import jd.union.open.order.query.request.{OrderReq, UnionOpenOrderQueryRequest}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import reward.RewardConstants
 import reward.config.RewardConfig
-import reward.entities.{PddOrder, TaobaoPublisherOrder}
-import reward.services.{PddService, TaobaoService, TaobaoTaskScheduler}
+import reward.entities.{JdOrder, PddOrder, TaobaoPublisherOrder}
+import reward.services.{JdService, PddService, TaobaoService, TaobaoTaskScheduler}
 import stark.activerecord.services.DSL.select
 import stark.utils.services.LoggerSupport
 
@@ -31,6 +32,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
   @Autowired
   private var pddService:PddService = null
   @Autowired
+  private var jdService:JdService= null
+  @Autowired
   private val config:RewardConfig = null
 //  val TaoAppKey = "27706268"
 //  val TaoSecret = "6505ff50b4d72c56fef583b2570593fa"
@@ -39,8 +42,12 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
 
   @Scheduled(fixedDelay = 100000L) //5 * 60 * 1000
   def sync(): Unit ={
-    this.syncTaobaoOrder()
-    this.syncPdd()
+    try { this.syncTaobaoOrder()
+    }catch{case e: Throwable => error(e.getMessage,e)}
+    try { this.syncJd()
+    }catch{case e: Throwable => error(e.getMessage,e)}
+    try { this.syncPdd()
+    }catch{case e: Throwable => error(e.getMessage,e)}
   }
   override def syncTaobaoOrder(): Unit ={
     if(config.taobao != null) {
@@ -123,10 +130,10 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
           DateTime.now().minusDays(3)
       }
     logger.info("sync pdd order with begin time ({})", beginTime)
+    val pageSize = 50
     val request = new PddDdkOrderListIncrementGetRequest
     request.setReturnCount(false)
-    request.setPageSize(100)
-    val pageSize = 50
+    request.setPageSize(pageSize)
 
     def loop(startTime:DateTime,page:Int=1): Unit ={
       request.setPage(page)
@@ -161,6 +168,58 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
     }
     loop(beginTime)
   }
+
+  def syncJd(): Unit ={
+    val orderOpt = JdOrder.where.orderBy(JdOrder.orderTime[DateTime].desc).limit(1).headOption
+    val beginTime =
+      orderOpt match{
+        case Some(order) =>
+          order.orderTime
+        case _ =>
+          DateTime.now().minusDays(3)
+      }
+    logger.info("sync jd order with begin time ({})", beginTime)
+    val request = new UnionOpenOrderQueryRequest
+    val orderReq = new OrderReq
+    val pageSize = 50
+    orderReq.setType(3) //按照订单更新时间查询
+    orderReq.setPageSize(pageSize)
+
+    request.setOrderReq(orderReq)
+
+
+    def loop(startTime:DateTime,page:Int=1): Unit ={
+      var endTime = startTime.plusHours(1)
+      val isAfterNow = endTime.isAfterNow
+      if(isAfterNow){
+        endTime = DateTime.now()
+      }
+      orderReq.setPageNo(page)
+      orderReq.setTime(startTime.toString("yyyyMMddHH")) //设置时间
+
+      val response = jdService.getClient().execute(request)
+      if(response.getCode != 200){
+        throw new RuntimeException(response.getMessage)
+      }
+//      println(JsonUtil.toJson(response))
+      val orderList = response.getData
+      if(orderList != null) {
+        orderList.foreach { order =>
+          order.getSkuList.foreach { sku =>
+            jdService.createOrUpdateOrder(order, sku)
+          }
+        }
+      }
+
+      if(response.getHasMore){//还有数据没取完
+        loop(startTime,page+1)
+      }else if(!isAfterNow) {
+        loop(endTime)
+      }
+    }
+    loop(beginTime)
+  }
+
   private[internal] def setPddService(pddService:PddService): Unit ={
     this.pddService = pddService
   }

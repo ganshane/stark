@@ -94,13 +94,14 @@ class JdController {
       case Some(tr) => tr.pid
       case _ =>
         val jdPid=jdService.createPidByUserId(user.id)
-        traceOrderService.savePid(jdPid,user,coupon_amount,item_id,CommerceType.JD)
         jdPid
     }
+    traceOrderService.savePid(pid,user,coupon_amount,item_id,CommerceType.JD)
 
 
-    val url = "http://api.web.21ds.cn/jingdong/doItemCpsUrl?"
-    val material="https://item.jd.com/"+item_id+".html"
+    val url = "http://api.gofanli.cn/jingdong/doItemCpsUrl?"
+//    val material="https://item.jd.com/"+item_id+".html"
+    val material="https://wqitem.jd.com/item/view?sku="+item_id
     val parameters = Map(
       "apkey" -> MYQ_AP_KEY,
       "key_id"->MYQ_JD_CONNECT_KEY,
