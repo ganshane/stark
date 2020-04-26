@@ -87,6 +87,39 @@ class UserController extends ActiveRecordPageableSupport{
         onlineUser.save()
     }
   }
+  @GetMapping(Array("/orders2"))
+  @ApiOperation(value="得到自己以及下属客户订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  @Secured(Array(RewardConstants.ROLE_USER))
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def orders2(
+              @ApiParam(name="status",allowMultiple=true,value="提现状态",required=false)
+              @RequestParam(name="status",required = false)
+              status:java.util.List[Integer],
+              @AuthenticationPrincipal user:User,
+              @ApiIgnore pageable: Pageable): List[UserOrder]={
+    val uos = UserOrder where UserOrder.userId === user.id
+    if(status != null&&status.size > 0) {
+      uos.and({
+        var condition:Condition  = null
+        status.foreach(s => {
+          if(condition == null)
+            condition = UserOrder.withdrawStatus === WithdrawResult(s)
+          else
+            condition = condition.or(UserOrder.withdrawStatus === WithdrawResult(s))
+        })
+        condition
+      })
+    }
+
+    pageActiveRecordsByPageable(uos,pageable).map(uo=>uo.initCommerceOrder)
+  }
   @GetMapping(Array("/orders"))
   @ApiOperation(value="得到自己以及下属客户订单",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))

@@ -2,6 +2,7 @@ package reward.internal
 
 import java.util.concurrent.TimeUnit
 
+import com.pdd.pop.sdk.http.api.request.PddDdkOrderListIncrementGetRequest
 import com.taobao.api.request.TbkOrderDetailsGetRequest
 import com.taobao.api.response.TbkOrderDetailsGetResponse
 import org.joda.time.DateTime
@@ -10,8 +11,8 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import reward.RewardConstants
 import reward.config.RewardConfig
-import reward.entities.TaobaoPublisherOrder
-import reward.services.{TaobaoService, TaobaoTaskScheduler}
+import reward.entities.{PddOrder, TaobaoPublisherOrder}
+import reward.services.{PddService, TaobaoService, TaobaoTaskScheduler}
 import stark.activerecord.services.DSL.select
 import stark.utils.services.LoggerSupport
 
@@ -28,6 +29,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
   @Autowired
   private val taobaoService:TaobaoService = null
   @Autowired
+  private var pddService:PddService = null
+  @Autowired
   private val config:RewardConfig = null
 //  val TaoAppKey = "27706268"
 //  val TaoSecret = "6505ff50b4d72c56fef583b2570593fa"
@@ -35,6 +38,10 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
   //  val TaoSecret = "c982412aeb22bccc535b918de4165a3a"
 
   @Scheduled(fixedDelay = 100000L) //5 * 60 * 1000
+  def sync(): Unit ={
+    this.syncTaobaoOrder()
+    this.syncPdd()
+  }
   override def syncTaobaoOrder(): Unit ={
     if(config.taobao != null) {
       //test save
@@ -105,7 +112,68 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
     }
     loop(beginTime)
   }
+
+  def syncPdd(): Unit ={
+    val orderOpt = PddOrder.where.orderBy(PddOrder.orderModifyAt[DateTime].desc).limit(1).headOption
+    val beginTime =
+      orderOpt match{
+        case Some(order) =>
+          order.orderModifyAt
+        case _ =>
+          DateTime.now().minusDays(3)
+      }
+    logger.info("sync pdd order with begin time ({})", beginTime)
+    val request = new PddDdkOrderListIncrementGetRequest
+    request.setReturnCount(false)
+    request.setPageSize(100)
+    val pageSize = 50
+
+    def loop(startTime:DateTime,page:Int=1): Unit ={
+      request.setPage(page)
+
+      var endTime = startTime.plusHours(24)
+      val isAfterNow = endTime.isAfterNow
+      if(isAfterNow){
+        endTime = DateTime.now()
+      }
+      val startTimeSeconds = startTime.getMillis /1000 //1587225600000L //
+      val endTimeSeconds = endTime.getMillis /1000 //1587830399999L
+      request.setEndUpdateTime(endTimeSeconds)
+      request.setStartUpdateTime(startTimeSeconds)
+//      println("[pdd] startTime:{},endTime:{}",startTime.toString,endTime.toString)
+//      println(startTimeSeconds,endTimeSeconds)
+      val response = pddService.getClient().syncInvoke(request)
+      if(response.getErrorResponse != null){
+        throw new RuntimeException(response.getErrorResponse.getErrorMsg)
+      }
+      val orderListResponse = response.getOrderListGetResponse
+      val orderList = orderListResponse.getOrderList
+      val it = orderList.iterator()
+      while(it.hasNext){
+        pddService.createOrUpdateOrder(it.next)
+      }
+
+      if(orderList.size() == pageSize){//还有数据没取完
+        loop(startTime,page+1)
+      }else if(!isAfterNow) {
+        loop(endTime)
+      }
+    }
+    loop(beginTime)
+  }
+  private[internal] def setPddService(pddService:PddService): Unit ={
+    this.pddService = pddService
+  }
 }
 
 object TaobaoTaskSchedulerImpl {
+  def main(args: Array[String]): Unit = {
+    val task = new TaobaoTaskSchedulerImpl
+    val pddService = new PddServiceImpl
+    task.setPddService(pddService)
+    task.syncPdd()
+
+//    import scala.collection.JavaConversions._
+//    pddService.queryAllPids().foreach(println)
+  }
 }

@@ -3,8 +3,8 @@ package reward.pages
 import java.{lang, util}
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.pdd.pop.sdk.common.util.JsonUtil
-import com.pdd.pop.sdk.http.PopHttpClient
 import com.pdd.pop.sdk.http.api.request._
 import com.pdd.pop.sdk.http.api.response.PddDdkGoodsPromotionUrlGenerateResponse
 import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
@@ -16,9 +16,8 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import reward.RewardConstants
 import reward.entities.TraceOrder.CommerceType
-import reward.entities.{TraceOrder, User}
+import reward.entities.User
 import reward.services.{PddService, TraceOrderService}
-import stark.activerecord.services.DSL
 
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
@@ -32,10 +31,7 @@ import scala.collection.JavaConversions._
 @Api(value="拼多多",description="拼多多",tags=Array("pdd"))
 @Validated
 class PddController {
-  private val clientId="869872c316ea408fb16b61b0fcdccc0b"
-  private val clientSecret="7735676a0bcc5b42cf26d428b2ef1616041f90f5"
-//  private val pid = "9959558_132231707"
-  private val client = new PopHttpClient(clientId, clientSecret)
+  private val GLOBAL_PDD_PID="9959558_138440038"
   private val optMapping:Map[Int,Int]=Map(
     11  ->  1,
     1 -> 14,
@@ -59,16 +55,18 @@ class PddController {
   private val traceOrderService:TraceOrderService =  null
   @Autowired
   private val pddService:PddService=  null
+  @Autowired
+  private val objectMapper:ObjectMapper=  null
   def opts(): Unit ={
     val request = new PddGoodsOptGetRequest
     request.setParentOptId(0)
-    val response = client.syncInvoke(request)
+    val response = pddService.getClient().syncInvoke(request)
     System.out.println(JsonUtil.transferToJson(response))
   }
   def createPromotionId: Unit ={
     val geRequest = new PddDdkGoodsPidGenerateRequest
     geRequest.setNumber(100L)
-    client.syncInvoke(geRequest)
+    pddService.getClient().syncInvoke(geRequest)
     loopGetAllPid().foreach(println)
   }
   @tailrec
@@ -76,7 +74,7 @@ class PddController {
     val request = new PddDdkGoodsPidQueryRequest
     request.setPage(page)
     request.setPageSize(pageSize)
-    val response = client.syncInvoke(request)
+    val response = pddService.getClient().syncInvoke(request)
     if(response.getErrorResponse == null) {
       val pidResponse = response.getPIdQueryResponse
       val list = pidResponse.getPIdList.toList.map(_.getPId)
@@ -105,26 +103,21 @@ class PddController {
                @ApiParam(value="搜索id",defaultValue = "0",example = "0")
                search_id:String
             )  ={
-    val where = TraceOrder where DSL.column("item.commerceType") === CommerceType.PDD and
-      TraceOrder.userId === user.id limit 1
-    val headOption = where.toList.headOption
-    val pid = headOption match{
-      case Some(tr) => tr.pid
-      case _ =>
-        val pddPid=pddService.createPidByUserId(user.id)
-        traceOrderService.savePid(pddPid,user,coupon_amount,item_id,CommerceType.PDD)
-        pddPid
-    }
+    val pid= GLOBAL_PDD_PID //pddService.createPidByUserId(user.id)
+    traceOrderService.savePid(pid,user,coupon_amount,item_id,CommerceType.PDD)
 
+    val parameter=new PddService.CustomParameter
+    parameter.uid = user.id.toString
     val request = new PddDdkGoodsPromotionUrlGenerateRequest
     request.setPId(pid)
     val ids = new util.ArrayList[java.lang.Long]()
     ids.add(item_id.toLong)
     request.setGoodsIdList(ids)
     request.setSearchId(search_id)
+    request.setCustomParameters(objectMapper.writeValueAsString(parameter))
     request.setGenerateWeApp(true)
 
-    val response = client.syncInvoke(request).getGoodsPromotionUrlGenerateResponse
+    val response = pddService.getClient().syncInvoke(request).getGoodsPromotionUrlGenerateResponse
     val urls = response.getGoodsPromotionUrlList
 
     val haodankuResponse = new MockHandankuResponse[util.List[PddDdkGoodsPromotionUrlGenerateResponse.GoodsPromotionUrlGenerateResponseGoodsPromotionUrlListItem]]
@@ -157,7 +150,7 @@ class PddController {
 //    request.setPid(pid)
 
 
-    val response = client.syncInvoke(request)
+    val response = pddService.getClient().syncInvoke(request)
     val haodankuResponse = new MockHandankuResponse[HaodankuGoods]
     haodankuResponse.code = 1
     val detail = response.getGoodsDetailResponse.getGoodsDetails.head
@@ -211,7 +204,7 @@ class PddController {
     if(activity_tags != null)
       request.setActivityTags(activity_tags.toList)
 
-    val response = client.syncInvoke(request)
+    val response = pddService.getClient().syncInvoke(request)
     val list = response.getGoodsSearchResponse.getGoodsList
     val haodankuResponse = new MockHandankuResponse[Array[HaodankuGoods]]
     haodankuResponse.min_id = response.getGoodsSearchResponse.getListId

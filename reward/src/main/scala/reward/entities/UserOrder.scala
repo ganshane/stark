@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import javax.persistence._
 import org.joda.time.DateTime
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 import reward.entities.TraceOrder.{CommerceType, CommerceTypeToIntegerConverter}
 import reward.entities.UserWithdraw.WithdrawResultConverter
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -18,6 +20,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 @Entity
 @Table(name = "user_order")
 class UserOrder extends ActiveRecord with Serializable{
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
@@ -48,6 +51,44 @@ class UserOrder extends ActiveRecord with Serializable{
   @Convert(converter = classOf[WithdrawResultConverter])
   @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
   var withdrawStatus:UserWithdraw.WithdrawResult.Type =_
+
+
+  @Transient
+  @JsonProperty("order")
+  var taobaoOrder:TaobaoPublisherOrder = _
+  @Transient
+  @JsonProperty("order")
+  var jdOrder:JdOrder= _
+  @Transient
+  @JsonProperty("order")
+  var pddOrder:PddOrder = _
+  @Transient
+  def setTaobaoOrder(taobaoPublisherOrder: TaobaoPublisherOrder): this.type ={
+    this.taobaoOrder = taobaoPublisherOrder
+    this
+  }
+  @Transient
+  def setJdOrder(jdOrderInfo: JdOrder): this.type ={
+    this.jdOrder= jdOrderInfo
+    this
+  }
+  @Transient
+  def setPddOrder(pddOrder: PddOrder): this.type ={
+    this.pddOrder= pddOrder
+    this
+  }
+  def initCommerceOrder: this.type = {
+    tradeOrder.commerceType match {
+      case CommerceType.TAOBAO =>
+        setTaobaoOrder(TaobaoPublisherOrder.find(tradeOrder.tradeId))
+      //        case CommerceType.JD =>
+      //          uo.setJdOrder(JdOrder.find(uo.tradeOrder.tradeId))
+      case CommerceType.PDD =>
+        setPddOrder(PddOrder.find(tradeOrder.tradeId))
+      case other =>
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "wrong commercetype " + other)
+    }
+  }
 }
 
 @Embeddable

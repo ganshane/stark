@@ -27,5 +27,13 @@ object RewardConstants {
   final val ORDER_PAID_STATUS =12
   final val ORDER_CLOSED_STATUS=13
 
+  final val PDD_ORDER_STATUS_UNPAID= -1
+  final val PDD_ORDER_STATUS_PAID=0
+  final val PDD_ORDER_STATUS_GROUPED=1
+  final val PDD_ORDER_STATUS_CONFIRM=2
+  final val PDD_ORDER_STATUS_AUDIT=3
+  final val PDD_ORDER_STATUS_FAIL_AUDIT=4
+  final val PDD_ORDER_STATUS_CLOSED=5
+
   final val COMMISSION_CONFIG_KEY="commission_config"
 }

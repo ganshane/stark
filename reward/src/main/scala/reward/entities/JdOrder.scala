@@ -2,6 +2,7 @@ package reward.entities
 
 import javax.persistence.{Embeddable, EmbeddedId, Entity, Table}
 import org.joda.time.DateTime
+import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
   * 京东订单同步数据
@@ -10,7 +11,7 @@ import org.joda.time.DateTime
   */
 @Entity
 @Table(name = "jd_order_info")
-class JdOrderInfo {
+class JdOrder extends ActiveRecord{
   @EmbeddedId
   var tradeId:JdOrderInfoPK = _
   var finishTime:DateTime= _
@@ -52,6 +53,7 @@ class JdOrderInfo {
 
   var updatedAt:DateTime = _
 }
+object JdOrder extends ActiveRecordInstance[JdOrder]
 @Embeddable
 class JdOrderInfoPK extends Serializable {
   var orderId:Long = _
