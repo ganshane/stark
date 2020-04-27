@@ -263,6 +263,7 @@ class PddServiceImpl extends PddService with LoggerSupport{
             consumption.createdAt=DateTime.now()
             consumption.amount=traceOrder.couponAmount
             consumption.tradeId = tradeId
+            consumption.commerceType =  traceOrder.item.commerceType
             consumption.userId = traceOrder.userId
             consumption.save()
             //更新用户余额

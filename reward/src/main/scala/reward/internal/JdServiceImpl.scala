@@ -291,7 +291,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
             }else if(newStatus <= RewardConstants.JD_ORDER_STATUS_FAIL) {
               WithdrawResult.UNAPPLY
             }else {
-              userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * pddOrder.estimateCosPrice /100).intValue()
+              userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * pddOrder.estimateFee /100).intValue()
               WithdrawResult.PRE_APPLY
             }
 
@@ -311,7 +311,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
             if(order.withdrawStatus == WithdrawResult.CAN_APPLY)
               order.fee = (commissionConfig.findCommissionRate(order.level) * pddOrder.actualFee/100).intValue()
             else if(order.withdrawStatus != WithdrawResult.UNAPPLY){
-              order.preFee = (commissionConfig.findCommissionRate(order.level) * pddOrder.estimateCosPrice/100).intValue()
+              order.preFee = (commissionConfig.findCommissionRate(order.level) * pddOrder.estimateFee/100).intValue()
             }
             order.save()
 
@@ -327,6 +327,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
           consumption.createdAt=DateTime.now()
           consumption.amount=traceOrder.couponAmount
           consumption.tradeId = tradeId
+          consumption.commerceType =  traceOrder.item.commerceType
           consumption.userId = traceOrder.userId
           consumption.save()
           //更新用户余额

@@ -243,6 +243,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             consumption.createdAt=DateTime.now()
             consumption.amount=traceOrder.couponAmount
             consumption.tradeId = taobaoOrder.tradeId
+            consumption.commerceType =  traceOrder.item.commerceType
             consumption.userId = traceOrder.userId
             consumption.save()
             //更新用户余额
@@ -259,17 +260,28 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   }
 
   private val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMATE)
+  private def convertDateTime(value:String) :DateTime ={
+    try{
+      DateTime.parse(value, format)
+    }catch{
+      case e =>
+        logger.error("fail parse datetime value:"+value)
+        null
+    }
+  }
   def copyProperties(taobaoPublisherOrder: TaobaoPublisherOrder,t:PublisherOrderDto): TaobaoPublisherOrder={
     taobaoPublisherOrder.adzoneId = t.getAdzoneId
     taobaoPublisherOrder.adzoneName = t.getAdzoneName
     taobaoPublisherOrder.alimamaRate = t.getAlimamaRate
     taobaoPublisherOrder.alimamaShareFee = t.getAlimamaShareFee
-    taobaoPublisherOrder.alipayTotalPrice = t.getAlipayTotalPrice
+    if(!StringUtils.isEmpty(t.getAlipayTotalPrice))
+      taobaoPublisherOrder.alipayTotalPrice = (t.getAlipayTotalPrice.toDouble * 100).intValue()
     taobaoPublisherOrder.alscId = t.getAlscId
     taobaoPublisherOrder.alscPid = t.getAlscPid
     if(!StringUtils.isEmpty(t.getClickTime))
       taobaoPublisherOrder.clickTime = DateTime.parse(t.getClickTime,format)
-    taobaoPublisherOrder.depositPrice = t.getDepositPrice
+    if(!StringUtils.isEmpty(t.getDepositPrice))
+      taobaoPublisherOrder.depositPrice = (t.getDepositPrice.toDouble * 100).intValue()
     taobaoPublisherOrder.flowSource = t.getFlowSource
     taobaoPublisherOrder.incomeRate = t.getIncomeRate
     taobaoPublisherOrder.itemCategoryName = t.getItemCategoryName
@@ -277,10 +289,12 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     taobaoPublisherOrder.itemImg = t.getItemImg
     taobaoPublisherOrder.itemLink = t.getItemLink
     taobaoPublisherOrder.itemNum = t.getItemNum
-    taobaoPublisherOrder.itemPrice = t.getItemPrice
+    if(!StringUtils.isEmpty(t.getItemPrice))
+      taobaoPublisherOrder.itemPrice = (t.getItemPrice.toDouble * 100).intValue()
     taobaoPublisherOrder.itemTitle = t.getItemTitle
     taobaoPublisherOrder.orderType = t.getOrderType
-    taobaoPublisherOrder.payPrice = t.getPayPrice
+    if(!StringUtils.isEmpty(t.getPayPrice))
+      taobaoPublisherOrder.payPrice = (t.getPayPrice.toDouble * 100).intValue()
     taobaoPublisherOrder.pubId = t.getPubId
     taobaoPublisherOrder.pubShareFee = (t.getPubShareFee.toDouble * 100).intValue()
     taobaoPublisherOrder.pubSharePreFee = (t.getPubSharePreFee.toDouble*100).intValue()
@@ -295,23 +309,26 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     taobaoPublisherOrder.subsidyFee = t.getSubsidyFee
     taobaoPublisherOrder.subsidyRate = t.getSubsidyRate
     taobaoPublisherOrder.subsidyType = t.getSubsidyType
-    taobaoPublisherOrder.tbDepositTime = t.getTbDepositTime
-    taobaoPublisherOrder.tbPaidTime = t.getTbPaidTime
+    if(!StringUtils.isEmpty(t.getTbDepositTime))
+        taobaoPublisherOrder.tbDepositTime = convertDateTime(t.getTbDepositTime)
+    if(!StringUtils.isEmpty(t.getTbPaidTime))
+      taobaoPublisherOrder.tbPaidTime = convertDateTime(t.getTbPaidTime)
     taobaoPublisherOrder.terminalType = t.getTerminalType
     taobaoPublisherOrder.tkCommissionFeeForMediaPlatform = t.getTkCommissionFeeForMediaPlatform
     taobaoPublisherOrder.tkCommissionPreFeeForMediaPlatform = t.getTkCommissionPreFeeForMediaPlatform
     taobaoPublisherOrder.tkCommissionRateForMediaPlatform = t.getTkCommissionRateForMediaPlatform
     if(!StringUtils.isEmpty(t.getTkCreateTime)){
-      taobaoPublisherOrder.tkCreateTime = DateTime.parse(t.getTkCreateTime,format)
+      taobaoPublisherOrder.tkCreateTime = convertDateTime(t.getTkCreateTime)
     }
-    taobaoPublisherOrder.tkDepositTime = t.getTkDepositTime
+    if(!StringUtils.isEmpty(t.getTkDepositTime))
+      taobaoPublisherOrder.tkDepositTime = convertDateTime(t.getTkDepositTime)
     if(!StringUtils.isEmpty(t.getTkEarningTime)){
-      taobaoPublisherOrder.tkEarningTime = DateTime.parse(t.getTkEarningTime,format)
+      taobaoPublisherOrder.tkEarningTime = convertDateTime(t.getTkEarningTime)
     }
 
     taobaoPublisherOrder.tkOrderRole = t.getTkOrderRole
     if(!StringUtils.isEmpty(t.getTkPaidTime)) {
-      taobaoPublisherOrder.tkPaidTime = DateTime.parse(t.getTkPaidTime,format)
+      taobaoPublisherOrder.tkPaidTime = convertDateTime(t.getTkPaidTime)
     }
 
     taobaoPublisherOrder.tkStatus = t.getTkStatus

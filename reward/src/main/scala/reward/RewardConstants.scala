@@ -27,6 +27,8 @@ object RewardConstants {
   final val ORDER_PAID_STATUS =12
   final val ORDER_CLOSED_STATUS=13
 
+  //https://open.pinduoduo.com/#/apidocument/port?portId=pdd.ddk.order.list.increment.get
+  //see order_status
   final val PDD_ORDER_STATUS_UNPAID= -1
   final val PDD_ORDER_STATUS_PAID=0
   final val PDD_ORDER_STATUS_GROUPED=1
@@ -35,6 +37,8 @@ object RewardConstants {
   final val PDD_ORDER_STATUS_FAIL_AUDIT=4
   final val PDD_ORDER_STATUS_CLOSED=5
 
+  //see https://union.jd.com/openplatform/api/10419
+  //see validCode
   final val JD_ORDER_STATUS_PAID=16
   final val JD_ORDER_STATUS_FAIL=14
   final val JD_ORDER_STATUS_CLOSED=17

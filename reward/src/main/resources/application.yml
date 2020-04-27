@@ -18,5 +18,5 @@ logging:
         security: DEBUG
         web: WARN
       hibernate:
-        SQL: debug
+        SQL: WARN
 

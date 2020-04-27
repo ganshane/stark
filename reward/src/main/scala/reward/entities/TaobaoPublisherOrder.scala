@@ -25,7 +25,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="alimama_share_fee")
   var alimamaShareFee:String = _
   @Column(name="alipay_total_price")
-  var alipayTotalPrice:String = _
+  var alipayTotalPrice:Int= _
   @Column(name="alsc_id")
   var alscId:String = _
   @Column(name="alsc_pid")
@@ -33,7 +33,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="click_time")
   var clickTime:DateTime = _
   @Column(name="deposit_price")
-  var depositPrice:String = _
+  var depositPrice:Int= _
   @Column(name="flow_source")
   var flowSource:String = _
   @Column(name="income_rate")
@@ -51,13 +51,13 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @ApiModelProperty(example = "1")
   var itemNum:java.lang.Long = _
   @Column(name="item_price")
-  var itemPrice:String = _
+  var itemPrice:Int= _
   @Column(name="item_title")
   var itemTitle:String = _
   @Column(name="order_type")
   var orderType:String = _
   @Column(name="pay_price")
-  var payPrice:String = _
+  var payPrice:Int= _
   @Column(name="pub_id")
   @ApiModelProperty(example = "1")
   var pubId:java.lang.Long = _
@@ -92,9 +92,9 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="subsidy_type")
   var subsidyType:String = _
   @Column(name="tb_deposit_time")
-  var tbDepositTime:String = _
+  var tbDepositTime:DateTime= _
   @Column(name="tb_paid_time")
-  var tbPaidTime:String = _
+  var tbPaidTime:DateTime = _
   @Column(name="terminal_type")
   var terminalType:String = _
   @Column(name="tk_commission_fee_for_media_platform")
@@ -106,7 +106,7 @@ class TaobaoPublisherOrder extends ActiveRecord{
   @Column(name="tk_create_time")
   var tkCreateTime:DateTime= _
   @Column(name="tk_deposit_time")
-  var tkDepositTime:String = _
+  var tkDepositTime:DateTime = _
   @Column(name="tk_earning_time")
   var tkEarningTime:DateTime= _
   @Column(name="tk_order_role")

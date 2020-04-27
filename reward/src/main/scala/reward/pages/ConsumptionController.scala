@@ -8,7 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
-import reward.entities.{Consumption, TaobaoPublisherOrder, User}
+import reward.entities.{Consumption, User}
 import reward.services.{ActiveRecordPageableSupport, UserService}
 import springfox.documentation.annotations.ApiIgnore
 
@@ -60,9 +60,6 @@ class ConsumptionController extends ActiveRecordPageableSupport{
   ))
   def list(@ApiIgnore pageable: Pageable,@AuthenticationPrincipal user:User):java.util.List[Consumption]={
     val coll=Consumption.find_by_userId(user.id)
-    pageActiveRecordsByPageable(coll,pageable).map(c=>{
-      TaobaoPublisherOrder.findOption(c.tradeId).foreach(o=>c.order=o)
-      c
-    })
+    pageActiveRecordsByPageable(coll,pageable).map(_.initCommerceOrder)
   }
 }

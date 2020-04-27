@@ -58,14 +58,14 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
       //    order.save
       val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime[DateTime].max)
       var maxCreateTime = maxCreateTimeValue.head.asInstanceOf[DateTime]
-      if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(30)
+      if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(90)
       logger.info("sync taobao order with max tkCreateTime ({})", maxCreateTime)
       syncTaobaoOrder(maxCreateTime, 1)
       logger.info("finish to sync taobao order with create time")
 
       val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime[DateTime].max)
       var maxEarningTime = maxEarningTimeValue.head.asInstanceOf[DateTime]
-      if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(30)
+      if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(90)
       logger.info("sync taobao order with max maxEarningTime ({})", maxEarningTime)
       syncTaobaoOrder(maxEarningTime, 3)
       logger.info("finish to sync taobao order with earning time")
@@ -85,19 +85,23 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
 
     @tailrec
     def processResponse(response:TbkOrderDetailsGetResponse) {
-      if (response.getData.getResults != null && response.getData.getResults.size() > 0) {
-        val it = response.getData.getResults.iterator()
-        while(it.hasNext){
-          taobaoService.createOrUpdateOrder(it.next)
+      if (response.isSuccess){
+        if(response.getData.getResults != null) {
+          val it = response.getData.getResults.iterator()
+          while (it.hasNext) {
+            taobaoService.createOrUpdateOrder(it.next)
+          }
+          //休息一秒，避免限流
+          Thread.sleep(TimeUnit.SECONDS.toMillis(2))
+          if (response.getData.getHasNext) {
+            //还有下一页
+            req.setPageNo(response.getData.getPageNo + 1)
+            req.setPositionIndex(response.getData.getPositionIndex)
+            processResponse(client.execute(req))
+          }
         }
-        //休息一秒，避免限流
-        Thread.sleep(TimeUnit.SECONDS.toMillis(2))
-        if (response.getData.getHasNext) {
-          //还有下一页
-          req.setPageNo(response.getData.getPageNo + 1)
-          req.setPositionIndex(response.getData.getPositionIndex)
-          processResponse(client.execute(req))
-        }
+      }else{
+        throw new RuntimeException(response.getBody)
       }
     }
     @tailrec
