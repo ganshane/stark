@@ -78,6 +78,11 @@ class JdOrder extends ActiveRecord with CommerceOrderStatusSupport{
 
   //https://union.jd.com/openplatform/api/10419
   override def getCommerceOrderStatus: Type = {
+    JdOrder.convertAsCommerceOrderStatus(validCode)
+  }
+}
+object JdOrder extends ActiveRecordInstance[JdOrder]{
+  def convertAsCommerceOrderStatus(validCode:Int):CommerceOrderStatus.Type={
     validCode match{
       case 15 =>
         CommerceOrderStatus.NEW
@@ -93,5 +98,5 @@ class JdOrder extends ActiveRecord with CommerceOrderStatusSupport{
         CommerceOrderStatus.UNKNOWN
     }
   }
+
 }
-object JdOrder extends ActiveRecordInstance[JdOrder]

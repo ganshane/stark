@@ -137,12 +137,12 @@ class PddServiceImpl extends PddService with LoggerSupport{
   //https://open.pinduoduo.com/#/apidocument/port?portId=pdd.ddk.order.list.increment.get
   @Transactional
   override def createOrUpdateOrder(originOrder: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem): Unit = {
-    val newStatus = originOrder.getOrderStatus
+    val newStatus = PddOrder.convertAsCommerceOrderStatus(originOrder.getOrderStatus)
     var oldStatus = newStatus
     val pddOrderOpt = PddOrder.find_by_orderSn(originOrder.getOrderSn) headOption
     val pddOrder = pddOrderOpt match{
       case Some(pddOrderEntity) =>
-        oldStatus = pddOrderEntity.orderStatus
+        oldStatus = pddOrderEntity.getCommerceOrderStatus
         copyProperties(pddOrderEntity,originOrder)
       case _ =>
         copyProperties(new PddOrder,originOrder)
@@ -154,13 +154,13 @@ class PddServiceImpl extends PddService with LoggerSupport{
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
     if(userOrders.nonEmpty) { //已经有订单匹配
       if(newStatus != oldStatus &&
-        (newStatus == RewardConstants.PDD_ORDER_STATUS_CLOSED ||
-          newStatus == RewardConstants.PDD_ORDER_STATUS_FAIL_AUDIT
+        (newStatus == CommerceOrderStatus.SETTLED ||
+          newStatus == CommerceOrderStatus.FAIL
           )
       ) { //状态发生变化才进行处理
         userOrders.foreach(uo => {
           //如果佣金已经被支付，则需要调整提现状态
-          if (newStatus == RewardConstants.PDD_ORDER_STATUS_CLOSED ) {
+          if (newStatus == CommerceOrderStatus.SETTLED ) {
             //新状态发生变化
             //收到佣金
             uo.withdrawStatus = WithdrawResult.CAN_APPLY
@@ -174,7 +174,7 @@ class PddServiceImpl extends PddService with LoggerSupport{
             us.withdrawAmount += uo.fee
             us.save()
 
-          } else if (newStatus == RewardConstants.PDD_ORDER_STATUS_FAIL_AUDIT ) {
+          } else if (newStatus == CommerceOrderStatus.FAIL) {
             //订单关闭
             val us = userService.getOrCreateUserStatistic(uo.userId)
             us.preOrderNum -= 1
@@ -221,10 +221,10 @@ class PddServiceImpl extends PddService with LoggerSupport{
             userOrder.tradeOrder= new CommerceOrder(tradeId,CommerceType.PDD)
             userOrder.level = 0
             userOrder.withdrawStatus =
-              if (pddOrder.orderStatus == RewardConstants.PDD_ORDER_STATUS_CLOSED){
+              if (newStatus == CommerceOrderStatus.SETTLED){
                 userOrder.fee=(commissionConfig.findCommissionRate(userOrder.level) * pddOrder.promotionAmount /100).intValue()
                 WithdrawResult.CAN_APPLY
-              }else if(newStatus == RewardConstants.PDD_ORDER_STATUS_FAIL_AUDIT) {
+              }else if(newStatus == CommerceOrderStatus.FAIL) {
                 WithdrawResult.UNAPPLY
               }else {
                 userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * pddOrder.promotionAmount /100).intValue()

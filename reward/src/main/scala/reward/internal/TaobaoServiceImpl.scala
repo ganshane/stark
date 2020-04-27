@@ -130,12 +130,12 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   }
   @Transactional
   override def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit ={
-    val newStatus = originOrder.getTkStatus
+    val newStatus = TaobaoPublisherOrder.convertAsCommerceOrderStatus(originOrder.getTkStatus)
     var oldStatus = newStatus
     val taobaoOrderOpt = TaobaoPublisherOrder.findOption(originOrder.getTradeId.toLong)
     val taobaoOrder = taobaoOrderOpt match{
       case Some(taobaoOrderEntity) =>
-        oldStatus = taobaoOrderEntity.tkStatus
+        oldStatus = taobaoOrderEntity.getCommerceOrderStatus
         copyProperties(taobaoOrderEntity,originOrder)
       case _ =>
         copyProperties(new TaobaoPublisherOrder,originOrder)
@@ -147,11 +147,11 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
     if(userOrders.nonEmpty) { //已经有订单匹配
       if(newStatus != oldStatus &&
-        (newStatus == RewardConstants.TK_PAID_STATUS || newStatus == RewardConstants.ORDER_CLOSED_STATUS)
+        (newStatus == CommerceOrderStatus.SETTLED || newStatus == CommerceOrderStatus.FAIL)
       ) { //状态发生变化才进行处理
         userOrders.foreach(uo => {
           //如果佣金已经被支付，则需要调整提现状态
-          if (newStatus == RewardConstants.TK_PAID_STATUS) {
+          if (newStatus == CommerceOrderStatus.SETTLED) {
             //新状态发生变化
             //收到佣金
             uo.withdrawStatus = WithdrawResult.CAN_APPLY
@@ -165,7 +165,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             us.withdrawAmount += uo.fee
             us.save()
 
-          } else if (newStatus == RewardConstants.ORDER_CLOSED_STATUS ) {
+          } else if (newStatus == CommerceOrderStatus.FAIL) {
             //订单关闭
             val us = userService.getOrCreateUserStatistic(uo.userId)
             us.preOrderNum -= 1
@@ -201,10 +201,10 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
             userOrder.tradeOrder= new CommerceOrder(tradeId,CommerceType.TAOBAO)
             userOrder.level = 0
             userOrder.withdrawStatus =
-              if (taobaoOrder.tkStatus == RewardConstants.TK_PAID_STATUS){
+              if (newStatus == CommerceOrderStatus.SETTLED){
                 userOrder.fee=commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubShareFee /100
                 WithdrawResult.CAN_APPLY
-              }else if(newStatus == RewardConstants.ORDER_CLOSED_STATUS) {
+              }else if(newStatus == CommerceOrderStatus.FAIL) {
                 WithdrawResult.UNAPPLY
               }else {
                 userOrder.preFee = commissionConfig.findCommissionRate(userOrder.level) * taobaoOrder.pubSharePreFee /100

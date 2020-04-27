@@ -56,20 +56,24 @@ class PddOrder extends ActiveRecord with CommerceOrderStatusSupport {
 
   //https://open.pinduoduo.com/#/apidocument/port?portId=pdd.ddk.order.list.increment.get
   override def getCommerceOrderStatus: Type = {
-    orderStatus match{
-      case -1 =>
-        CommerceOrderStatus.NEW
-      case x if x== 0 || x == 1 =>
-        CommerceOrderStatus.PAID
-      case x if x == 2 || x == 3 =>
-        CommerceOrderStatus.FINISHED
-      case x if x == 4 || x == 8 =>
-        CommerceOrderStatus.FAIL
-      case 5 =>
-        CommerceOrderStatus.SETTLED
-      case _ =>
-        CommerceOrderStatus.UNKNOWN
-    }
+    PddOrder.convertAsCommerceOrderStatus(orderStatus)
   }
 }
-object PddOrder extends ActiveRecordInstance[PddOrder]
+object PddOrder extends ActiveRecordInstance[PddOrder]{
+ def convertAsCommerceOrderStatus(orderStatus:Int): CommerceOrderStatus.Type = {
+   orderStatus match{
+     case -1 =>
+       CommerceOrderStatus.NEW
+     case x if x== 0 || x == 1 =>
+       CommerceOrderStatus.PAID
+     case x if x == 2 || x == 3 =>
+       CommerceOrderStatus.FINISHED
+     case x if x == 4 || x == 8 =>
+       CommerceOrderStatus.FAIL
+     case 5 =>
+       CommerceOrderStatus.SETTLED
+     case _ =>
+       CommerceOrderStatus.UNKNOWN
+   }
+ }
+}

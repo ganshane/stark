@@ -210,12 +210,12 @@ class JdServiceImpl extends JdService with LoggerSupport{
 
   @Transactional
   override def createOrUpdateOrder(order: OrderResp, originOrder:SkuInfo): Unit = {
-    val newStatus = originOrder.getValidCode
+    val newStatus = JdOrder.convertAsCommerceOrderStatus(originOrder.getValidCode)
     var oldStatus = newStatus
     val pddOrderOpt = JdOrder.find_by_orderId_and_skuId(order.getOrderId,originOrder.getSkuId) headOption
     val pddOrder = pddOrderOpt match{
       case Some(pddOrderEntity) =>
-        oldStatus = pddOrderEntity.validCode
+        oldStatus = pddOrderEntity.getCommerceOrderStatus
         copyProperties(pddOrderEntity,order,originOrder)
       case _ =>
         copyProperties(new JdOrder,order,originOrder)
@@ -228,13 +228,13 @@ class JdServiceImpl extends JdService with LoggerSupport{
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
     if(userOrders.nonEmpty) { //已经有订单匹配
       if(newStatus != oldStatus &&
-        (newStatus <= RewardConstants.JD_ORDER_STATUS_FAIL ||
-          newStatus == RewardConstants.JD_ORDER_STATUS_CLOSED
+        (newStatus == CommerceOrderStatus.SETTLED ||
+          newStatus == CommerceOrderStatus.FAIL
           )
       ) { //状态发生变化才进行处理
         userOrders.foreach(uo => {
           //如果佣金已经被支付，则需要调整提现状态
-          if (newStatus == RewardConstants.JD_ORDER_STATUS_CLOSED ) {
+          if (newStatus == CommerceOrderStatus.SETTLED) {
             //新状态发生变化
             //收到佣金
             uo.withdrawStatus = WithdrawResult.CAN_APPLY
@@ -248,7 +248,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
             us.withdrawAmount += uo.fee
             us.save()
 
-          } else if (newStatus <= RewardConstants.JD_ORDER_STATUS_FAIL ) {
+          } else if (newStatus == CommerceOrderStatus.FAIL) {
             //订单关闭
             val us = userService.getOrCreateUserStatistic(uo.userId)
             us.preOrderNum -= 1
@@ -285,10 +285,10 @@ class JdServiceImpl extends JdService with LoggerSupport{
           userOrder.tradeOrder= new CommerceOrder(tradeId,CommerceType.JD)
           userOrder.level = 0
           userOrder.withdrawStatus =
-            if (pddOrder.validCode == RewardConstants.JD_ORDER_STATUS_CLOSED){
+            if (newStatus == CommerceOrderStatus.SETTLED){
               userOrder.fee=(commissionConfig.findCommissionRate(userOrder.level) * pddOrder.actualFee  /100).intValue()
               WithdrawResult.CAN_APPLY
-            }else if(newStatus <= RewardConstants.JD_ORDER_STATUS_FAIL) {
+            }else if(newStatus == CommerceOrderStatus.FAIL) {
               WithdrawResult.UNAPPLY
             }else {
               userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * pddOrder.estimateFee /100).intValue()
