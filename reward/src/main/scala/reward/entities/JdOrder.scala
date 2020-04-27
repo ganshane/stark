@@ -49,6 +49,8 @@ class JdOrder extends ActiveRecord with CommerceOrderStatusSupport{
   var skuName :String = _
   @JsonProperty("item_num")
   var skuNum :Long = _
+  @JsonProperty("item_img")
+  var itemImg:String = _
   var skuReturnNum :Long = _
   var subSideRate :Int = _
   var subsidyRate :Int = _
@@ -70,11 +72,11 @@ class JdOrder extends ActiveRecord with CommerceOrderStatusSupport{
   @JsonProperty("order_type")
   @Transient
   var orderType="jd"
-  @JsonProperty("item_img")
-  @Transient
-  def getItemImg:String={
-    "https://misc.360buyimg.com/jdf/1.0.0/unit/global-header/5.0.0/i/jdlogo-201708-@2x.png"
-  }
+//  @JsonProperty("item_img")
+//  @Transient
+//  def getItemImg:String={
+//    "https://misc.360buyimg.com/jdf/1.0.0/unit/global-header/5.0.0/i/jdlogo-201708-@2x.png"
+//  }
 
   //https://union.jd.com/openplatform/api/10419
   override def getCommerceOrderStatus: Type = {

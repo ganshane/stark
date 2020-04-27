@@ -8,12 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.jd.open.api.sdk.{DefaultJdClient, JdClient}
 import javax.transaction.Transactional
+import jd.union.open.goods.promotiongoodsinfo.query.request.UnionOpenGoodsPromotiongoodsinfoQueryRequest
 import jd.union.open.order.query.response.{OrderResp, SkuInfo}
 import jd.union.open.promotion.common.get.request.{PromotionCodeReq, UnionOpenPromotionCommonGetRequest}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Service
+import org.springframework.util.StringUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import reward.RewardConstants
@@ -204,6 +206,17 @@ class JdServiceImpl extends JdService with LoggerSupport{
     jdOrder.giftCouponKey =originOrder.getGiftCouponKey
     jdOrder.giftCouponOcsAmount =(originOrder.getGiftCouponOcsAmount * 100).intValue()
 //    jdOrder.updatedAt=DateTime.now
+
+    if(StringUtils.isEmpty(jdOrder.itemImg)) {
+      val request = new UnionOpenGoodsPromotiongoodsinfoQueryRequest
+      request.setSkuIds(jdOrder.skuId.toString)
+      val response = client.execute(request)
+      if (response.getCode != 200) {
+        throw new RuntimeException(response.getMessage)
+      }
+      jdOrder.itemImg = response.getData()(0).getImgUrl
+    }
+
 
     jdOrder
   }
