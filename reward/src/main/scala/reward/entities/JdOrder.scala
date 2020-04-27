@@ -3,6 +3,7 @@ package reward.entities
 import com.fasterxml.jackson.annotation.JsonProperty
 import javax.persistence._
 import org.joda.time.DateTime
+import reward.entities.CommerceOrderStatus.Type
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -12,7 +13,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "jd_order")
-class JdOrder extends ActiveRecord{
+class JdOrder extends ActiveRecord with CommerceOrderStatusSupport{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
@@ -75,6 +76,22 @@ class JdOrder extends ActiveRecord{
     "https://misc.360buyimg.com/jdf/1.0.0/unit/global-header/5.0.0/i/jdlogo-201708-@2x.png"
   }
 
-//  var updatedAt:DateTime = _
+  //https://union.jd.com/openplatform/api/10419
+  override def getCommerceOrderStatus: Type = {
+    validCode match{
+      case 15 =>
+        CommerceOrderStatus.NEW
+      case 16 =>
+        CommerceOrderStatus.PAID
+      case 17 =>
+        CommerceOrderStatus.FINISHED
+      case 18 =>
+        CommerceOrderStatus.SETTLED
+      case other if other <= 14 =>
+        CommerceOrderStatus.FAIL
+      case _  =>
+        CommerceOrderStatus.UNKNOWN
+    }
+  }
 }
 object JdOrder extends ActiveRecordInstance[JdOrder]

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
+import reward.entities.CommerceOrderStatus.Type
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -14,7 +15,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "taobao_publisher_order")
-class TaobaoPublisherOrder extends ActiveRecord{
+class TaobaoPublisherOrder extends ActiveRecord with CommerceOrderStatusSupport {
   @Column(name="adzone_id")
   @ApiModelProperty(example = "1")
   var adzoneId:java.lang.Long = _
@@ -141,6 +142,27 @@ class TaobaoPublisherOrder extends ActiveRecord{
     this.userOrder = userOrder
     this
   }
+
+  //1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
+  override def getCommerceOrderStatus: Type = {
+    TaobaoPublisherOrder.convertAsCommerceOrderStatus(tkStatus)
+  }
 }
 
-object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]
+object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
+  //1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
+  def convertAsCommerceOrderStatus(tkStatus:Long): Type = {
+    tkStatus.intValue() match{
+      case 3 =>
+        CommerceOrderStatus.SETTLED
+      case 12 =>
+        CommerceOrderStatus.PAID
+      case 13 =>
+        CommerceOrderStatus.FAIL
+      case 14 =>
+        CommerceOrderStatus.FINISHED
+      case _ =>
+        CommerceOrderStatus.UNKNOWN
+    }
+  }
+}

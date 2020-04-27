@@ -23,3 +23,8 @@ class ScalaEnumerationSerializer extends JsonSerializer[Enumeration#Value]{
     gen.writeNumber(value.id)
   }
 }
+class ScalaEnumerationTextSerializer extends JsonSerializer[Enumeration#Value]{
+  override def serialize(value: Enumeration#Value, gen: JsonGenerator, serializers: SerializerProvider): Unit = {
+    gen.writeString(value.toString)
+  }
+}

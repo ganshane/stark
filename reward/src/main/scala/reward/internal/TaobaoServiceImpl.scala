@@ -264,7 +264,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     try{
       DateTime.parse(value, format)
     }catch{
-      case e =>
+      case _: Throwable =>
         logger.error("fail parse datetime value:"+value)
         null
     }

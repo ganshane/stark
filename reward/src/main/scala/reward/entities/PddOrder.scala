@@ -3,6 +3,7 @@ package reward.entities
 import com.fasterxml.jackson.annotation.JsonProperty
 import javax.persistence._
 import org.joda.time.DateTime
+import reward.entities.CommerceOrderStatus.Type
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -12,7 +13,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name="pdd_order")
-class PddOrder extends ActiveRecord{
+class PddOrder extends ActiveRecord with CommerceOrderStatusSupport {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
@@ -53,5 +54,22 @@ class PddOrder extends ActiveRecord{
   @Transient
   def pub_share_pre_fee = this.promotionAmount
 
+  //https://open.pinduoduo.com/#/apidocument/port?portId=pdd.ddk.order.list.increment.get
+  override def getCommerceOrderStatus: Type = {
+    orderStatus match{
+      case -1 =>
+        CommerceOrderStatus.NEW
+      case x if x== 0 || x == 1 =>
+        CommerceOrderStatus.PAID
+      case x if x == 2 || x == 3 =>
+        CommerceOrderStatus.FINISHED
+      case x if x == 4 || x == 8 =>
+        CommerceOrderStatus.FAIL
+      case 5 =>
+        CommerceOrderStatus.SETTLED
+      case _ =>
+        CommerceOrderStatus.UNKNOWN
+    }
+  }
 }
 object PddOrder extends ActiveRecordInstance[PddOrder]

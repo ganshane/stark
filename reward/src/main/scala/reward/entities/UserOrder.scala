@@ -111,13 +111,17 @@ object UserOrder extends ActiveRecordInstance[UserOrder]{
     val objectMapper = new ObjectMapper()
     objectMapper.registerModule(DefaultScalaModule)
 
+    val jdOrder = new JdOrder
+    jdOrder.validCode=13
+    println(objectMapper.writeValueAsString(jdOrder))
+
 //    objectMapper.configure(DeserializationConfig.Feature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 //    objectMapper.configure(SerializationFeature.EAGER_SERIALIZER_FETCH, false)
     val order = new UserOrder
     order.id=123
     order.tradeOrder = new CommerceOrder(929024384375848670L,CommerceType.TAOBAO)
     order.withdrawStatus = UserWithdraw.WithdrawResult.CAN_APPLY
-    objectMapper.writeValue(System.out,order)
+    println(objectMapper.writeValueAsString(order))
   }
 }
 
