@@ -41,6 +41,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
   private val objectMapper:ObjectMapper = null
 
 
+
   @Transactional(propagation = Propagation.MANDATORY)
   override def getOrCreateUserStatistic(userId: Long): UserStatistic = {
     UserStatistic.findOption(userId) match{
@@ -52,6 +53,23 @@ class UserServiceImpl extends LoggerSupport with UserService {
     }
   }
 
+  @Transactional
+  override def doWithdraw(id: Long): UserWithdraw = {
+    val uw = UserWithdraw.find(id)
+    uw.successTime = DateTime.now()
+    uw.sendResult = UserWithdraw.WithdrawResult.SUCCESS
+    uw.save()
+
+    UserStatistic.findOption(uw.userId) match{
+      case Some(us) =>
+        us.totalWithdrawAmount += uw.amount
+        us.save()
+      case _ =>
+        logger.warn("user not found,id:"+uw.userId)
+    }
+
+    uw
+  }
   @Transactional
   override def withdraw(userOrderId:Long,currentUser: User): UserWithdraw ={
     //1.检测是否已经存在提现记录

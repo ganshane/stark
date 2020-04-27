@@ -37,7 +37,7 @@ trait GlobalLoggerConfigurationSupport {
       loggerPrefix foreach { p => properties.put("log4j.category." + p, "info")}
       properties.put("log4j.category.org.apache.zookeeper", "warn")
       properties.put("log4j.category.com.netflix", "warn")
-      properties.put("log4j.category.org.hibernate.SQL", "DEBUG")
+//      properties.put("log4j.category.org.hibernate.SQL", "DEBUG")
 
       PropertyConfigurator.configure(properties)
     }

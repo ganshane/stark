@@ -9,6 +9,8 @@ import reward.entities._
   * @since 2020-03-12
   */
 trait UserService {
+  def doWithdraw(id: Long): UserWithdraw
+
   def withdraw(userOrderId:Long,currentUser: User): UserWithdraw
 
   def getOrCreateUserStatistic(userId:Long): UserStatistic

@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException
 import reward.RewardConstants
 import reward.entities.UserWithdraw.WithdrawResult
 import reward.entities._
-import reward.services.{ActiveRecordPageableSupport, TaobaoService}
+import reward.services.{ActiveRecordPageableSupport, TaobaoService, UserService}
 import springfox.documentation.annotations.ApiIgnore
 import stark.activerecord.services.DSL.delete
 
@@ -33,6 +33,8 @@ import scala.collection.JavaConversions._
 class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRecordPageableSupport{
   @Autowired
   private val objectMapper:ObjectMapper = null
+  @Autowired
+  private val userService:UserService= null
 
   @PostMapping(value=Array("/config/add"),consumes = Array(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
   @ApiOperation(value="增加配置",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
@@ -139,10 +141,7 @@ class AdminController(@Autowired taobaoService: TaobaoService) extends ActiveRec
   def doWithdraw(
                 @ApiParam(name="id",value="ID",required = true,example = "1")
                 @RequestParam id:Long):UserWithdraw ={
-    val uw = UserWithdraw.find(id)
-    uw.successTime = DateTime.now()
-    uw.sendResult = UserWithdraw.WithdrawResult.SUCCESS
-    uw.save()
+    userService.doWithdraw(id)
   }
   @GetMapping(Array("/user/info"))
   @ApiOperation(value="得到用户信息",authorizations = Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
