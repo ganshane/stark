@@ -194,11 +194,11 @@ class PddServiceImpl extends PddService with LoggerSupport{
         */
       val customParameter=
         if(StringUtils.isEmpty(originOrder.getCustomParameters)) {
-//          throw new RuntimeException("custom parameter not found! order_sn:"+originOrder.getOrderSn)
+          throw new RuntimeException("custom parameter not found! order_sn:"+originOrder.getOrderSn)
           //only for test
-          warn("custom parameter not found,order_sn:"+originOrder.getOrderSn)
-          val value="{\"uid\":\"65\"}"
-          objectMapper.readValue(value,classOf[PddService.CustomParameter])
+//          warn("custom parameter not found,order_sn:"+originOrder.getOrderSn)
+//          val value="{\"uid\":\"65\"}"
+//          objectMapper.readValue(value,classOf[PddService.CustomParameter])
         }
         else objectMapper.readValue(originOrder.getCustomParameters,classOf[PddService.CustomParameter])
 
