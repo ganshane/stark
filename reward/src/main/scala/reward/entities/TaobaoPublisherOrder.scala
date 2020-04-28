@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
-import org.slf4j.LoggerFactory
 import reward.entities.CommerceOrderStatus.Type
 import reward.entities.TraceOrder.CommerceType
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
@@ -149,7 +148,7 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
   override def getTradeId: Long = this.tradeId
 
 
-  override def toCommercePK: CommerceOrderPK = new CommerceOrderPK(this.tradeId,CommerceType.TAOBAO)
+  override def toCommerceOrderPK: CommerceOrderPK = new CommerceOrderPK(this.tradeId,CommerceType.TAOBAO)
 
 
 //  override def toCommerceItem: TraceOrder.CommerceItem = new CommerceItem(this.itemId,CommerceType.TAOBAO)
@@ -173,7 +172,6 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
 }
 
 object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
-  private val logger = LoggerFactory getLogger getClass
   //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
   //see tk_status
   def convertAsCommerceOrderStatus(tkStatus:Long): Type = {

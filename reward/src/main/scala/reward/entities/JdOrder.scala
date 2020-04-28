@@ -86,7 +86,7 @@ class JdOrder extends ActiveRecord with CommerceOrder {
 
   override def getTradeId: Long = id
 
-  override def toCommercePK: CommerceOrderPK = new CommerceOrderPK(getTradeId,CommerceType.JD)
+  override def toCommerceOrderPK: CommerceOrderPK = new CommerceOrderPK(getTradeId,CommerceType.JD)
 
   override def getCommission: Int = actualFee
 

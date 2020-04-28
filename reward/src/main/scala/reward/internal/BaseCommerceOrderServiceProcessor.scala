@@ -46,7 +46,7 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
   override def processOrder(originOrder: O): Unit = {
     val(oldStatus,commerceOrderEntity,newStatus) = saveOrUpdate(originOrder)
     val tradeId = commerceOrderEntity.getTradeId
-    val userOrders = UserOrder.find_by_tradeOrder(commerceOrderEntity.toCommercePK)
+    val userOrders = UserOrder.find_by_tradeOrder(commerceOrderEntity.toCommerceOrderPK)
     val appConfigOpt = AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
     if(userOrders.nonEmpty) { //已经有订单匹配
@@ -102,7 +102,7 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
             userOrder.clickTime = commerceOrderEntity.getClickTime
             userOrder.traceTime = traceOrder.createdAt
             userOrder.userId = traceOrder.userId
-            userOrder.tradeOrder=  commerceOrderEntity.toCommercePK //CommerceOrderPK(tradeId,CommerceType.TAOBAO)
+            userOrder.tradeOrder=  commerceOrderEntity.toCommerceOrderPK //CommerceOrderPK(tradeId,CommerceType.TAOBAO)
             userOrder.level = 0
             userOrder.withdrawStatus =
               if (newStatus == CommerceOrderStatus.SETTLED){
@@ -125,7 +125,7 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
                 order.clickTime = commerceOrderEntity.getClickTime
                 order.traceTime = traceOrder.createdAt
                 order.userId = ur.parentId
-                order.tradeOrder = commerceOrderEntity.toCommercePK //new CommerceOrderPK(tradeId,CommerceType.TAOBAO)
+                order.tradeOrder = commerceOrderEntity.toCommerceOrderPK //new CommerceOrderPK(tradeId,CommerceType.TAOBAO)
                 order.level = ur.level
                 order.withdrawStatus = userOrder.withdrawStatus
                 if(order.withdrawStatus == WithdrawResult.CAN_APPLY)
@@ -159,7 +159,7 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
             wxService.sendConsumptionMessage(user.openId,us,traceOrder.couponAmount)
 //          }
         case _ =>
-          warn("commerce order[{}] not traced",commerceOrderEntity.toCommercePK)
+          warn("commerce order[{}] not traced",commerceOrderEntity.toCommerceOrderPK)
       }
     }
   }

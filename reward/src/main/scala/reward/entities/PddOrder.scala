@@ -62,7 +62,7 @@ class PddOrder extends ActiveRecord with CommerceOrder {
 
   override def getTradeId: Long = id
 
-  override def toCommercePK: CommerceOrderPK = new CommerceOrderPK(id,CommerceType.PDD)
+  override def toCommerceOrderPK: CommerceOrderPK = new CommerceOrderPK(id,CommerceType.PDD)
 
   override def getCommission: Int = promotionAmount.intValue()
 
