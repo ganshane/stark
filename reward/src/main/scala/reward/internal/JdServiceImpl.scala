@@ -225,17 +225,17 @@ class JdServiceImpl extends JdService with LoggerSupport{
   override def createOrUpdateOrder(order: OrderResp, originOrder:SkuInfo): Unit = {
     val newStatus = JdOrder.convertAsCommerceOrderStatus(originOrder.getValidCode)
     var oldStatus = newStatus
-    val pddOrderOpt = JdOrder.find_by_orderId_and_skuId(order.getOrderId,originOrder.getSkuId) headOption
-    val pddOrder = pddOrderOpt match{
+    val jdEntityOrderOpt = JdOrder.find_by_orderId_and_skuId(order.getOrderId,originOrder.getSkuId) headOption
+    val jdEntityOrder = jdEntityOrderOpt match{
       case Some(pddOrderEntity) =>
         oldStatus = pddOrderEntity.getCommerceOrderStatus
         copyProperties(pddOrderEntity,order,originOrder)
       case _ =>
         copyProperties(new JdOrder,order,originOrder)
     }
-    pddOrder.save()
+    jdEntityOrder.save()
 
-    val tradeId = pddOrder.id
+    val tradeId = jdEntityOrder.id
     val userOrders = UserOrder.find_by_tradeOrder(new CommerceOrder(tradeId,CommerceType.JD))
     val appConfigOpt = AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
     val commissionConfig = appConfigOpt.map(_.readAsCommissionConfig(objectMapper)).getOrElse(new CommissionConfig)
@@ -251,7 +251,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
             //新状态发生变化
             //收到佣金
             uo.withdrawStatus = WithdrawResult.CAN_APPLY
-            uo.fee = (commissionConfig.findCommissionRate(uo.level) * pddOrder.actualFee/100).intValue()
+            uo.fee = (commissionConfig.findCommissionRate(uo.level) * jdEntityOrder.actualFee/100).intValue()
             uo.save()
 
             val us = userService.getOrCreateUserStatistic(uo.userId)
@@ -277,7 +277,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
       }
     }else { //新的订单数据过来
       /**
-        * 通过pdd的pid commerceType来进行定位
+        * 通过jd的pid commerceType来进行定位
         */
 
       val coll = TraceOrder where
@@ -292,19 +292,19 @@ class JdServiceImpl extends JdService with LoggerSupport{
           //          val minutesDiff = Minutes.minutesBetween(taobaoOrder.clickTime,traceOrder.createdAt).getMinutes
           //          if(minutesDiff < 10) { //当拷贝二维码后，十分钟还未进入手机淘宝的，则忽略
           val userOrder = new UserOrder
-          userOrder.clickTime = pddOrder.orderTime
+          userOrder.clickTime = jdEntityOrder.orderTime
           userOrder.traceTime = traceOrder.createdAt
           userOrder.userId = traceOrder.userId
           userOrder.tradeOrder= new CommerceOrder(tradeId,CommerceType.JD)
           userOrder.level = 0
           userOrder.withdrawStatus =
             if (newStatus == CommerceOrderStatus.SETTLED){
-              userOrder.fee=(commissionConfig.findCommissionRate(userOrder.level) * pddOrder.actualFee  /100).intValue()
+              userOrder.fee=(commissionConfig.findCommissionRate(userOrder.level) * jdEntityOrder.actualFee  /100).intValue()
               WithdrawResult.CAN_APPLY
             }else if(newStatus == CommerceOrderStatus.FAIL) {
               WithdrawResult.UNAPPLY
             }else {
-              userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * pddOrder.estimateFee /100).intValue()
+              userOrder.preFee = (commissionConfig.findCommissionRate(userOrder.level) * jdEntityOrder.estimateFee /100).intValue()
               WithdrawResult.PRE_APPLY
             }
 
@@ -315,16 +315,16 @@ class JdServiceImpl extends JdService with LoggerSupport{
         { //增加父以及爷订单
           UserRelation.find_by_userId(traceOrder.userId).foreach(ur=>{
             val order = new UserOrder
-            order.clickTime = pddOrder.orderTime
+            order.clickTime = jdEntityOrder.orderTime
             order.traceTime = traceOrder.createdAt
             order.userId = ur.parentId
             order.tradeOrder = new CommerceOrder(tradeId,CommerceType.JD)
             order.level = ur.level
             order.withdrawStatus = userOrder.withdrawStatus
             if(order.withdrawStatus == WithdrawResult.CAN_APPLY)
-              order.fee = (commissionConfig.findCommissionRate(order.level) * pddOrder.actualFee/100).intValue()
+              order.fee = (commissionConfig.findCommissionRate(order.level) * jdEntityOrder.actualFee/100).intValue()
             else if(order.withdrawStatus != WithdrawResult.UNAPPLY){
-              order.preFee = (commissionConfig.findCommissionRate(order.level) * pddOrder.estimateFee/100).intValue()
+              order.preFee = (commissionConfig.findCommissionRate(order.level) * jdEntityOrder.estimateFee/100).intValue()
             }
             order.save()
 
