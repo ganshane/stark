@@ -6,17 +6,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.pdd.pop.sdk.http.PopHttpClient
 import com.pdd.pop.sdk.http.api.request.{PddDdkGoodsPidGenerateRequest, PddDdkGoodsPidQueryRequest}
-import com.pdd.pop.sdk.http.api.response.PddDdkOrderListIncrementGetResponse
-import javax.transaction.Transactional
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.util.StringUtils
-import reward.RewardConstants
-import reward.entities.AppConfig.CommissionConfig
-import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
-import reward.entities.UserWithdraw.WithdrawResult
-import reward.entities._
 import reward.services.{PddService, UserService, WxService}
 import stark.utils.services.LoggerSupport
 
@@ -78,6 +69,7 @@ class PddServiceImpl extends PddService with LoggerSupport{
     }
   }
 
+  /*
   def copyProperties(pddOrder: PddOrder, originOrder: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem) :PddOrder= {
     pddOrder.orderSn = originOrder.getOrderSn
     pddOrder.goodsId = originOrder.getGoodsId
@@ -278,5 +270,5 @@ class PddServiceImpl extends PddService with LoggerSupport{
           warn("pdd order[{}] not traced,goodsId:{}",originOrder.getOrderSn,originOrder.getGoodsId)
       }
     }
-  }
+  } */
 }

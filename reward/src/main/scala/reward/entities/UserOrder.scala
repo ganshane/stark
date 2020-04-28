@@ -37,7 +37,7 @@ class UserOrder extends ActiveRecord with Serializable{
 //  var orderType:OrderType.Type=_
   @Embedded
   @JsonUnwrapped
-  var tradeOrder:CommerceOrder = _
+  var tradeOrder:CommerceOrderPK = _
 
   var traceTime:DateTime=_
   var clickTime:DateTime=_
@@ -92,7 +92,7 @@ class UserOrder extends ActiveRecord with Serializable{
 }
 
 @Embeddable
-class CommerceOrder{
+class CommerceOrderPK{
   def this(tradeId:Long,commerceType:CommerceType.Type){
     this()
     this.tradeId  = tradeId
@@ -105,6 +105,10 @@ class CommerceOrder{
   @Convert(converter = classOf[CommerceTypeToIntegerConverter])
   @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
   var commerceType:CommerceType.Type=_
+
+  override def toString: String = {
+    "id:%s,type:%s".format(tradeId,commerceType)
+  }
 }
 object UserOrder extends ActiveRecordInstance[UserOrder]{
   def main(args: Array[String]): Unit = {
@@ -119,7 +123,7 @@ object UserOrder extends ActiveRecordInstance[UserOrder]{
 //    objectMapper.configure(SerializationFeature.EAGER_SERIALIZER_FETCH, false)
     val order = new UserOrder
     order.id=123
-    order.tradeOrder = new CommerceOrder(929024384375848670L,CommerceType.TAOBAO)
+    order.tradeOrder = new CommerceOrderPK(929024384375848670L,CommerceType.TAOBAO)
     order.withdrawStatus = UserWithdraw.WithdrawResult.CAN_APPLY
     println(objectMapper.writeValueAsString(order))
   }

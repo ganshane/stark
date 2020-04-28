@@ -7,22 +7,12 @@ import com.fasterxml.jackson.core.`type`.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.jd.open.api.sdk.{DefaultJdClient, JdClient}
-import javax.transaction.Transactional
-import jd.union.open.goods.promotiongoodsinfo.query.request.UnionOpenGoodsPromotiongoodsinfoQueryRequest
-import jd.union.open.order.query.response.{OrderResp, SkuInfo}
 import jd.union.open.promotion.common.get.request.{PromotionCodeReq, UnionOpenPromotionCommonGetRequest}
-import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Service
-import org.springframework.util.StringUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import reward.RewardConstants
-import reward.entities.AppConfig.CommissionConfig
-import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
-import reward.entities.UserWithdraw.WithdrawResult
-import reward.entities._
 import reward.services.JdService.{MiaoYouQuanResponse, PidData, PromotionPosition}
 import reward.services.{JdService, UserService, WxService}
 import stark.utils.services.LoggerSupport
@@ -152,6 +142,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
     println(response.getMessage)
     println(response.getData)
   }
+  /*
   private def saveUserStatisticFromNewOrder(userOrder: UserOrder): Unit ={
     //更新用户状态
     val us = userService.getOrCreateUserStatistic(userOrder.userId)
@@ -356,6 +347,7 @@ class JdServiceImpl extends JdService with LoggerSupport{
       }
     }
   }
+  */
 }
 
 object JdServiceImpl{

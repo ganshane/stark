@@ -2,7 +2,6 @@ package reward.services
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.pdd.pop.sdk.http.PopHttpClient
-import com.pdd.pop.sdk.http.api.response.PddDdkOrderListIncrementGetResponse
 
 /**
   *
@@ -10,7 +9,7 @@ import com.pdd.pop.sdk.http.api.response.PddDdkOrderListIncrementGetResponse
   * @since 2020-04-21
   */
 trait PddService {
-  def createOrUpdateOrder(order: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem): Unit
+//  def createOrUpdateOrder(order: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem): Unit
 
   def queryAllPids(): java.util.Queue[String]
   def createPidByUserId(userId:Long):String

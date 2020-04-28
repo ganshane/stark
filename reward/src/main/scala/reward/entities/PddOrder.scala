@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.CommerceOrderStatus.Type
+import reward.entities.TraceOrder.CommerceType
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -13,7 +14,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name="pdd_order")
-class PddOrder extends ActiveRecord with CommerceOrderStatusSupport {
+class PddOrder extends ActiveRecord with CommerceOrder {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
@@ -58,6 +59,16 @@ class PddOrder extends ActiveRecord with CommerceOrderStatusSupport {
   override def getCommerceOrderStatus: Type = {
     PddOrder.convertAsCommerceOrderStatus(orderStatus)
   }
+
+  override def getTradeId: Long = id
+
+  override def toCommercePK: CommerceOrderPK = new CommerceOrderPK(id,CommerceType.PDD)
+
+  override def getCommission: Int = promotionAmount.intValue()
+
+  override def getEstimateCommission: Int = promotionAmount.intValue()
+
+  override def getClickTime: DateTime = orderCreateTime
 }
 object PddOrder extends ActiveRecordInstance[PddOrder]{
  def convertAsCommerceOrderStatus(orderStatus:Int): CommerceOrderStatus.Type = {

@@ -11,20 +11,10 @@ import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
 import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, Minutes}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.StringUtils
-import reward.RewardConstants
 import reward.config.RewardConfig
-import reward.entities.AppConfig.CommissionConfig
-import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
-import reward.entities.UserWithdraw.WithdrawResult
-import reward.entities._
 import reward.services.{TaobaoService, UserService, WxService}
 import stark.utils.services.LoggerSupport
 
@@ -114,6 +104,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
 
     response.getCredentials
   }
+  /*
   private def saveUserStatisticFromNewOrder(userOrder: UserOrder): Unit ={
     //更新用户状态
     val us = userService.getOrCreateUserStatistic(userOrder.userId)
@@ -259,7 +250,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     }
   }
 
-  private val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMATE)
+  private val format = DateTimeFormat .forPattern(RewardConstants.TAOBAO_DATETIME_FORMAT)
   private def convertDateTime(value:String) :DateTime ={
     try{
       DateTime.parse(value, format)
@@ -343,4 +334,5 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
 
     taobaoPublisherOrder
   }
+  */
 }

@@ -3,17 +3,20 @@ package reward.internal
 import java.util.concurrent.TimeUnit
 
 import com.pdd.pop.sdk.http.api.request.PddDdkOrderListIncrementGetRequest
+import com.pdd.pop.sdk.http.api.response.PddDdkOrderListIncrementGetResponse
 import com.taobao.api.request.TbkOrderDetailsGetRequest
 import com.taobao.api.response.TbkOrderDetailsGetResponse
+import com.taobao.api.response.TbkOrderDetailsGetResponse.PublisherOrderDto
+import javax.inject.Named
 import jd.union.open.order.query.request.{OrderReq, UnionOpenOrderQueryRequest}
+import jd.union.open.order.query.response.{OrderResp, SkuInfo}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.{JdOrder, PddOrder, TaobaoPublisherOrder}
-import reward.services.{JdService, PddService, TaobaoService, TaobaoTaskScheduler}
+import reward.services._
 import stark.activerecord.services.DSL.select
 import stark.utils.services.LoggerSupport
 
@@ -26,13 +29,22 @@ import scala.annotation.tailrec
   * @since 2020-03-13
   */
 @Service
-class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
+class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with LoggerSupport{
   @Autowired
   private val taobaoService:TaobaoService = null
   @Autowired
   private var pddService:PddService = null
   @Autowired
   private var jdService:JdService= null
+  @Autowired
+  @Named("TAOBAO")
+  private val taobaoCommerceOrderService:CommerceOrderService[PublisherOrderDto,TaobaoPublisherOrder]= null
+  @Autowired
+  @Named("PDD")
+  private val pddCommerceOrderService:CommerceOrderService[PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem,PddOrder]= null
+  @Autowired
+  @Named("JD")
+  private val jdCommerceOrderService:CommerceOrderService[(OrderResp,SkuInfo),JdOrder]= null
   @Autowired
   private val config:RewardConfig = null
 //  val TaoAppKey = "27706268"
@@ -78,6 +90,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
     * @param queryType 查询时间类型，1：按照订单淘客创建时间查询，2:按照订单淘客付款时间查询，3:按照订单淘客结算时间查询
     */
   def syncTaobaoOrder(beginTime:DateTime,queryType:Int): Unit ={
+    val TAOBAO_DATETIME_FORMAT="yyyy-MM-dd HH:mm:ss"
+
     val client = taobaoService.getOrCreateTaobaoClient()
     val req = new TbkOrderDetailsGetRequest
     req.setPageSize(100L)
@@ -89,7 +103,7 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
         if(response.getData.getResults != null) {
           val it = response.getData.getResults.iterator()
           while (it.hasNext) {
-            taobaoService.createOrUpdateOrder(it.next)
+            taobaoCommerceOrderService.processOrder(it.next)
           }
           //休息一秒，避免限流
           Thread.sleep(TimeUnit.SECONDS.toMillis(2))
@@ -114,8 +128,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
       if(isAfterNow){
         endTime = DateTime.now()
       }
-      req.setStartTime(startTime.toString(RewardConstants.TAOBAO_DATETIME_FORMATE))
-      req.setEndTime(endTime.toString(RewardConstants.TAOBAO_DATETIME_FORMATE))
+      req.setStartTime(startTime.toString(TAOBAO_DATETIME_FORMAT))
+      req.setEndTime(endTime.toString(TAOBAO_DATETIME_FORMAT))
       val response = client.execute(req)
       processResponse(response)
 
@@ -161,7 +175,8 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
       val orderList = orderListResponse.getOrderList
       val it = orderList.iterator()
       while(it.hasNext){
-        pddService.createOrUpdateOrder(it.next)
+//        pddService.createOrUpdateOrder(it.next)
+        pddCommerceOrderService.processOrder(it.next())
       }
 
       if(orderList.size() == pageSize){//还有数据没取完
@@ -210,7 +225,7 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
       if(orderList != null) {
         orderList.foreach { order =>
           order.getSkuList.foreach { sku =>
-            jdService.createOrUpdateOrder(order, sku)
+            jdCommerceOrderService.processOrder(order, sku)
           }
         }
       }
@@ -229,9 +244,9 @@ class TaobaoTaskSchedulerImpl extends TaobaoTaskScheduler with LoggerSupport{
   }
 }
 
-object TaobaoTaskSchedulerImpl {
+object SyncCommerceOrderSchedulerImpl {
   def main(args: Array[String]): Unit = {
-    val task = new TaobaoTaskSchedulerImpl
+    val task = new SyncCommerceOrderSchedulerImpl
     val pddService = new PddServiceImpl
     task.setPddService(pddService)
     task.syncPdd()

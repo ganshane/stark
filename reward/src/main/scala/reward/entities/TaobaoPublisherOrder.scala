@@ -1,10 +1,12 @@
 package reward.entities
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
+import org.slf4j.LoggerFactory
 import reward.entities.CommerceOrderStatus.Type
+import reward.entities.TraceOrder.CommerceType
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -15,7 +17,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "taobao_publisher_order")
-class TaobaoPublisherOrder extends ActiveRecord with CommerceOrderStatusSupport {
+class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
   @Column(name="adzone_id")
   @ApiModelProperty(example = "1")
   var adzoneId:java.lang.Long = _
@@ -143,6 +145,27 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrderStatusSupport 
     this
   }
 
+
+  override def getTradeId: Long = this.tradeId
+
+
+  override def toCommercePK: CommerceOrderPK = new CommerceOrderPK(this.tradeId,CommerceType.TAOBAO)
+
+
+//  override def toCommerceItem: TraceOrder.CommerceItem = new CommerceItem(this.itemId,CommerceType.TAOBAO)
+
+  override def getCommission: Int = this.pubShareFee.intValue()
+
+  override def getEstimateCommission: Int = this.pubSharePreFee.intValue()
+
+  @JsonIgnore
+  @Transient
+  def getPositionId: String = "mm_%s_%s_%s".format(pubId, siteId, adzoneId)
+
+//  override def getItemId: Long = itemId
+
+  override def getClickTime: DateTime = clickTime
+
   //1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
   override def getCommerceOrderStatus: Type = {
     TaobaoPublisherOrder.convertAsCommerceOrderStatus(tkStatus)
@@ -150,6 +173,7 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrderStatusSupport 
 }
 
 object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
+  private val logger = LoggerFactory getLogger getClass
   //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
   //see tk_status
   def convertAsCommerceOrderStatus(tkStatus:Long): Type = {
@@ -166,4 +190,5 @@ object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
         CommerceOrderStatus.UNKNOWN
     }
   }
+
 }
