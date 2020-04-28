@@ -20,28 +20,5 @@ object RewardConstants {
   final val ROLE_USER="ROLE_USER"
   final val ROLE_ADMIN="ROLE_ADMIN"
 
-  final val TAOBAO_DATETIME_FORMATE="yyyy-MM-dd HH:mm:ss"
-  //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
-  //see tk_status
-  final val TK_PAID_STATUS =3
-  final val ORDER_PAID_STATUS =12
-  final val ORDER_CLOSED_STATUS=13
-
-  //https://open.pinduoduo.com/#/apidocument/port?portId=pdd.ddk.order.list.increment.get
-  //see order_status
-  final val PDD_ORDER_STATUS_UNPAID= -1
-  final val PDD_ORDER_STATUS_PAID=0
-  final val PDD_ORDER_STATUS_GROUPED=1
-  final val PDD_ORDER_STATUS_CONFIRM=2
-  final val PDD_ORDER_STATUS_AUDIT=3
-  final val PDD_ORDER_STATUS_FAIL_AUDIT=4
-  final val PDD_ORDER_STATUS_CLOSED=5
-
-  //see https://union.jd.com/openplatform/api/10419
-  //see validCode
-  final val JD_ORDER_STATUS_PAID=16
-  final val JD_ORDER_STATUS_FAIL=14
-  final val JD_ORDER_STATUS_CLOSED=17
-
   final val COMMISSION_CONFIG_KEY="commission_config"
 }

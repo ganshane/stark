@@ -150,7 +150,8 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrderStatusSupport 
 }
 
 object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
-  //1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
+  //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
+  //see tk_status
   def convertAsCommerceOrderStatus(tkStatus:Long): Type = {
     tkStatus.intValue() match{
       case 3 =>

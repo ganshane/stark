@@ -15,6 +15,7 @@ import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
 import reward.RewardConstants
+import reward.entities.TraceOrder.CommerceType
 import reward.entities._
 import reward.services.{UserService, WxService}
 import stark.activerecord.services.DSL._
@@ -83,15 +84,21 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"订单未找到")
     }
     //3.检测原始订单状态
-    val taobaoOrderOpt = TaobaoPublisherOrder.findOption(userOrder.tradeOrder.tradeId)
-    val taobaoOrder = taobaoOrderOpt match{
-      case Some(to) =>
-        // see https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
-        // 3 已付佣金
-        if(to.tkStatus != RewardConstants.TK_PAID_STATUS){
+    val commerceOrderOpt = {
+      userOrder.tradeOrder.commerceType match{
+        case CommerceType.TAOBAO =>
+          TaobaoPublisherOrder.findOption(userOrder.tradeOrder.tradeId)
+        case CommerceType.JD=>
+          JdOrder.findOption(userOrder.tradeOrder.tradeId)
+        case CommerceType.PDD=>
+          PddOrder.findOption(userOrder.tradeOrder.tradeId)
+      }
+    }
+    commerceOrderOpt match{
+      case Some(o) =>
+        if(o.getCommerceOrderStatus != CommerceOrderStatus.SETTLED){
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"订单尚不能提现")
         }
-        to
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"原始订单未找到")
     }
     //4.检测是否存在对应佣金配置
@@ -109,7 +116,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
     }
     //5.申请提现
     val userWithdraw = new UserWithdraw
-    userWithdraw.amount = (rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
+    userWithdraw.amount = userOrder.fee //(rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
     userWithdraw.level = userOrder.level
     //红包订单ID,原始订单ID和当前用户的id
     userWithdraw.redPackId="%s%010d".format(userOrder.tradeOrder.tradeId,currentUser.id)
