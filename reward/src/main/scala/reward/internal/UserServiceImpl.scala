@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.{Propagation, Transactional}
 import org.springframework.util.DigestUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
-import reward.RewardConstants
 import reward.entities.TraceOrder.CommerceType
 import reward.entities._
 import reward.services.{UserService, WxService}
@@ -61,6 +60,15 @@ class UserServiceImpl extends LoggerSupport with UserService {
     uw.sendResult = UserWithdraw.WithdrawResult.SUCCESS
     uw.save()
 
+    //提现成功后更新UserOrder提现状态
+    UserOrder.findOption(uw.userOrderId) match{
+      case Some(uo) =>
+        uo.withdrawStatus = uw.sendResult
+        uo.save()
+      case _ =>
+        logger.warn("UserOrder not found,id:"+uw.userOrderId)
+    }
+
     UserStatistic.findOption(uw.userId) match{
       case Some(us) =>
         us.totalWithdrawAmount += uw.amount
@@ -102,6 +110,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case _ => throw new ResponseStatusException(HttpStatus.NOT_FOUND,"原始订单未找到")
     }
     //4.检测是否存在对应佣金配置
+    /*
     val commissionConfigOpt= AppConfig.find_by_key(RewardConstants.COMMISSION_CONFIG_KEY).headOption
     val commissionConfig = commissionConfigOpt match{
       case Some(cc) =>
@@ -114,6 +123,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
       case 2=> commissionConfig.level_2
       case _ =>throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"错误的用户等级")
     }
+    */
     //5.申请提现
     val userWithdraw = new UserWithdraw
     userWithdraw.amount = userOrder.fee //(rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
