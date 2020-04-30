@@ -1,6 +1,7 @@
 package reward.services
 import com.aliyuncs.auth.sts.AssumeRoleResponse
 import com.taobao.api.TaobaoClient
+import reward.entities.User
 
 /**
   *
@@ -8,7 +9,7 @@ import com.taobao.api.TaobaoClient
   * @since 2020-03-14
   */
 trait TaobaoService {
-  def getJsClientAccessInfo():java.util.HashMap[String,Any]
+  def getJsClientAccessInfo(user:User):java.util.HashMap[String,Any]
   def getOssAccessInfo(): AssumeRoleResponse.Credentials
   def getOrCreateTaobaoClient(): TaobaoClient
 //  def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.annotations.{Api, ApiOperation, ApiParam, Authorization}
 import javax.imageio.ImageIO
 import me.chanjar.weixin.common.bean.WxAccessToken
+import me.chanjar.weixin.common.error.WxErrorException
 import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
@@ -66,6 +67,7 @@ class WxController {
 
   @GetMapping(value = Array("/qr/custom"), produces = Array(MediaType.IMAGE_JPEG_VALUE))
   @ResponseBody
+  @throws(classOf[WxErrorException])
   def qr(
           @RequestParam @ApiParam(name = "page", required = true) page: String,
           @RequestParam @ApiParam(name = "scene", required = true) scene: String

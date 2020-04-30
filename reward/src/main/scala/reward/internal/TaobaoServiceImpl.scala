@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import com.aliyun.oss.OSSClientBuilder
 import com.aliyun.oss.common.utils.BinaryUtil
-import com.aliyun.oss.model.PolicyConditions
+import com.aliyun.oss.model.{MatchMode, PolicyConditions}
 import com.aliyuncs.DefaultAcsClient
 import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
 import com.aliyuncs.http.MethodType
@@ -15,6 +15,7 @@ import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import reward.config.RewardConfig
+import reward.entities.User
 import reward.services.{TaobaoService, UserService, WxService}
 import stark.utils.services.LoggerSupport
 
@@ -42,14 +43,14 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
-  override def getJsClientAccessInfo()={
+  override def getJsClientAccessInfo(user:User)={
 //    val accessId = this.config.aliyun.id //"<yourAccessKeyId>" // 请填写您的AccessKeyId。
 //    val accessKey = this.config.aliyun.secret //"<yourAccessKeySecret>" // 请填写您的AccessKeySecret。
     val endpointHost = "oss-cn-qingdao.aliyuncs.com" // 请填写您的 endpoint。
     val bucket = "taofenxiang" // 请填写您的 bucketname 。
     val host = "https://" + bucket + "." + endpointHost // host的格式为 bucketname.endpoint
 
-    val dir = "2020/receiving_qr" // 用户上传文件时指定的前缀。
+    val dir = "2020/"+user.id // 用户上传文件时指定的前缀。
 
 
 //    val client = new OSSClient(endpoint, accessId, accessKey)
@@ -59,6 +60,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     val policyConds = new PolicyConditions
     policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000)
 //    policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir)
+    policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir)
 
     if(this.credentialExpiredTime < System.currentTimeMillis()){
       this.initCredential()
