@@ -23,16 +23,16 @@ class JdOrder extends ActiveRecord with CommerceOrder {
   var orderId:Long = _
   @JsonProperty("item_id")
   var skuId:Long = _
-  @JsonProperty("tb_paid_time")
   var finishTime:DateTime= _
+  @JsonProperty("tb_paid_time")
   var orderTime:DateTime= _
 
-  @JsonProperty("alipay_total_price")
   var actualCosPrice :Int = _
   @JsonProperty("pub_share_fee")
   var actualFee :Int = _
   @JsonProperty("pub_share_rate")
   var commissionRate:Int = _
+  @JsonProperty("alipay_total_price")
   var estimateCosPrice :Int = _
   @JsonProperty("pub_share_pre_fee")
   var estimateFee :Int = _

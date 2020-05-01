@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 
 import com.aliyun.oss.OSSClientBuilder
 import com.aliyun.oss.common.utils.BinaryUtil
-import com.aliyun.oss.model.{MatchMode, PolicyConditions}
+import com.aliyun.oss.model.PolicyConditions
 import com.aliyuncs.DefaultAcsClient
 import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
 import com.aliyuncs.http.MethodType
@@ -59,8 +59,8 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     val expiration = new Date(expireEndTime)
     val policyConds = new PolicyConditions
     policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000)
+    //TODO 前端开通后，需要打开此行
 //    policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir)
-    policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, dir)
 
     if(this.credentialExpiredTime < System.currentTimeMillis()){
       this.initCredential()
