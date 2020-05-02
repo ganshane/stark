@@ -142,21 +142,25 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
             traceOrder.status = TraceOrderStatus.DETECTED
             traceOrder.detectedTime = DateTime.now()
             traceOrder.save()
-            //更新消费记录
-            val consumption = new Consumption
-            consumption.createdAt=DateTime.now()
-            consumption.amount=traceOrder.couponAmount
-            consumption.tradeId = commerceOrderEntity.getTradeId
-            consumption.commerceType =  traceOrder.item.commerceType
-            consumption.userId = traceOrder.userId
-            consumption.save()
-            //更新用户余额
-            val us = userService.getOrCreateUserStatistic(traceOrder.userId)
-            us.consumptionAmount += traceOrder.couponAmount
-            us.lastConsume = DateTime.now
-            us.save()
-            val user = User.find(traceOrder.userId)
-            wxService.sendConsumptionMessage(user.openId,us,traceOrder.couponAmount)
+
+            //当且仅当有优惠金额的时候才对账户余额进行更新处理
+            if(traceOrder.couponAmount > 0) {
+              //更新消费记录
+              val consumption = new Consumption
+              consumption.createdAt = DateTime.now()
+              consumption.amount = traceOrder.couponAmount
+              consumption.tradeId = commerceOrderEntity.getTradeId
+              consumption.commerceType = traceOrder.item.commerceType
+              consumption.userId = traceOrder.userId
+              consumption.save()
+              //更新用户余额
+              val us = userService.getOrCreateUserStatistic(traceOrder.userId)
+              us.consumptionAmount += traceOrder.couponAmount
+              us.lastConsume = DateTime.now
+              us.save()
+              val user = User.find(traceOrder.userId)
+              wxService.sendConsumptionMessage(user.openId, us, traceOrder.couponAmount)
+            }
 //          }
         case _ =>
           warn("commerce order[{}] not traced",commerceOrderPK)

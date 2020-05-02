@@ -10,6 +10,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import io.swagger.annotations.{Api, ApiOperation, ApiParam}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.util.StringUtils
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.{GetMapping, RequestMapping, RequestParam, RestController}
 import org.springframework.web.client.RestTemplate
@@ -106,8 +107,7 @@ class JdController {
       "apkey" -> MYQ_AP_KEY,
       "key_id"->MYQ_JD_CONNECT_KEY,
       "materialId"->material,
-      "positionId"->pid,
-      "couponUrl"->URLDecoder.decode(coupon_url,"UTF-8")
+      "positionId"->pid
     )
 
     // 准备参数
@@ -116,6 +116,10 @@ class JdController {
       case (k,v) => uriComponentsBuilder.queryParam(k, v)
       case _ =>
     }
+    //假如优惠券不为空
+    if(!StringUtils.isEmpty(coupon_url))
+      uriComponentsBuilder.queryParam("couponUrl",URLDecoder.decode(coupon_url,"UTF-8"))
+
     val uri = uriComponentsBuilder.build().encode().toUri
 
     val json = restTemplate.getForObject(uri,classOf[String])
