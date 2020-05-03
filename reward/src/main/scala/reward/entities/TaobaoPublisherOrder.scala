@@ -25,7 +25,7 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
   @Column(name="alimama_rate")
   var alimamaRate:String = _
   @Column(name="alimama_share_fee")
-  var alimamaShareFee:String = _
+  var alimamaShareFee:Int= _
   @Column(name="alipay_total_price")
   var alipayTotalPrice:Int= _
   @Column(name="alsc_id")
@@ -153,7 +153,9 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
 
 //  override def toCommerceItem: TraceOrder.CommerceItem = new CommerceItem(this.itemId,CommerceType.TAOBAO)
 
-  override def getCommission: Int = this.pubShareFee.intValue()
+  override def getCommission: Int = {
+    this.pubShareFee - this.alimamaShareFee
+  }
 
   override def getEstimateCommission: Int = this.pubSharePreFee.intValue()
 

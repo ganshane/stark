@@ -70,7 +70,7 @@ class TaobaoCommerceOrderService extends BaseCommerceOrderServiceProcessor[Publi
     taobaoPublisherOrder.adzoneId = t.getAdzoneId
     taobaoPublisherOrder.adzoneName = t.getAdzoneName
     taobaoPublisherOrder.alimamaRate = t.getAlimamaRate
-    taobaoPublisherOrder.alimamaShareFee = t.getAlimamaShareFee
+    taobaoPublisherOrder.alimamaShareFee = (t.getAlimamaShareFee.toDouble * 100).intValue()
     if(!StringUtils.isEmpty(t.getAlipayTotalPrice))
       taobaoPublisherOrder.alipayTotalPrice = (t.getAlipayTotalPrice.toDouble * 100).intValue()
     taobaoPublisherOrder.alscId = t.getAlscId

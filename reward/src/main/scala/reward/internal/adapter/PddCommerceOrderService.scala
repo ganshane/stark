@@ -81,7 +81,7 @@ class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOr
     pddOrder.goodsPrice = originOrder.getGoodsPrice
     pddOrder.orderAmount = originOrder.getOrderAmount
     pddOrder.pId = originOrder.getPId
-    pddOrder.promotionRate = originOrder.getPromotionRate
+    pddOrder.promotionRate = originOrder.getPromotionRate/10 //拼多多的佣金比率是1000分的整数
     pddOrder.promotionAmount = originOrder.getPromotionAmount
     pddOrder.orderStatus = originOrder.getOrderStatus
     pddOrder.orderStatusDesc = originOrder.getOrderStatusDesc

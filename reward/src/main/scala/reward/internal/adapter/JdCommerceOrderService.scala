@@ -70,10 +70,10 @@ class JdCommerceOrderService extends BaseCommerceOrderServiceProcessor[(OrderRes
       jdOrder.orderTime=new DateTime(order.getOrderTime)
     jdOrder.actualCosPrice =(originOrder.getActualCosPrice * 100).intValue()
     jdOrder.actualFee =(originOrder.getActualFee*100).intValue()
-    jdOrder.commissionRate=(originOrder.getCommissionRate*100).intValue()
+    jdOrder.commissionRate= originOrder.getCommissionRate.intValue()
     jdOrder.estimateCosPrice =(originOrder.getEstimateCosPrice*100).intValue()
     jdOrder.estimateFee =(originOrder.getEstimateFee * 100).intValue()
-    jdOrder.finalRate =(originOrder.getFinalRate*100).intValue()
+    jdOrder.finalRate = originOrder.getFinalRate.intValue()
     jdOrder.cid1=originOrder.getCid1
     jdOrder.frozenSkuNum=originOrder.getFrozenSkuNum
     jdOrder.pid =originOrder.getPid
