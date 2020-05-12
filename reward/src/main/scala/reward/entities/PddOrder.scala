@@ -1,6 +1,8 @@
 package reward.entities
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.CommerceOrderStatus.Type
@@ -25,7 +27,8 @@ class PddOrder extends ActiveRecord with CommerceOrder {
   @JsonProperty("item_img")var goodsThumbnailUrl:String = _
   @JsonProperty("item_num")var goodsQuantity:Long = _
   @JsonProperty("item_price")var goodsPrice:Long = _
-  @JsonProperty("alipay_total_price")var orderAmount:Long = _
+  @Column(name="order_amount")
+  @JsonProperty("alipay_total_price")var pddUserAmount:Long = _
   @JsonProperty("p_id")var pId :String= _
   @JsonProperty("pub_share_rate")var promotionRate:Long = _
   @JsonProperty("pub_share_fee")var promotionAmount:Long = _
@@ -69,8 +72,30 @@ class PddOrder extends ActiveRecord with CommerceOrder {
   override def getEstimateCommission: Int = promotionAmount.intValue()
 
   override def getClickTime: DateTime = orderCreateTime
+
+
+  override def getItemId: String = this.goodsId.toString
+  override def getItemTitle: String = this.goodsName
+  override def getItemPic=this.goodsThumbnailUrl
+  override def getItemPrice: Int = this.goodsPrice.intValue()
+  override def getShopType: String = "pdd"
+  override def getShopName: String = null
+  override def getOrderId: String = this.orderSn
+  override def getPaidTime=this.orderPayTime
+  override def getOrderAmount: Int = this.pddUserAmount.intValue()
+  override def getEarningTime=this.orderSettleTime
+
+  override def getItemNum: Int = this.goodsQuantity.intValue()
 }
 object PddOrder extends ActiveRecordInstance[PddOrder]{
+  def main(args: Array[String]): Unit = {
+    val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+    val order = new PddOrder
+    order.orderId = "asdf"
+    order.pddUserAmount=213
+    println(objectMapper.writeValueAsString(order))
+  }
  def convertAsCommerceOrderStatus(orderStatus:Int): CommerceOrderStatus.Type = {
    orderStatus match{
      case -1 =>

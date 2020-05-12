@@ -1,6 +1,8 @@
 package reward.entities
 
 import com.fasterxml.jackson.annotation.{JsonIgnore, JsonProperty}
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence._
 import org.joda.time.DateTime
@@ -45,17 +47,26 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
   @Column(name="item_id")
   @ApiModelProperty(example = "1")
   var itemId:java.lang.Long = _
+  @Column(name="item_title")
+  var itemTitle:String = _
+  @Column(name="item_price")
+  var itemPrice:Int= _
+  @Transient @JsonProperty("item_endprice")
+  def getItemEndPrice:Int = this.alipayTotalPrice
+  @Column(name="tk_earning_time")
+  @JsonProperty("earning_time")
+  var tkEarningTime:DateTime= _
+  @Column(name="tk_paid_time")
+  @JsonProperty("paid_time")
+  var tkPaidTime:DateTime= _
+
   @Column(name="item_img")
   var itemImg:String = _
   @Column(name="item_link")
   var itemLink:String = _
   @Column(name="item_num")
-  @ApiModelProperty(example = "1")
+  @JsonIgnore
   var itemNum:java.lang.Long = _
-  @Column(name="item_price")
-  var itemPrice:Int= _
-  @Column(name="item_title")
-  var itemTitle:String = _
   @Column(name="order_type")
   var orderType:String = _
   @Column(name="pay_price")
@@ -109,13 +120,9 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
   var tkCreateTime:DateTime= _
   @Column(name="tk_deposit_time")
   var tkDepositTime:DateTime = _
-  @Column(name="tk_earning_time")
-  var tkEarningTime:DateTime= _
   @Column(name="tk_order_role")
   @ApiModelProperty(example = "1")
   var tkOrderRole:java.lang.Long = _
-  @Column(name="tk_paid_time")
-  var tkPaidTime:DateTime= _
   /*
       已付款：指订单已付款，但还未确认收货 已收货：指订单已确认收货，但商家佣金未支付 已结算：指订单已确认收货，且商家佣金已支付成功 已失效：指订单关闭/订单佣金小于0.01元，订单关闭主要有：1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
    */
@@ -169,14 +176,53 @@ class TaobaoPublisherOrder extends ActiveRecord with CommerceOrder{
 
   //1）买家超时未付款； 2）买家付款前，买家/卖家取消了订单；3）订单付款后发起售中退款成功；3：订单结算，12：订单付款， 13：订单失效，14：订单成功
   override def getCommerceOrderStatus: Type = {
-    TaobaoPublisherOrder.convertAsCommerceOrderStatus(tkStatus)
+    if(tkStatus != null)
+      TaobaoPublisherOrder.convertAsCommerceOrderStatus(tkStatus)
+    else CommerceOrderStatus.UNKNOWN
   }
+
+  override def getItemId: String = if(this.itemId != null) this.itemId.toString else null
+  override def getItemTitle: String = this.itemTitle
+  override def getItemPic:String = this.itemImg
+  override def getItemPrice: Int = this.itemPrice
+
+  override def getPaidTime: DateTime = this.tkPaidTime
+
+  override def getEarningTime: DateTime = this.tkEarningTime
+
+  override def getShopType: String = {
+    this.orderType match{
+      case "天猫" => "tm"
+      case "淘宝" => "tb"
+      case "聚划算" => "jhs"
+      case _ =>
+        this.orderType
+    }
+  }
+
+  override def getShopName: String = this.sellerShopTitle
+
+  override def getOrderId: String = this.tradeParentId
+
+  override def getOrderAmount: Int = this.alipayTotalPrice.intValue()
+
+  override def getItemNum: Int = this.itemNum.intValue()
 }
 
 object TaobaoPublisherOrder extends ActiveRecordInstance[TaobaoPublisherOrder]{
+  def main(args: Array[String]): Unit = {
+    val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+    val order = new TaobaoPublisherOrder
+    order.itemTitle = "asdf"
+    order.itemNum = 1L
+    println(objectMapper.writeValueAsString(order))
+  }
   //https://open.taobao.com/api.htm?spm=a2e0r.13193907.0.0.233424adiQRoB7&docId=43328&docType=2
   //see tk_status
   def convertAsCommerceOrderStatus(tkStatus:Long): Type = {
+    if(tkStatus == null) return CommerceOrderStatus.UNKNOWN
+
     tkStatus.intValue() match{
       case 3 =>
         CommerceOrderStatus.SETTLED

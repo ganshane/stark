@@ -107,7 +107,7 @@ class PddController {
     traceOrderService.savePid(pid,user,coupon_amount,item_id,CommerceType.PDD)
 
     val parameter=new PddService.CustomParameter
-    parameter.uid = user.id.toString
+    parameter.uid = user.id
     val request = new PddDdkGoodsPromotionUrlGenerateRequest
     request.setPId(pid)
     val ids = new util.ArrayList[java.lang.Long]()

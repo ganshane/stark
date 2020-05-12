@@ -34,7 +34,7 @@ class JdCommerceOrderService extends BaseCommerceOrderServiceProcessor[(OrderRes
     val order = originOrders._1
     val newStatus = JdOrder.convertAsCommerceOrderStatus(originOrder.getValidCode)
     var oldStatus = newStatus
-    val jdEntityOrderOpt = JdOrder.find_by_orderId_and_skuId(order.getOrderId,originOrder.getSkuId) headOption
+    val jdEntityOrderOpt = JdOrder.find_by_jdOrderId_and_skuId(order.getOrderId,originOrder.getSkuId) headOption
     val jdEntityOrder = jdEntityOrderOpt match{
       case Some(pddOrderEntity) =>
         oldStatus = pddOrderEntity.getCommerceOrderStatus
@@ -62,7 +62,7 @@ class JdCommerceOrderService extends BaseCommerceOrderServiceProcessor[(OrderRes
     coll headOption
   }
   private def copyProperties(jdOrder: JdOrder,order:OrderResp,originOrder: SkuInfo):JdOrder = {
-    jdOrder.orderId=order.getOrderId
+    jdOrder.jdOrderId=order.getOrderId
     jdOrder.skuId = originOrder.getSkuId
     if(order.getFinishTime > 0)
       jdOrder.finishTime=new DateTime(order.getFinishTime)

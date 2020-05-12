@@ -1,6 +1,8 @@
 package reward.entities
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.CommerceOrderStatus.Type
@@ -19,13 +21,15 @@ class JdOrder extends ActiveRecord with CommerceOrder {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column
   var id:Long= _
-  @JsonProperty("trade_parent_id")
-  var orderId:Long = _
+  @Column(name="order_id")
+  @JsonProperty(value="trade_parent_id",access = JsonProperty.Access.READ_ONLY)
+  var jdOrderId:Long = _
   @JsonProperty("item_id")
   var skuId:Long = _
   var finishTime:DateTime= _
   @JsonProperty("tb_paid_time")
   var orderTime:DateTime= _
+
 
   var actualCosPrice :Int = _
   @JsonProperty("pub_share_fee")
@@ -34,6 +38,9 @@ class JdOrder extends ActiveRecord with CommerceOrder {
   var commissionRate:Int = _
   @JsonProperty("alipay_total_price")
   var estimateCosPrice :Int = _
+  @Transient @JsonProperty("item_endprice")
+  def getItemEndprice=this.estimateCosPrice
+
   @JsonProperty("pub_share_pre_fee")
   var estimateFee :Int = _
   var finalRate :Int = _
@@ -93,8 +100,35 @@ class JdOrder extends ActiveRecord with CommerceOrder {
   override def getEstimateCommission: Int = estimateFee
 
   override def getClickTime: DateTime = orderTime
+
+  override def getItemId: String = this.skuId.toString
+
+  override def getItemTitle: String = this.skuName
+
+  override def getItemPrice: Int = this.price
+
+  override def getShopType: String = "JD"
+
+  override def getShopName: String = null
+
+  override def getOrderId: String = this.jdOrderId.toString
+
+  override def getOrderAmount: Int =this.actualCosPrice
+
+  override def getItemNum: Int = this.skuNum.intValue()
+  def getItemPic=this.itemImg
+  def getEarningTime=this.finishTime
+  def getPaidTime=this.orderTime
 }
 object JdOrder extends ActiveRecordInstance[JdOrder]{
+  def main(args: Array[String]): Unit = {
+    val objectMapper = new ObjectMapper()
+    objectMapper.registerModule(DefaultScalaModule)
+    val order = new JdOrder
+    order.skuName = "asdf"
+    order.jdOrderId=12L
+    println(objectMapper.writeValueAsString(order))
+  }
   def convertAsCommerceOrderStatus(validCode:Int):CommerceOrderStatus.Type={
     validCode match{
       case 15 =>

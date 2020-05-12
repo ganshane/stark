@@ -1,6 +1,6 @@
 package reward.services
 
-import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.pdd.pop.sdk.http.PopHttpClient
 
 /**
@@ -17,9 +17,8 @@ trait PddService {
 }
 object  PddService{
   class CustomParameter{
-    var uid:String = _
+    @JsonProperty(required = true)
+    var uid:Long= _
     var sid:String = _
-    @JsonIgnore
-    def userId:Long = uid.toLong
   }
 }

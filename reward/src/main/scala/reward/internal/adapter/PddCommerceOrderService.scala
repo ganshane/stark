@@ -12,6 +12,7 @@ import reward.entities.TraceOrder.{CommerceItem, CommerceType, TraceOrderStatus}
 import reward.entities.{PddOrder, TraceOrder}
 import reward.internal.BaseCommerceOrderServiceProcessor
 import reward.services.PddService
+import reward.services.PddService.CustomParameter
 
 /**
   *
@@ -50,26 +51,37 @@ class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOr
     * @return TraceOrder entity
     */
   override def findTraceOrderOption(entity: PddOrder): Option[TraceOrder] = {
-    val customParameter=
-      if(StringUtils.isEmpty(entity.customParameters)) {
-//        throw new RuntimeException("custom parameter not found! order_sn:"+entity.orderSn)
-//        only for test
-        warn("custom parameter not found,order_sn:"+entity.orderSn)
-        val value="{\"uid\":\"65\"}"
-        objectMapper.readValue(value,classOf[PddService.CustomParameter])
+    val customParameterOpt:Option[CustomParameter]= {
+      try {
+        if (StringUtils.isEmpty(entity.customParameters)) {
+          //        throw new RuntimeException("custom parameter not found! order_sn:"+entity.orderSn)
+          //        only for test
+          warn("custom parameter not found,order_sn:" + entity.orderSn)
+          val value = "{\"uid\":\"65\"}"
+          Some(objectMapper.readValue(value, classOf[PddService.CustomParameter]))
+        }else Some(objectMapper.readValue(entity.customParameters, classOf[PddService.CustomParameter]))
+      } catch {
+        case e: Throwable =>
+          logger.error("customParameters:{}",entity.customParameters)
+          logger.error(e.getMessage, e)
+          None
       }
-      else objectMapper.readValue(entity.customParameters,classOf[PddService.CustomParameter])
+    }
+    customParameterOpt match{
+      case Some(customParameter) =>
+        val coll = TraceOrder where
+          //        TraceOrder.pid === pid and
+          TraceOrder.userId === customParameter.uid and
+          TraceOrder.item === new CommerceItem(entity.goodsId,CommerceType.PDD) and
+          TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
+          //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
+          TraceOrder.createdAt[DateTime].desc limit 1
 
-    val coll = TraceOrder where
-      //        TraceOrder.pid === pid and
-      TraceOrder.userId === customParameter.userId and
-      TraceOrder.item === new CommerceItem(entity.goodsId,CommerceType.PDD) and
-      TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
-      //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
-      TraceOrder.createdAt[DateTime].desc limit 1
-
-    coll headOption
-
+        coll headOption
+      case _ =>
+        logger.error("customParameters:{}",entity.customParameters)
+        None
+    }
   }
 
   private def copyProperties(pddOrder: PddOrder, originOrder: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem) :PddOrder= {
@@ -79,7 +91,7 @@ class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOr
     pddOrder.goodsThumbnailUrl = originOrder.getGoodsThumbnailUrl
     pddOrder.goodsQuantity = originOrder.getGoodsQuantity
     pddOrder.goodsPrice = originOrder.getGoodsPrice
-    pddOrder.orderAmount = originOrder.getOrderAmount
+    pddOrder.pddUserAmount = originOrder.getOrderAmount
     pddOrder.pId = originOrder.getPId
     pddOrder.promotionRate = originOrder.getPromotionRate/10 //拼多多的佣金比率是1000分的整数
     pddOrder.promotionAmount = originOrder.getPromotionAmount
