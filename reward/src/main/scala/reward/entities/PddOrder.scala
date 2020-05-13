@@ -7,6 +7,7 @@ import javax.persistence._
 import org.joda.time.DateTime
 import reward.entities.CommerceOrderStatus.Type
 import reward.entities.TraceOrder.CommerceType
+import reward.services.PddService
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 /**
@@ -95,6 +96,10 @@ object PddOrder extends ActiveRecordInstance[PddOrder]{
     order.orderId = "asdf"
     order.pddUserAmount=213
     println(objectMapper.writeValueAsString(order))
+    val value="{\"showId\":\"20200512_29522047_01\"}"
+    val obj = objectMapper.readValue(value, classOf[PddService.CustomParameter])
+    println(obj.uid)
+    println(obj.showId)
   }
  def convertAsCommerceOrderStatus(orderStatus:Int): CommerceOrderStatus.Type = {
    orderStatus match{

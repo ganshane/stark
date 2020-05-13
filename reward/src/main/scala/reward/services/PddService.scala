@@ -17,8 +17,10 @@ trait PddService {
 }
 object  PddService{
   class CustomParameter{
-    @JsonProperty(required = true)
-    var uid:Long= _
+    @JsonProperty
+    var uid:String = _
+    @JsonProperty
+    var showId:String = _
     var sid:String = _
   }
 }
