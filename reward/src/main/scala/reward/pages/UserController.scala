@@ -156,18 +156,37 @@ class UserController extends ActiveRecordPageableSupport{
   @GetMapping(Array("/son"))
   @ApiOperation(value="得到儿子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
-  def son(@AuthenticationPrincipal user:User): List[User]={
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def son(@AuthenticationPrincipal user:User,@ApiIgnore pageable: Pageable): List[User]={
     //等级为1
     val urs = select[UserRelation] where UserRelation.parentId === user.id and UserRelation.level === 1
-    urs.map(ur=>User.find(ur.userId)).toList
+    pageActiveRecordsByPageable(urs,pageable).map(ur=>User.find(ur.userId))
+//    urs.map(ur=>User.find(ur.userId)).toList
   }
   @GetMapping(Array("/grandson"))
   @ApiOperation(value="得到孙子级",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   @Secured(Array(RewardConstants.ROLE_USER))
-  def grandson(@AuthenticationPrincipal user:User): List[User]={
+  @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+      value = "抓取的页数(0..N)"),
+    new ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+      value = "每页多少条记录."),
+    new ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+      value = "对查询进行排序，格式为: property(,asc|desc).支持多种排序,传递多个sort参数")
+  ))
+  def grandson(@AuthenticationPrincipal user:User,@ApiIgnore pageable: Pageable): List[User]={
     //等级为1
     val urs = select[UserRelation] where UserRelation.parentId === user.id and UserRelation.level === 2
-    urs.map(ur=>User.find(ur.userId)).toList
+
+    pageActiveRecordsByPageable(urs,pageable).map(ur=>User.find(ur.userId))
+//    urs.map(ur=>User.find(ur.userId)).toList
   }
   @PostMapping(Array("/logout"))
   @ApiOperation(value="登出",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
