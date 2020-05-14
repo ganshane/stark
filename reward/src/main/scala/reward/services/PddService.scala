@@ -19,7 +19,7 @@ object  PddService{
   class CustomParameter{
     @JsonProperty
     var uid:String = _
-    @JsonProperty
+    @JsonProperty("showId")
     var showId:String = _
     var sid:String = _
   }

@@ -24,6 +24,7 @@ import reward.services.PddService.CustomParameter
 class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem, PddOrder] {
   @Autowired
   private val objectMapper: ObjectMapper = null
+  private val ZHIBO_USER_ID=65L
 
   /**
     * save or update origin order information.
@@ -68,25 +69,28 @@ class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOr
           None
       }
     }
-    val userId: Long =
-      customParameterOpt match {
-        case Some(customParameter) if customParameter.uid != null => customParameter.uid.toLong
-        case Some(customParameter) if customParameter.showId != null => 65L //直播订单
-        case _ =>
-          logger.error("customParameters:{}", entity.customParameters)
-          -1L
-      }
-    if (userId > 0) {
-      val coll = TraceOrder where
-        //        TraceOrder.pid === pid and
-        TraceOrder.userId === userId and
-        TraceOrder.item === new CommerceItem(entity.goodsId, CommerceType.PDD) and
-        TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
-        //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
-        TraceOrder.createdAt[DateTime].desc limit 1
+    customParameterOpt match {
+      case Some(customParameter) if customParameter.uid != null =>
+        val coll = TraceOrder where
+          //        TraceOrder.pid === pid and
+          TraceOrder.userId === customParameter.uid.toLong and
+          TraceOrder.item === new CommerceItem(entity.goodsId, CommerceType.PDD) and
+          TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
+          //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
+          TraceOrder.createdAt[DateTime].desc limit 1
 
-      coll headOption
-    } else None
+        coll headOption
+      case Some(customParameter) if customParameter.showId != null => //直播订单
+
+        val coll = TraceOrder where
+          TraceOrder.userId === ZHIBO_USER_ID  orderBy
+          TraceOrder.createdAt[DateTime].desc limit 1
+
+        coll headOption
+      case _ =>
+        logger.error("customParameters:{}", entity.customParameters)
+        None
+    }
   }
 
   private def copyProperties(pddOrder: PddOrder, originOrder: PddDdkOrderListIncrementGetResponse.OrderListGetResponseOrderListItem): PddOrder = {
