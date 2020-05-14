@@ -14,6 +14,7 @@ import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
   */
 @Entity
 @Table(name = "consumption")
+@deprecated(message = "采用UserOrder的consumptionMoney来记录消费值")
 class Consumption extends ActiveRecord{
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

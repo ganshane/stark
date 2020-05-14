@@ -51,6 +51,7 @@ class UserOrder extends ActiveRecord with Serializable{
   @Convert(converter = classOf[WithdrawResultConverter])
   @JsonSerialize(using=classOf[ScalaEnumerationSerializer])
   var withdrawStatus:UserWithdraw.WithdrawResult.Type =_
+  var consumptionMoney:Int = _
 
 
   @Transient

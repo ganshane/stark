@@ -102,6 +102,9 @@ class UserController extends ActiveRecordPageableSupport{
               @ApiParam(name="status",allowMultiple=true,value="提现状态",required=false)
               @RequestParam(name="status",required = false)
               status:java.util.List[Integer],
+              @ApiParam(name="level",value="用户等级",required=false,defaultValue = "-1")
+              @RequestParam(name="level",required = false,defaultValue = "-1")
+              level:Int,
               @AuthenticationPrincipal user:User,
               @ApiIgnore pageable: Pageable): List[UserOrder]={
     val uos = UserOrder where UserOrder.userId === user.id
@@ -116,6 +119,9 @@ class UserController extends ActiveRecordPageableSupport{
         })
         condition
       })
+    }
+    if(level >= 0){
+      uos.and(UserOrder.level === level)
     }
 
     pageActiveRecordsByPageable(uos,pageable).map(uo=>uo.initCommerceOrder)

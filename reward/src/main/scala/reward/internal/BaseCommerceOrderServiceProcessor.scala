@@ -102,6 +102,7 @@ abstract class BaseCommerceOrderServiceProcessor[O,E <: CommerceOrder] extends C
             userOrder.clickTime = commerceOrderEntity.getClickTime
             userOrder.traceTime = traceOrder.createdAt
             userOrder.userId = traceOrder.userId
+            userOrder.consumptionMoney = traceOrder.couponAmount //增加消费记录
             userOrder.tradeOrder=  commerceOrderPK //CommerceOrderPK(tradeId,CommerceType.TAOBAO)
             userOrder.level = 0
             userOrder.withdrawStatus =
