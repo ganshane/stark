@@ -1,10 +1,13 @@
 package reward.pages
 
+import java.net.URLDecoder
+
 import io.swagger.annotations._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.util.Base64Utils
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import reward.RewardConstants
@@ -28,6 +31,35 @@ class RechargeController extends ActiveRecordPageableSupport{
   @Autowired
   private val userService:UserService = null
 
+  import java.io.UnsupportedEncodingException
+
+  @throws[UnsupportedEncodingException]
+  private def splitQuery(scene: String): Map[String,String]= {
+    var parameters = Map[String,String]()
+    val pairs = scene.split("&")
+    for (pair <- pairs) {
+      val idx = pair.indexOf("=")
+      val key = if (idx > 0) URLDecoder.decode(pair.substring(0, idx), "UTF-8")
+      else pair
+      parameters += key-> URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
+    }
+    parameters
+  }
+  @PostMapping(Array("/add/v2"))
+  @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
+  def add(
+           @RequestParam(name="scene",required = true)
+           @ApiParam(value="二维码内容",required = true)
+           scene:String,
+           @ApiIgnore
+           @AuthenticationPrincipal user:User
+         ): Recharge ={
+    val contentDecoded = Base64Utils.decodeFromString(scene.substring(3))
+
+    val parameters = splitQuery(new String(contentDecoded))
+//    const { no, secret } = api.parseSceneParameters(contentDecoded)
+    userService.recharge(parameters("no"),parameters("secret"),user)
+  }
   @PostMapping(Array("/add"))
   @ApiOperation(value="充值",authorizations=Array(new Authorization(RewardConstants.GLOBAL_AUTH)))
   def add(

@@ -18,7 +18,7 @@
     <!-- <module>stark-rpc</module> -->
     <module>stark-migration</module>
     <module>stark-utils</module>
-    <module>stark-webservice</module>
+    <!--<module>stark-webservice</module>-->
     <module>reward</module>
   </modules>
   <scm>
