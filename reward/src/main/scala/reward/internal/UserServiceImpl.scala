@@ -129,7 +129,8 @@ class UserServiceImpl extends LoggerSupport with UserService {
     userWithdraw.amount = userOrder.fee //(rate * (taobaoOrder.pubShareFee.toDouble*100)).intValue()
     userWithdraw.level = userOrder.level
     //红包订单ID,原始订单ID和当前用户的id
-    userWithdraw.redPackId="%s%010d".format(userOrder.tradeOrder.tradeId,currentUser.id)
+//    userWithdraw.redPackId="%s%010d".format(userOrder.tradeOrder.tradeId,currentUser.id)
+    userWithdraw.redPackId="9%010d".format(userOrder.id)
     userWithdraw.sendResult = UserWithdraw.WithdrawResult.APPLY
     userWithdraw.userId = currentUser.id
     userWithdraw.userOrderId = userOrderId

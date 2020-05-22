@@ -21,13 +21,14 @@ import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
-import org.springframework.http.{HttpEntity, HttpHeaders, MediaType}
+import org.springframework.http.{HttpEntity, HttpHeaders, HttpStatus, MediaType}
 import org.springframework.security.access.annotation.Secured
 import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation._
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.server.ResponseStatusException
 import reward.RewardConstants
 import reward.config.RewardConfig
 import reward.entities.{OnlineUser, User}
@@ -65,6 +66,30 @@ class WxController {
     Map("code" -> onlineUser.token)
   }
 
+  @GetMapping(value = Array("/qr/v2"), produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  @ResponseBody
+  @throws(classOf[WxErrorException])
+  def qr2(
+          @RequestParam(required=true) @ApiParam(name = "page_id", required = true) page_id: Int,
+          @RequestParam @ApiParam(name = "scene", required = true) scene: String
+        ): BufferedImage = {
+    val page = page_id match{
+      case 1 => //商品详情页
+         "pages/detail/index"
+      case 2 => //登录界面
+        "pages/me/login"
+      case _ =>
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"错误的请求,page_id:"+page_id+",scene:"+scene)
+
+    }
+    val file = weixinPopular.getQrcodeService.createWxaCodeUnlimit(scene, page)
+    val fis = new FileInputStream(file)
+    try {
+      ImageIO.read(fis)
+    } finally {
+      IOUtils.closeQuietly(fis)
+    }
+  }
   @GetMapping(value = Array("/qr/custom"), produces = Array(MediaType.IMAGE_JPEG_VALUE))
   @ResponseBody
   @throws(classOf[WxErrorException])
