@@ -21,8 +21,11 @@
             <xs:element type="databaseType" name="database" minOccurs="1" maxOccurs="1"/>
             <xs:element type="jpaType" name="jpa"/>
             <xs:element type="wechatMpType" name="wechat_mp" minOccurs="1" maxOccurs="1"/>
-            <xs:element type="apiConfigType" name="taobao" maxOccurs="1" minOccurs="0"/>
+            <!--<xs:element type="apiConfigType" name="taobao" maxOccurs="1" minOccurs="0"/>-->
             <xs:element type="aliyunConfigType" name="aliyun" maxOccurs="1" minOccurs="0"/>
+            <xs:element type="jpaType" name="taobao" maxOccurs="1" minOccurs="0"/>
+            <xs:element type="jpaType" name="jd" maxOccurs="1" minOccurs="0"/>
+            <xs:element type="jpaType" name="pdd" maxOccurs="1" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 

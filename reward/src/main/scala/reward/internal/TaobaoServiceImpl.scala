@@ -26,7 +26,7 @@ import stark.utils.services.LoggerSupport
   */
 @Service
 class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
-  private lazy val taobaoClient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao.id, config.taobao.secret)
+  private lazy val taobaoClient = new DefaultTaobaoClient("http://gw.api.taobao.com/router/rest", config.taobao("id"), config.taobao("secret"))
   private lazy val endpoint = "sts.aliyuncs.com"
   private lazy val roleSessionName = "reward"
   @Autowired

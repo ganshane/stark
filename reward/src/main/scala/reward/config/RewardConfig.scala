@@ -1,6 +1,9 @@
 package reward.config
 
+import java.util
+
 import javax.xml.bind.annotation._
+import javax.xml.bind.annotation.adapters.{XmlAdapter, XmlJavaTypeAdapter}
 import stark.activerecord.config.ActiveRecordConfigSupport
 import stark.utils.services.WebServerConfigSupport
 
@@ -22,10 +25,18 @@ class RewardConfig
   var db: DatabaseConfig = new DatabaseConfig()
   @XmlElement(name = "wechat_mp")
   var wechat: WechatMpConfig= new WechatMpConfig()
-  @XmlElement(name = "taobao")
-  var taobao: ApiConfig= _
   @XmlElement(name = "aliyun")
   var aliyun: AliyunConfig= _
+
+  @XmlElement(name = "taobao")
+  @XmlJavaTypeAdapter(classOf[MyHashMapAdapter])
+  var taobao:Map[String,String] = _
+  @XmlElementWrapper(name = "jd")
+  @XmlElement(name = "property")
+  var jd = new util.ArrayList[PlatformProperty]
+  @XmlElementWrapper(name = "pdd")
+  @XmlElement(name = "property")
+  var pdd = new util.ArrayList[PlatformProperty]
 }
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "DatabaseConfig")
@@ -65,4 +76,31 @@ class ApiConfig{
 class AliyunConfig extends ApiConfig {
   @XmlAttribute(name = "arn")
   var arn: String = _
+}
+@XmlRootElement(name = "property")
+@XmlType(name = "PlatformProperty")
+class PlatformProperty {
+  @XmlAttribute(name = "name")
+  var name: String = null
+  @XmlAttribute(name = "value")
+  var value: String = null
+}
+final class MyHashMapWrapper{
+  @XmlElement(name = "property")
+  var list=  new util.ArrayList[PlatformProperty]()
+}
+final class MyHashMapAdapter extends XmlAdapter[MyHashMapWrapper,Map[String,String]]{
+  override def unmarshal(v: MyHashMapWrapper): Map[String, String] = {
+    var map = Map[String,String]()
+    if(v!= null) {
+      val it = v.list.iterator()
+      while(it.hasNext){
+        val property = it.next()
+        map +=  property.name->property.value
+      }
+    }
+    map
+  }
+
+  override def marshal(v: Map[String, String]): MyHashMapWrapper = ???
 }
