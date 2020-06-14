@@ -123,7 +123,11 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
       req.setPositionIndex(null) //clear position
       req.setPageNo(1L) //new query
 
-      var endTime = startTime.plusHours(3) //订单查询结束时间，订单开始时间至订单结束时间，中间时间段日常要求不超过3个小时，但如618、双11、年货节等大促期间预估时间段不可超过20分钟，超过会提示错误，调用时请务必注意时间段的选择，以保证亲能正常调用！
+//      var endTime = startTime.plusHours(3) //订单查询结束时间，订单开始时间至订单结束时间，中间时间段日常要求不超过3个小时，但如618、双11、年货节等大促期间预估时间段不可超过20分钟，超过会提示错误，调用时请务必注意时间段的选择，以保证亲能正常调用！
+      //亲，订单开始时间至订单结束时间的时间段是180分钟，时间段日
+      //常要求不超过3个小时，但如618、双11、年货节等大促期间预估时间段不可超过20分钟，超过会提示错误，调用时请务必注意时间段的选择，以保证
+      //亲能正常调用！
+      var endTime = startTime.plusMinutes(20) //订单查询结束时间，订单开始时间至订单结束时间，中间时间段日常要求不超过3个小时，但如618、双11、年货节等大促期间预估时间段不可超过20分钟，超过会提示错误，调用时请务必注意时间段的选择，以保证亲能正常调用！
       val isAfterNow = endTime.isAfterNow
       if(isAfterNow){
         endTime = DateTime.now()
