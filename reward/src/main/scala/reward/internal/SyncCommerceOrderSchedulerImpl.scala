@@ -47,6 +47,7 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
   private val jdCommerceOrderService:CommerceOrderService[(OrderResp,SkuInfo),JdOrder]= null
   @Autowired
   private val config:RewardConfig = null
+  private var taobaoLimit  = 0
 //  val TaoAppKey = "27706268"
 //  val TaoSecret = "6505ff50b4d72c56fef583b2570593fa"
   //  val TaoAppKey = "28430902"
@@ -54,7 +55,12 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
 
   @Scheduled(fixedDelay = 100000L) //5 * 60 * 1000
   def sync(): Unit ={
-    try { this.syncTaobaoOrder()
+    try {
+      if(taobaoLimit <= 0 ){
+        this.syncTaobaoOrder()
+      }else {
+        taobaoLimit -= 1
+      }
     }catch{case e: Throwable => error(e.getMessage,e)}
     try { this.syncJd()
     }catch{case e: Throwable => error(e.getMessage,e)}
@@ -103,10 +109,10 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
         if(response.getData.getResults != null) {
           val it = response.getData.getResults.iterator()
           while (it.hasNext) {
+            //休息一秒，避免限流
+            Thread.sleep(TimeUnit.SECONDS.toMillis(1))
             taobaoCommerceOrderService.processOrder(it.next)
           }
-          //休息一秒，避免限流
-          Thread.sleep(TimeUnit.SECONDS.toMillis(2))
           if (response.getData.getHasNext) {
             //还有下一页
             req.setPageNo(response.getData.getPageNo + 1)
@@ -115,6 +121,14 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
           }
         }
       }else{
+        //{"error_response":{"code":15,"msg":"Remote service error","sub_code":"9100","sub_msg":"您的账号因调用
+        //不符合要求，当前触发限流。为保障广大推广者正常使用系统，会有账号维度的限流机制：通过API、淘宝客PC后台、联盟APP或使用第三方工具获取
+        //数据，同账号会统一限流。同一个账号1秒总请求次数约200次，其中调用API约40次，超过或接近临界值，会触发限流。建议您逐一排查各个渠道的
+        //总调用量，降低调用频次。此外，在淘宝客PC后台_效果报表_推广者推广明细页面，注意事项第3条会有订单查询方式建议，违反建议也会触发限流
+        //。请按建议调整请求策略。","request_id":"148oi0inyczn5"}}
+        if(response.getSubCode == "9100") { //限流
+          taobaoLimit += 1
+        }
         throw new RuntimeException(response.getBody)
       }
     }
