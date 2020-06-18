@@ -55,7 +55,28 @@ object ActiveRecordMacroDefinition {
       * find all members included inherited members
       *
       */
-    c.weakTypeOf[E].members.filter(_.isTerm).filter(_.asTerm.isAccessor).map(_.asTerm.accessed.asTerm).toStream.distinct.toSeq
+//    println(c.weakTypeOf[E].members.filter(_.isTerm).filter(_.asTerm.isAccessor))
+//    println(c.weakTypeOf[E].decls.filter(_.isTerm))
+    c.weakTypeOf[E].members.filter(_.isTerm)
+      .filter(_.asTerm.isAccessor)
+      .map(x=>{
+        x.asTerm
+        /*
+        println("xxx",x)
+        println(x.asTerm.accessed)
+        val accessor = x.asTerm.accessed
+        println("fullName",accessor.fullName)
+        if(accessor.fullName == "<none>"){
+          println("parent==>",x.asTerm.getClass)
+          println(x.asTerm.getter.asTerm.typeSignature)
+          x.asTerm
+        }else{
+          println("xxxx=> ",x.asTerm.accessed.asTerm.typeSignature)
+          x.asTerm //.accessed.asTerm
+        }
+         */
+      })
+      .toStream.distinct
   }
   /**
    * find method
@@ -113,9 +134,12 @@ object ActiveRecordMacroDefinition {
             val termName = _name
             val termType = term.typeSignature
             val valueType = value.tpe
-            //if(!(termType weak_<:< valueType))
-            if(!(valueType <:< termType))
-              c.error(value.pos, s"$termType expected,but $valueType occur.")
+            //TODO check termValue Type
+//            println(show(trees))
+//            println(showRaw(value))
+//            //if(!(termType weak_<:< valueType))
+//            if(!(valueType weak_<:< termType))
+//              c.error(value.pos, s"$termType expected,but $valueType occur.")
             q"($termName,$value.asInstanceOf[$termType])"
           case None =>
             c.error(c.enclosingPosition, s"${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString("#", ", #", "")}.")

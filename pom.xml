@@ -6,7 +6,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ganshane.stark</groupId>
-  <artifactId>stark-project_2.11</artifactId>
+  <artifactId>stark-project_2.12</artifactId>
   <packaging>pom</packaging>
   <version>2.0.4-SNAPSHOT</version>
   <name>Stark Project</name>
@@ -132,7 +132,7 @@
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
-        <version>5.4.12.Final</version>
+        <version>5.4.17.Final</version>
       </dependency>
       <!-- netty -->
       <dependency>
@@ -675,8 +675,8 @@
     <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
     <tapestry-release-version>5.3.8</tapestry-release-version>
     <jetty-release-version>8.1.16.v20140903</jetty-release-version>
-    <scala-release-version>2.11.7</scala-release-version>
-    <scala-binary-version>2.11</scala-binary-version>
+    <scala-release-version>2.12.11</scala-release-version>
+    <scala-binary-version>2.12</scala-binary-version>
     <metrics-release-version>3.1.0</metrics-release-version>
     <hawtio-release-version>1.4.19</hawtio-release-version>
     <lucene-release-version>5.2.1</lucene-release-version>

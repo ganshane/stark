@@ -14,7 +14,8 @@ import scala.language.postfixOps
 class DSLTest extends BaseActiveRecordTestCase{
   @Test
   def test_simpleJoin: Unit = {
-    val query = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 123)
+
+    val query = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i[Integer] === 123)
     query.size
     val modelA = new ModelA
     modelA.name = "cctv"
@@ -25,11 +26,12 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelB.testId = modelA.id
     modelB.save
 
-    val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 1234)
+    val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i[Integer] === 1234)
     Assert.assertEquals(1,query2.size)
+    Assert.assertEquals(modelA.id,query2.head.testId)
 
-    val query3 = ModelB.where.join[ModelA](ModelB.testTableJoin)(ModelA.i === 22222)
-    Assert.assertEquals(1,query2.size)
+    val query3 = ModelB.where.join[ModelA](ModelB.testTableJoin)(ModelA.i[Integer] === 22222)
+    Assert.assertEquals(0,query3.size)
   }
   @Test
   def test_sum: Unit = {
