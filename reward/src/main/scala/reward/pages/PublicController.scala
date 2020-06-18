@@ -67,7 +67,7 @@ class PublicController {
   @GetMapping(Array("/slides"))
   @ApiOperation(value="轮播图列表")
   def listSlide():java.util.List[Slide]={
-    val coll = select[Slide] where Slide.status[Int] > 0
+    val coll = select[Slide] where Slide.status > 0
     coll.toList
   }
 

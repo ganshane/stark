@@ -75,16 +75,16 @@ class PddCommerceOrderService extends BaseCommerceOrderServiceProcessor[PddDdkOr
           //        TraceOrder.pid === pid and
           TraceOrder.userId === customParameter.uid.toLong and
           TraceOrder.item === new CommerceItem(entity.goodsId, CommerceType.PDD) and
-          TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
+          TraceOrder.status === TraceOrderStatus.NEW orderBy
           //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
-          TraceOrder.createdAt[DateTime].desc limit 1
+          TraceOrder.createdAt.desc limit 1
 
         coll headOption
       case Some(customParameter) if customParameter.showId != null => //直播订单
 
         val coll = TraceOrder where
           TraceOrder.userId === ZHIBO_USER_ID  orderBy
-          TraceOrder.createdAt[DateTime].desc limit 1
+          TraceOrder.createdAt.desc limit 1
 
         coll headOption
       case _ =>

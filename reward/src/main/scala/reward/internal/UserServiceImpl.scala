@@ -302,7 +302,7 @@ class UserServiceImpl extends LoggerSupport with UserService {
   override def deleteExpiredUser(): Unit = {
     logger.info("delete expired user")
 
-    val num = delete[OnlineUser] where OnlineUser.expiredAt[DateTime] < DateTime.now() execute
+    val num = delete[OnlineUser] where OnlineUser.expiredAt < DateTime.now() execute
 
     logger.info("finish to delete {} expired user",num)
   }

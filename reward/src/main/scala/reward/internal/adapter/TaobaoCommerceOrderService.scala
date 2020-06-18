@@ -50,9 +50,9 @@ class TaobaoCommerceOrderService extends BaseCommerceOrderServiceProcessor[Publi
     val coll = TraceOrder where
       TraceOrder.pid === entity.getPositionId and
       TraceOrder.item === new CommerceItem(entity.itemId,CommerceType.TAOBAO) and
-      TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW and
-      TraceOrder.createdAt[DateTime] < entity.clickTime orderBy
-      TraceOrder.createdAt[DateTime].desc limit 1
+      TraceOrder.status === TraceOrderStatus.NEW and
+      TraceOrder.createdAt < entity.clickTime orderBy
+      TraceOrder.createdAt.desc limit 1
 
     coll headOption
   }

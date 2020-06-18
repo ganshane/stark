@@ -31,11 +31,11 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(3, q1.size)
     */
 
-    val q = select[ModelA](ModelA.name[String].distinct) where ModelA.name === "asdf";
+    val q = select[ModelA](ModelA.name.distinct) where ModelA.name === "asdf";
     val r = q.toList
     Assert.assertEquals(1,q.size)
     Assert.assertEquals(1,q.count)
-    val count = select[ModelA](ModelA.name[String].count) ;
+    val count = select[ModelA](ModelA.name.count) ;
     Assert.assertEquals(3, count.head.asInstanceOf[Long])
 
   }
@@ -54,9 +54,9 @@ class DSLTest extends BaseActiveRecordTestCase{
       Assert.assertEquals(1, q2.size)
 
       val q3 = select[ModelA] where ModelA.name === "cctv" and (
-        ModelA.seq === 1 or ModelA.name === "cctv" or ModelA.name[String].isNull
-          or ModelA.seq[Int] > 1 or ModelA.name === "asdf"
-        ) limit 3 offset 0 orderBy ModelA.name[String].desc
+        ModelA.seq === 1 or ModelA.name === "cctv" or ModelA.name.isNull
+          or ModelA.seq > 1 or ModelA.name === "asdf"
+        ) limit 3 offset 0 orderBy ModelA.name.desc
 
 
       Assert.assertEquals(1, q3.size)

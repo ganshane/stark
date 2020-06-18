@@ -74,14 +74,14 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
       //    order.tradeId = "123123"
       //    order.tkCreateTime = DateTime.now
       //    order.save
-      val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime[DateTime].max)
+      val maxCreateTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkCreateTime.max)
       var maxCreateTime = maxCreateTimeValue.head.asInstanceOf[DateTime]
       if (maxCreateTime == null) maxCreateTime = DateTime.now().minusDays(90)
       logger.info("sync taobao order with max tkCreateTime ({})", maxCreateTime)
       syncTaobaoOrder(maxCreateTime, 1)
       logger.info("finish to sync taobao order with create time")
 
-      val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime[DateTime].max)
+      val maxEarningTimeValue = select[TaobaoPublisherOrder](TaobaoPublisherOrder.tkEarningTime.max)
       var maxEarningTime = maxEarningTimeValue.head.asInstanceOf[DateTime]
       if (maxEarningTime == null) maxEarningTime = DateTime.now().minusDays(90)
       logger.info("sync taobao order with max maxEarningTime ({})", maxEarningTime)
@@ -157,7 +157,7 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
   }
 
   def syncPdd(): Unit ={
-    val orderOpt = PddOrder.where.orderBy(PddOrder.orderModifyAt[DateTime].desc).limit(1).headOption
+    val orderOpt = PddOrder.where.orderBy(PddOrder.orderModifyAt.desc).limit(1).headOption
     val beginTime =
       orderOpt match{
         case Some(order) =>
@@ -207,7 +207,7 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
   }
 
   def syncJd(): Unit ={
-    val orderOpt = JdOrder.where.orderBy(JdOrder.orderTime[DateTime].desc).limit(1).headOption
+    val orderOpt = JdOrder.where.orderBy(JdOrder.orderTime.desc).limit(1).headOption
     val beginTime =
       orderOpt match{
         case Some(order) =>

@@ -155,7 +155,8 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
    * @return relation query object
    */
   def applyDynamicNamed(name:String)(params:(String,Any)*):DSLSelectionQuery[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,DSLSelectionQuery[A,A]]
-  def selectDynamic[T](fieldName:String):Field[T] = macro ActiveRecordMacroDefinition.findField[A,Field[T]]
+  //Don't use generic type.use Any type.
+  def selectDynamic(fieldName:String):Field[Any] = macro ActiveRecordMacroDefinition.findField[A,Field[Any]]
   /*{
     field match{
       case "find_by"=>

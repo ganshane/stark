@@ -15,7 +15,7 @@ class DSLTest extends BaseActiveRecordTestCase{
   @Test
   def test_simpleJoin: Unit = {
 
-    val query = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i[Integer] === 123)
+    val query = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 123)
     query.size
     val modelA = new ModelA
     modelA.name = "cctv"
@@ -26,11 +26,11 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelB.testId = modelA.id
     modelB.save
 
-    val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i[Integer] === 1234)
+    val query2 = ModelB.where.join[ModelA](ModelB.modelA)(ModelA.i === 1234)
     Assert.assertEquals(1,query2.size)
     Assert.assertEquals(modelA.id,query2.head.testId)
 
-    val query3 = ModelB.where.join[ModelA](ModelB.testTableJoin)(ModelA.i[Integer] === 22222)
+    val query3 = ModelB.where.join[ModelA](ModelB.testTableJoin)(ModelA.i === 22222)
     Assert.assertEquals(0,query3.size)
   }
   @Test
@@ -40,10 +40,10 @@ class DSLTest extends BaseActiveRecordTestCase{
     modelA.i = 1234
     modelA.save
 
-    Assert.assertEquals(1234L,select[ModelA](ModelA.i[Integer].sum) head)
-    Assert.assertEquals(1234,select[ModelA](ModelA.i[Integer].max) head)
-    Assert.assertEquals(1234,select[ModelA](ModelA.i[Integer].min) head)
-    Assert.assertEquals(1234.0,select[ModelA](ModelA.i[Integer].avg) head)
+    Assert.assertEquals(1234L,select[ModelA](ModelA.i.sum) head)
+    Assert.assertEquals(1234,select[ModelA](ModelA.i.max) head)
+    Assert.assertEquals(1234,select[ModelA](ModelA.i.min) head)
+    Assert.assertEquals(1234.0,select[ModelA](ModelA.i.avg) head)
   }
   @Test
   def test_select: Unit = {
@@ -58,7 +58,7 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(2, q1.size)
     val head = q1.head
     val first = q1.head
-    val q2 = select[ModelA](ModelA.name[String].count,ModelA.name) groupBy ModelA.name
+    val q2 = select[ModelA](ModelA.name.count,ModelA.name) groupBy ModelA.name
     Assert.assertEquals(2, q2.size)
     Assert.assertEquals(1L, q2.head.head)
 
@@ -86,9 +86,9 @@ class DSLTest extends BaseActiveRecordTestCase{
       Assert.assertEquals(1, q2.size)
 
       val q3 = select[ModelA] where ModelA.name === "cctv" and (
-        ModelA.seq === 1 or ModelA.name === "cctv" or ModelA.name[String].isNull
-          or ModelA.seq[Int] > 1 or ModelA.name[String] === "asdf" or ModelA.i[Integer] < 0
-        ) limit 3 offset 0 orderBy ModelA.name[String].desc
+        ModelA.seq === 1 or ModelA.name === "cctv" or ModelA.name.isNull
+          or ModelA.seq > 1 or ModelA.name === "asdf" or ModelA.i < 0
+        ) limit 3 offset 0 orderBy ModelA.name.desc
 
 
       Assert.assertEquals(1, q3.size)

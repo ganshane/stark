@@ -55,9 +55,9 @@ class JdCommerceOrderService extends BaseCommerceOrderServiceProcessor[(OrderRes
     val coll = TraceOrder where
       TraceOrder.pid === entity.positionId.toString and
       TraceOrder.item === new CommerceItem(entity.skuId,CommerceType.JD) and
-      TraceOrder.status[TraceOrderStatus.Type] === TraceOrderStatus.NEW orderBy
+      TraceOrder.status === TraceOrderStatus.NEW orderBy
       //        TraceOrder.createdAt[DateTime] < taobaoOrder.clickTime orderBy
-      TraceOrder.createdAt[DateTime].desc limit 1
+      TraceOrder.createdAt.desc limit 1
 
     coll headOption
   }

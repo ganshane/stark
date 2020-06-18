@@ -26,19 +26,19 @@ object Field {
   implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)
   implicit def wrapEnumerationField[T <: Enumeration#Value](field: Field[T]):EnumerationField[T]= new EnumerationField(field)
 }
-trait Field[T] extends SelectionField{
+trait Field[+A] extends SelectionField{
   val fieldName:String
-  def === (value:T): Condition
-  def !==(value : T)                                 : Condition
-  def !==(value : Field[T])                          : Condition
-  def <>(value : T)= !==(value)
-  def <>(value : Field[T])= !==(value)
+  def === [B >: A ](value:B): Condition
+  def !==[B>:A](value : B)                                 : Condition
+  def !==[B >: A](value : Field[B])                          : Condition
+  def <>[B>:A](value : B)= !==(value)
+  def <>[B>:A](value : Field[B])= !==(value)
 
   def isNull:Condition
   def notNull:Condition
 
-  def desc:SortField[T]
-  def asc:SortField[T]
+  def desc[B >: A]:SortField[B]
+  def asc[B >:A ]:SortField[B]
   def count:SelectionField
   def sum:SelectionField
   def distinct:SelectionField
@@ -51,18 +51,18 @@ trait DistinctSelectionField extends SelectionField{
 }
 case class SortField[T](field: Field[T],isAsc:Boolean=true)
 
-private[activerecord] class JPAField[T : TypeTag](val fieldName:String)  extends Field[T] {
-  def ===(value: T): Condition = {
+private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extends Field[T] {
+  override def ===[B >: T](value: B): Condition = {
     Condition.eq(this,value)
   }
-  override def !==(value: T): Condition = Condition.notEq(this,value)
-  override def !==(value: Field[T]): Condition = Condition.notEq(this,value)
+  override def !==[B >: T](value: B): Condition = Condition.notEq(this,value)
+  override def !==[B >: T](value: Field[B]): Condition = Condition.notEq(this,value)
 
   override def isNull: Condition = Condition.isNull(this)
   override def notNull: Condition = Condition.notNull(this)
 
-  override def desc: SortField[T] = SortField(this,false)
-  override def asc: SortField[T] = SortField(this,isAsc = true)
+  override def desc[B >: T]: SortField[B] = SortField(this,false)
+  override def asc[B >: T]: SortField[B] = SortField(this,isAsc = true)
 
   override def toSelection[X]: Selection[X]= {
     DSL.dslContext.value.root.get[X](fieldName)
