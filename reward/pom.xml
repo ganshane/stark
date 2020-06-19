@@ -171,6 +171,11 @@
       <groupId>com.ganshane.stark</groupId>
       <artifactId>stark-utils_${scala-binary-version}</artifactId>
     </dependency>
+    <dependency>
+      <groupId>io.github.wechaty</groupId>
+      <artifactId>wechaty_${scala-binary-version}</artifactId>
+      <version>0.0.9</version>
+    </dependency>
     <!-- for test -->
     <dependency>
       <groupId>junit</groupId>

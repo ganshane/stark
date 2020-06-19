@@ -55,17 +55,27 @@ class SyncCommerceOrderSchedulerImpl extends SyncCommerceOrderScheduler with Log
 
   @Scheduled(fixedDelay = 100000L) //5 * 60 * 1000
   def sync(): Unit ={
-    try {
-      if(taobaoLimit <= 0 ){
-        this.syncTaobaoOrder()
-      }else {
-        taobaoLimit -= 1
+    if(sys.props.get("disable-sync").isEmpty) {
+      try {
+        if (taobaoLimit <= 0) {
+          this.syncTaobaoOrder()
+        } else {
+          taobaoLimit -= 1
+        }
+      } catch {
+        case e: Throwable => error(e.getMessage, e)
       }
-    }catch{case e: Throwable => error(e.getMessage,e)}
-    try { this.syncJd()
-    }catch{case e: Throwable => error(e.getMessage,e)}
-    try { this.syncPdd()
-    }catch{case e: Throwable => error(e.getMessage,e)}
+      try {
+        this.syncJd()
+      } catch {
+        case e: Throwable => error(e.getMessage, e)
+      }
+      try {
+        this.syncPdd()
+      } catch {
+        case e: Throwable => error(e.getMessage, e)
+      }
+    }
   }
   override def syncTaobaoOrder(): Unit ={
     if(config.taobao != null) {

@@ -12,5 +12,6 @@ trait TaobaoService {
   def getJsClientAccessInfo(user:User):java.util.HashMap[String,Any]
   def getOssAccessInfo(): AssumeRoleResponse.Credentials
   def getOrCreateTaobaoClient(): TaobaoClient
+  def tryParserTkl(messageText:String):Option[String]
 //  def createOrUpdateOrder(originOrder:PublisherOrderDto): Unit
 }

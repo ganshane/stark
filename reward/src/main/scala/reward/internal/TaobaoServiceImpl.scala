@@ -11,13 +11,18 @@ import com.aliyuncs.auth.sts.{AssumeRoleRequest, AssumeRoleResponse}
 import com.aliyuncs.http.MethodType
 import com.aliyuncs.profile.DefaultProfile
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.taobao.api.{DefaultTaobaoClient, TaobaoClient}
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.stereotype.Service
+import org.springframework.web.client.RestTemplate
 import reward.config.RewardConfig
 import reward.entities.User
 import reward.services.{TaobaoService, UserService, WxService}
 import stark.utils.services.LoggerSupport
+
+import scala.collection.JavaConverters._
 
 /**
   *
@@ -40,6 +45,15 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
   private var credential: AssumeRoleResponse.Credentials = null
   private val CREDENTIAL_EXPIRED_DURATION=TimeUnit.HOURS.toSeconds(1) //最大一小时
   private var credentialExpiredTime = 0L
+  private val restTemplate:RestTemplate = {
+    val rt = new RestTemplate()
+    rt.getMessageConverters.asScala.foreach{
+      case converter: MappingJackson2HttpMessageConverter => converter.getObjectMapper.registerModule(DefaultScalaModule)
+      case _ =>
+    }
+    rt
+  }
+
 
   override def getOrCreateTaobaoClient(): TaobaoClient = taobaoClient
 
@@ -106,6 +120,7 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
 
     response.getCredentials
   }
+
   /*
   private def saveUserStatisticFromNewOrder(userOrder: UserOrder): Unit ={
     //更新用户状态
@@ -337,4 +352,19 @@ class TaobaoServiceImpl extends TaobaoService with LoggerSupport{
     taobaoPublisherOrder
   }
   */
+  val TKL_REG = "[￥؋‎฿₿¢₡₵$₫֏€₲₾₴₭₺₼₥₦₱£﷼‎៛₽₨௹₹৲৳૱₪₸₮₩¥₳₠₢₯₣₤₶₧₰₷]([a-z0-9A-Z]{8,11})[￥؋‎฿₿¢₡₵$₫֏€₲₾₴₭₺₼₥₦₱£﷼‎៛₽₨௹₹৲৳૱₪₸₮₩¥₳₠₢₯₣₤₶₧₰₷]".r
+  override def tryParserTkl(value:String): Option[String] = {
+    TKL_REG.findFirstMatchIn(value) match{
+      case Some(matcher) =>
+        val tkl=matcher.group(1)
+        debug("find tkl :{}",tkl)
+        val response=restTemplate.getForEntity("https://www.gofanli.cn/taoke/tpwdToId?tpwd=" + tkl, classOf[String])
+        debug("response {}",response)
+        val root = objectMapper.readTree(response.getBody)
+        Some(root.get("data").asText())
+      case _ =>
+        debug("tkl not found for {}",value)
+        None
+    }
+  }
 }
