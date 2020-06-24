@@ -19,7 +19,7 @@
     <module>stark-migration</module>
     <module>stark-utils</module>
     <!--<module>stark-webservice</module>-->
-    <module>reward</module>
+      <!-- <module>reward</module> -->
   </modules>
   <scm>
     <url>https://github.com/ganshane/stark</url>

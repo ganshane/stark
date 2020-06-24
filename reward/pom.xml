@@ -160,7 +160,6 @@
       <groupId>com.ganshane.stark</groupId>
       <artifactId>stark-migration_${scala-binary-version}</artifactId>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.jadira.usertype/usertype.core -->
     <dependency>
       <groupId>org.jadira.usertype</groupId>
       <artifactId>usertype.core</artifactId>
@@ -174,7 +173,7 @@
     <dependency>
       <groupId>io.github.wechaty</groupId>
       <artifactId>wechaty_${scala-binary-version}</artifactId>
-      <version>0.0.9</version>
+      <version>0.0.13</version>
     </dependency>
     <!-- for test -->
     <dependency>
