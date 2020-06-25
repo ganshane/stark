@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZookeeperTemplate.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZookeeperTemplate.scala</span></div><h1>ZookeeperTemplate.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent._
+
+import org.apache.tapestry5.ioc.annotations.EagerLoad
+import org.apache.zookeeper.Watcher.Event.KeeperState
+import org.apache.zookeeper.{CreateMode, WatchedEvent, Watcher, ZooKeeper}
+
+/**
+ * zookeeper template
+ * @author jcai
+ */
+@EagerLoad
+<span class="pc bnc" id="L16" title="All 16 branches missed.">class ZookeeperTemplate(val address: String,</span>
+<span class="fc" id="L17">                        val basePath: Option[String] = None,</span>
+<span class="fc" id="L18">                        val sessionTimeout: Int = 6000)</span>
+<span class="fc" id="L19">  extends ZkClientSupport</span>
+  with LoggerSupport
+  with ZkDeletePathSupport
+  with ZkPathCreatorSupport
+  with ZkNodeDataSupport
+  with RunInNoExceptionThrown
+  with ZkChildrenSupport
+  with ZkEphemeralPathSupport {
+
+  //only for test session expired
+  private[stark] def buildAnotherSession = {
+<span class="fc" id="L30">    val zookeeper = zkClient.getZookeeperClient.getZooKeeper</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">    val (sessionId, sessionPasswd) = (zookeeper.getSessionId, zookeeper.getSessionPasswd)</span>
+<span class="fc" id="L32">    val self = new CountDownLatch(1)</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">    val zk = new ZooKeeper(address, sessionTimeout, new Watcher {</span>
+      def process(event: WatchedEvent) {
+<span class="fc" id="L35">        event.getState match {</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">          case KeeperState.SyncConnected =&gt;</span>
+            //monitor
+<span class="fc" id="L38">            debug(&quot;Connected to cloud server&quot;)</span>
+<span class="fc" id="L39">            self.countDown()</span>
+          case other =&gt;
+<span class="nc" id="L41">            debug(&quot;other state:{}&quot;, event.getState)</span>
+        }
+
+      }
+<span class="fc" id="L45">    }, sessionId, sessionPasswd)</span>
+<span class="fc" id="L46">    self.await()</span>
+
+<span class="fc" id="L48">    zk</span>
+  }
+}
+
+<span class="fc" id="L52">class Node(val path: String, val data: Option[Array[Byte]], val createMode: CreateMode) extends Comparable[Node] {</span>
+  override def equals(p1: Any) = {
+<span class="fc" id="L54">    val p = p1.asInstanceOf[Node]</span>
+<span class="pc bpc" id="L55" title="3 of 6 branches missed.">    p.path == path</span>
+  }
+
+<span class="nc" id="L58">  def compareTo(p1: Node) = p1.path.compareTo(path)</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

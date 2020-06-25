@@ -1,0 +1,605 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColumnDefinition.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">ColumnDefinition.scala</span></div><h1>ColumnDefinition.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ * Copyright (c) 2009 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import org.slf4j.LoggerFactory
+
+/**
+ * Marker trait for a ColumnDefinition sublcass that the column type
+ * supports having a default value provided by a sequence.
+ */
+trait ColumnSupportsAutoIncrement {
+  this: ColumnDefinition =&gt;
+}
+
+/**
+ * Marker trait for a ColumnDefinition subclass that the column type
+ * supports a default value.
+ */
+trait ColumnSupportsDefault {
+  this: ColumnDefinition =&gt;
+}
+
+/**
+ * Marker trait for a ColumnDefinition subclass that the column type
+ * supports a limit on the range of values it supports,
+ * e.g. VARCHAR(32).
+ */
+trait ColumnSupportsLimit {
+  this: ColumnDefinition =&gt;
+}
+
+/**
+ * Marker trait for a ColumnDefinition subclass that the column type
+ * supports a precision on numerical values it stores,
+ * e.g. DECIMAL(10).
+ */
+trait ColumnSupportsPrecision {
+  this: ColumnDefinition =&gt;
+}
+
+/**
+ * Marker trait for a ColumnDefinition subclass that the column type
+ * supports a precision on numerical values it stores,
+ * e.g. DECIMAL(10, 5), where 5 is the scale.
+ */
+trait ColumnSupportsScale {
+  this: ColumnDefinition =&gt;
+}
+
+/**
+ * Abstract base class for the definition of a column type.  It stores
+ * all the information for the column type, e.g. if it supports a
+ * default value, if it supports a limit on the range of values it can
+ * hold, etc.
+ */
+<span class="fc" id="L89">abstract class ColumnDefinition {</span>
+<span class="fc" id="L90">  private final val logger = LoggerFactory.getLogger(this.getClass)</span>
+
+  /**
+   * The database adapter associated with this column definition,
+   * which may or may not be set.
+   */
+<span class="fc" id="L96">  protected[migration] var adapterOpt: Option[DatabaseAdapter] = None</span>
+
+  /**
+   * The database adapter associated with this column definition.
+   *
+   * @return the database adapter associated with this column
+   *         definition
+   * @throws java.util.NoSuchElementException if the database adapter
+   *         has not been associated with this column definition
+   */
+<span class="fc" id="L106">  protected[migration] def getAdapter = adapterOpt.get</span>
+
+  /**
+   * The table name the column is defined in, which may or may not be
+   * set.
+   */
+<span class="fc" id="L112">  protected[migration] var tableNameOpt: Option[String] = None</span>
+
+  /**
+   * Get the table name the column is defined in.
+   *
+   * @return the table name the column is defined in
+   * @throws java.util.NoSuchElementException if the table name has
+   *         not been set
+   */
+<span class="fc" id="L121">  protected[migration] def getTableName = tableNameOpt.get</span>
+
+  /**
+   * The column's name, which may or may not be set.
+   */
+<span class="fc" id="L126">  protected[migration] var columnNameOpt: Option[String] = None</span>
+
+  /**
+   * Get the column's name.
+   *
+   * @return the column name
+   * @throws java.util.NoSuchElementException if the column name has
+   *         not been set
+   */
+<span class="fc" id="L135">  protected[migration] def getColumnName = columnNameOpt.get</span>
+
+  /**
+   * Column options.
+   */
+<span class="fc" id="L140">  protected[migration] var options: List[ColumnOption] = _</span>
+
+  /**
+   * If AutoIncrement is specified for the column.
+   */
+<span class="fc" id="L145">  protected var isAutoIncrement: Boolean = false</span>
+
+  /**
+   * If a default is specified for the column.
+   */
+<span class="fc" id="L150">  private var default: Option[String] = None</span>
+
+  /**
+   * Called after the above properties have been wired.
+   */
+  def initialize() {
+    // Because AutoIncrement adds specific behavior the application
+    // depends upon, always check if AutoIncrement is specified and
+    // throw an exception if the column does not support it.
+<span class="fc" id="L159">    checkForAutoIncrement()</span>
+<span class="pc bpc" id="L160" title="1 of 4 branches missed.">    if (isAutoIncrement &amp;&amp; !this.isInstanceOf[ColumnSupportsAutoIncrement]) {</span>
+<span class="nc" id="L161">      val message = &quot;AutoIncrement cannot be used on column '&quot; +</span>
+<span class="nc" id="L162">        getColumnName +</span>
+<span class="nc" id="L163">        &quot;' because its data type does not support auto-increment.&quot;</span>
+<span class="nc" id="L164">      throw new UnsupportedOperationException(message)</span>
+    }
+
+<span class="fc" id="L167">    checkForComment()</span>
+
+<span class="fc bfc" id="L169" title="All 2 branches covered.">    if (this.isInstanceOf[ColumnSupportsLimit]) {</span>
+<span class="fc" id="L170">      checkForLimit()</span>
+    }
+
+<span class="fc bfc" id="L173" title="All 2 branches covered.">    if (this.isInstanceOf[ColumnSupportsDefault]) {</span>
+<span class="fc" id="L174">      checkForDefault()</span>
+    }
+
+<span class="fc bfc" id="L177" title="All 2 branches covered.">    if (this.isInstanceOf[ColumnSupportsPrecision]) {</span>
+<span class="fc" id="L178">      checkForPrecision()</span>
+    }
+
+<span class="fc bfc" id="L181" title="All 2 branches covered.">    if (this.isInstanceOf[ColumnSupportsScale]) {</span>
+<span class="fc" id="L182">      checkForScale()</span>
+    }
+  }
+
+  /**
+   * Search for and remove all AutoIncrement case objects from the
+   * option list, setting isAutoIncrement if AutoIncrement was found
+   * and warning if two or more AutoIncrement case objects are given.
+   */
+  private def checkForAutoIncrement() {
+<span class="pc bpc" id="L192" title="1 of 4 branches missed.">    for (option @ AutoIncrement &lt;- options) {</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">      if (isAutoIncrement) {</span>
+<span class="nc" id="L196">        logger.warn(&quot;Redundant AutoIncrement specified for the '{}' column.&quot;,</span>
+<span class="nc" id="L197">          getColumnName)</span>
+      }
+<span class="fc" id="L199">      isAutoIncrement = true</span>
+    }
+  }
+
+  /**
+   * Search for and remove all default values specified in the option
+   * list, saving the last one and warning if two or more default
+   * values are given.
+   */
+  private def checkForDefault() {
+<span class="pc bpc" id="L209" title="1 of 4 branches missed.">    for (option @ Default(value) &lt;- options) {</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L212" title="7 of 8 branches missed.">      if (default.isDefined &amp;&amp; default.get != value) {</span>
+<span class="nc" id="L213">        logger.warn(&quot;Redefining the default value for the '{}' column &quot; +</span>
+          &quot;from '{}' to '{}'.&quot;,
+<span class="nc" id="L215">          Array[AnyRef](getColumnName, default.get, value))</span>
+      }
+<span class="fc" id="L217">      default = Some(value)</span>
+    }
+  }
+
+  /**
+   * 是否设置了注释
+   */
+<span class="fc" id="L224">  private var _commentOpt:Option[String] = None</span>
+
+  /**
+   * 得到注释
+ *
+   * @return 得到注释
+   */
+<span class="nc" id="L231">  protected def comment = _commentOpt</span>
+
+  /**
+   * 检查是否配置了注释
+   */
+  private def checkForComment() {
+<span class="pc bpc" id="L237" title="1 of 4 branches missed.">    for (option @ Comment(comment) &lt;- options) {</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L240" title="7 of 8 branches missed.">      if (_commentOpt.isDefined &amp;&amp; _commentOpt.get != comment) {</span>
+<span class="nc" id="L241">        logger.warn(&quot;Redefining the comment for the '{}' column &quot; +</span>
+          &quot;from '{}' to '{}'.&quot;,
+<span class="nc" id="L243">          Array[AnyRef](getColumnName, _commentOpt.get, comment))</span>
+      }
+<span class="fc" id="L245">      _commentOpt = Some(comment)</span>
+    }
+  }
+
+  /**
+   * If a limit is specified for the column.
+   */
+<span class="fc" id="L252">  private var _limitOpt: Option[String] = None</span>
+
+  /**
+   * Get the limit for the column.
+   */
+<span class="fc" id="L257">  protected def limit = _limitOpt</span>
+
+  /**
+   * Search for and remove all limits specified in the option list,
+   * saving the last one and warning if two or more limits are given.
+   */
+  private def checkForLimit() {
+<span class="pc bpc" id="L264" title="1 of 4 branches missed.">    for (option @ Limit(length) &lt;- options) {</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L267" title="7 of 8 branches missed.">      if (_limitOpt.isDefined &amp;&amp; _limitOpt.get != length) {</span>
+<span class="nc" id="L268">        logger.warn(&quot;Redefining the limit for the '{}' column &quot; +</span>
+          &quot;from '{}' to '{}'.&quot;,
+<span class="nc" id="L270">          Array[AnyRef](getColumnName, _limitOpt.get, length))</span>
+      }
+<span class="fc" id="L272">      _limitOpt = Some(length)</span>
+    }
+  }
+
+  /**
+   * If the column can or cannot be null.
+   */
+<span class="pc bpc" id="L279" title="1 of 4 branches missed.">  private lazy val notNullOpt: Option[Boolean] = {</span>
+<span class="fc" id="L280">    var n1: Option[Boolean] = None</span>
+
+<span class="fc" id="L282">    for (option &lt;- options) {</span>
+<span class="fc" id="L283">      val n2 = option match {</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        case NotNull =&gt; Some(true)</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        case Nullable =&gt; Some(false)</span>
+<span class="fc" id="L286">        case _ =&gt; None</span>
+      }
+<span class="fc bfc" id="L288" title="All 2 branches covered.">      if (n2.isDefined) {</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L291" title="7 of 8 branches missed.">        if (n1.isDefined &amp;&amp; n1 != n2) {</span>
+<span class="nc" id="L292">          logger.warn(&quot;Redefining the '{}' column's nullability &quot; +</span>
+            &quot;from {} to {}.&quot;,
+<span class="nc" id="L294">            Array[AnyRef](getColumnName,</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">              if (n1.get) &quot;NOT NULL&quot; else &quot;NULL&quot;,</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">              if (n2.get) &quot;NOT NULL&quot; else &quot;NULL&quot;))</span>
+        }
+<span class="fc" id="L298">        n1 = n2</span>
+      }
+    }
+
+<span class="fc" id="L302">    n1</span>
+  }
+
+  /**
+   * If the column is a primary key.
+   */
+<span class="pc bpc" id="L308" title="1 of 4 branches missed.">  private lazy val isPrimaryKey: Boolean = {</span>
+<span class="fc" id="L309">    var isPrimary = false</span>
+
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">    for (option @ PrimaryKey &lt;- options) {</span>
+<span class="pc bpc" id="L312" title="1 of 2 branches missed.">      options = options filter { _ ne option }</span>
+<span class="fc" id="L313">      isPrimary = true</span>
+    }
+
+<span class="fc" id="L316">    isPrimary</span>
+  }
+
+  /**
+   * The precision for the column, used for DECIMAL and NUMERIC column
+   * types.
+   */
+<span class="fc" id="L323">  private var _precisionOpt: Option[Int] = None</span>
+
+  /**
+   * Get the precision for the column.
+   */
+<span class="fc" id="L328">  def precision = _precisionOpt</span>
+
+  /**
+   * Look for a Precision column option.
+   */
+  private def checkForPrecision() {
+<span class="pc bpc" id="L334" title="1 of 4 branches missed.">    for (option @ Precision(value) &lt;- options) {</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L337" title="3 of 4 branches missed.">      if (_precisionOpt.isDefined &amp;&amp; _precisionOpt.get != value) {</span>
+<span class="nc" id="L338">        logger.warn(&quot;Redefining the precision for the '{}' column &quot; +</span>
+          &quot;from '{}' to '{}'.&quot;,
+<span class="nc" id="L340">          Array[AnyRef](getColumnName,</span>
+<span class="nc" id="L341">            java.lang.Integer.valueOf(_precisionOpt.get),</span>
+<span class="nc" id="L342">            java.lang.Integer.valueOf(value)))</span>
+      }
+<span class="fc" id="L344">      _precisionOpt = Some(value)</span>
+    }
+  }
+
+  /**
+   * The scale for the column, used for DECIMAL and NUMERIC column
+   * types.
+   */
+<span class="fc" id="L352">  private var _scaleOpt: Option[Int] = None</span>
+
+  /**
+   * Get the scale for the column.
+   */
+<span class="fc" id="L357">  def scale = _scaleOpt</span>
+
+  /**
+   * Look for a Scale column option.
+   */
+  private def checkForScale() {
+<span class="pc bpc" id="L363" title="1 of 4 branches missed.">    for (option @ Scale(value) &lt;- options) {</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+
+<span class="pc bpc" id="L366" title="3 of 4 branches missed.">      if (_scaleOpt.isDefined &amp;&amp; _scaleOpt.get != value) {</span>
+<span class="nc" id="L367">        logger.warn(&quot;Redefining the scale for the '{}' column &quot; +</span>
+          &quot;from '{}' to '{}'.&quot;,
+<span class="nc" id="L369">          Array[AnyRef](getColumnName,</span>
+<span class="nc" id="L370">            java.lang.Integer.valueOf(_scaleOpt.get),</span>
+<span class="nc" id="L371">            java.lang.Integer.valueOf(value)))</span>
+      }
+<span class="fc" id="L373">      _scaleOpt = Some(value)</span>
+    }
+  }
+
+  /**
+   * If the column is unique.
+   */
+<span class="pc bpc" id="L380" title="1 of 4 branches missed.">  private lazy val isUnique: Boolean = {</span>
+<span class="fc" id="L381">    var unique = false</span>
+
+<span class="pc bpc" id="L383" title="1 of 4 branches missed.">    for (option @ Unique &lt;- options) {</span>
+<span class="fc bfc" id="L384" title="All 2 branches covered.">      options = options filter { _ ne option }</span>
+<span class="fc" id="L385">      unique = true</span>
+    }
+
+<span class="fc" id="L388">    unique</span>
+  }
+
+  protected def sql: String
+  final def toCommentSql:Option[String]={
+<span class="fc" id="L393">    _commentOpt.flatMap(c=&gt;Option(getAdapter.commentColumnSql(getTableName,getColumnName,c)))</span>
+  }
+
+  final def toSql: String = {
+<span class="fc" id="L397">    val sb = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L398">      .append(sql)</span>
+
+<span class="fc bfc" id="L400" title="All 2 branches covered.">    if (default.isDefined) {</span>
+<span class="fc" id="L401">      sb.append(&quot; DEFAULT &quot;)</span>
+<span class="fc" id="L402">      sb.append(default.get)</span>
+    }
+
+<span class="fc bfc" id="L405" title="All 2 branches covered.">    if (isPrimaryKey) {</span>
+<span class="fc" id="L406">      sb.append(&quot; PRIMARY KEY&quot;)</span>
+    }
+
+<span class="fc bfc" id="L409" title="All 2 branches covered.">    if (isUnique) {</span>
+<span class="fc" id="L410">      sb.append(&quot; UNIQUE&quot;)</span>
+    }
+
+    // Not all databases, such as Derby, support specifying NULL for a
+    // column that may have NULL values.
+<span class="fc" id="L415">    notNullOpt match {</span>
+<span class="fc bfc" id="L416" title="All 4 branches covered.">      case Some(true) =&gt; sb.append(&quot; NOT NULL&quot;)</span>
+<span class="pc bpc" id="L417" title="1 of 4 branches missed.">      case Some(false)=&gt;  sb.append(&quot; NULL &quot;) //允许NULL,针对mysql的Timestamp类型,允许NULL才能保存空值</span>
+<span class="fc" id="L418">      case _ =&gt;</span>
+    }
+
+<span class="pc bpc" id="L421" title="1 of 2 branches missed.">    if (getAdapter.supportsCheckConstraints) {</span>
+<span class="nc" id="L422">      for (option &lt;- options) {</span>
+        def appendCheckSql(name: String,
+                           expr: String) {
+<span class="nc bnc" id="L425" title="All 2 branches missed.">          options = options filter { _ ne option }</span>
+
+<span class="nc" id="L427">          sb.append(&quot; CONSTRAINT &quot;)</span>
+<span class="nc" id="L428">            .append(name)</span>
+<span class="nc" id="L429">            .append(&quot; CHECK (&quot;)</span>
+<span class="nc" id="L430">            .append(expr)</span>
+<span class="nc" id="L431">            .append(&quot;)&quot;)</span>
+        }
+
+<span class="nc" id="L434">        option match {</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">          case NamedCheck(name, expr) =&gt; {</span>
+<span class="nc" id="L436">            appendCheckSql(name, expr)</span>
+          }
+
+<span class="nc bnc" id="L439" title="All 2 branches missed.">          case Check(expr) =&gt; {</span>
+<span class="nc" id="L440">            val tbd = new TableColumnDefinition(getTableName,</span>
+<span class="nc" id="L441">              Array(getColumnName))</span>
+<span class="nc" id="L442">            val on = new On(tbd)</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">            val (name, _) = getAdapter.generateCheckConstraintName(on)</span>
+
+<span class="nc" id="L445">            appendCheckSql(name, expr)</span>
+          }
+
+<span class="nc" id="L448">          case _ =&gt;</span>
+        }
+      }
+    }
+
+
+    // Warn for any unused options.
+<span class="fc bfc" id="L455" title="All 2 branches covered.">    if (!options.isEmpty) {</span>
+<span class="fc" id="L456">      logger.warn(&quot;The following options for the '{}' column are unused: {}.&quot;,</span>
+<span class="fc" id="L457">        Array[AnyRef](getColumnName, options))</span>
+    }
+
+    // Warn about illegal combinations in some databases.
+<span class="pc bpc" id="L461" title="3 of 6 branches missed.">    if (isPrimaryKey &amp;&amp; notNullOpt.isDefined &amp;&amp; !notNullOpt.get) {</span>
+<span class="nc" id="L462">      logger.warn(&quot;Specifying PrimaryKey and Nullable in a column is not &quot; +</span>
+        &quot;supported in all databases.&quot;)
+    }
+
+    // Warn when different options are used that specify the same
+    // behavior so one can be removed.
+<span class="pc bpc" id="L468" title="3 of 6 branches missed.">    if (isPrimaryKey &amp;&amp; notNullOpt.isDefined &amp;&amp; notNullOpt.get) {</span>
+<span class="nc" id="L469">      logger.warn(&quot;Specifying PrimaryKey and NotNull is redundant.&quot;)</span>
+    }
+<span class="pc bpc" id="L471" title="1 of 4 branches missed.">    if (isPrimaryKey &amp;&amp; isUnique) {</span>
+<span class="nc" id="L472">      logger.warn(&quot;Specifying PrimaryKey and Unique is redundant.&quot;)</span>
+    }
+
+<span class="fc" id="L475">    sb.toString</span>
+  }
+
+  /**
+   * Given the SQL for a column data type, return it with the LIMIT
+   * syntax appended if a limit is given, otherwise return SQL
+   * unmodified.
+   *
+   * @param columnTypeName the column type name
+   * @param limitOpt optional column limit
+   * @return the column type name with the limit syntax if a limit was
+   *         given
+   */
+  protected def optionallyAddLimitToDataType(columnTypeName: String,
+                                             limitOpt: Option[String]): String = {
+<span class="pc" id="L490">    limitOpt match {</span>
+<span class="pc bpc" id="L491" title="1 of 2 branches missed.">      case Some(l) =&gt; columnTypeName + &quot;(&quot; + l + &quot;)&quot;</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">      case None =&gt; columnTypeName</span>
+    }
+  }
+
+  /**
+   * Given the SQL for a column data type, return it with the LIMIT
+   * syntax appended if a limit is specified on the column definition
+   * instance, otherwise return SQL unmodified.
+   *
+   * @param columnTypeName the column type name
+   * @return the column type name with the limit syntax if the column
+   *         definition specifies a limit
+   */
+  protected def optionallyAddLimitToDataType(columnTypeName: String): String = {
+<span class="fc" id="L506">    optionallyAddLimitToDataType(columnTypeName, limit)</span>
+  }
+}
+
+/**
+ * This class is an abstract class to handle DECIMAL and NUMERIC
+ * column types.
+ */
+<span class="fc" id="L514">abstract class AbstractDecimalColumnDefinition</span>
+<span class="fc" id="L515">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault
+    with ColumnSupportsPrecision
+    with ColumnSupportsScale {
+  /**
+   * Concrete subclasses must define this to the name of the DECIMAL
+   * or NUMERIC data type specific for the database.
+   */
+  val decimalSqlName: String
+
+  override protected def sql: String = {
+<span class="pc bpc" id="L526" title="4 of 8 branches missed.">    (precision, scale) match {</span>
+<span class="pc bpc" id="L527" title="1 of 4 branches missed.">      case (None, None) =&gt;</span>
+<span class="nc" id="L528">        decimalSqlName</span>
+<span class="pc bpc" id="L529" title="1 of 4 branches missed.">      case (Some(p), None) =&gt;</span>
+<span class="nc" id="L530">        decimalSqlName + &quot;(&quot; + p + &quot;)&quot;</span>
+<span class="pc bpc" id="L531" title="1 of 4 branches missed.">      case (Some(p), Some(s)) =&gt;</span>
+<span class="fc" id="L532">        decimalSqlName + &quot;(&quot; + p + &quot;, &quot; + s + &quot;)&quot;</span>
+<span class="pc bpc" id="L533" title="2 of 4 branches missed.">      case (None, Some(_)) =&gt;</span>
+<span class="fc" id="L534">        throw new IllegalArgumentException(&quot;Cannot specify a scale without &quot; +</span>
+          &quot;also specifying a precision.&quot;)
+    }
+  }
+}
+
+class DefaultBigintColumnDefinition
+<span class="fc" id="L541">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="fc" id="L543">  override protected def sql = &quot;BIGINT&quot;</span>
+}
+
+class DefaultBlobColumnDefinition
+<span class="fc" id="L547">    extends ColumnDefinition {</span>
+<span class="fc" id="L548">  override protected def sql = &quot;BLOB&quot;</span>
+}
+class DefaultClobColumnDefinition
+<span class="fc" id="L551">  extends ColumnDefinition {</span>
+<span class="fc" id="L552">  override protected def sql = &quot;CLOB&quot;</span>
+}
+
+class DefaultBooleanColumnDefinition
+<span class="nc" id="L556">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="nc" id="L558">  override protected def sql = &quot;BOOLEAN&quot;</span>
+}
+
+class DefaultCharColumnDefinition
+<span class="fc" id="L562">    extends ColumnDefinition</span>
+    with ColumnSupportsLimit
+    with ColumnSupportsDefault {
+<span class="fc" id="L565">  override protected def sql = optionallyAddLimitToDataType(&quot;CHAR&quot;)</span>
+}
+
+class DefaultDecimalColumnDefinition
+<span class="fc" id="L569">    extends AbstractDecimalColumnDefinition {</span>
+<span class="fc" id="L570">  override val decimalSqlName = &quot;DECIMAL&quot;</span>
+}
+
+class DefaultIntegerColumnDefinition
+<span class="fc" id="L574">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="fc" id="L576">  override protected def sql = &quot;INTEGER&quot;</span>
+}
+
+class DefaultSmallintColumnDefinition
+<span class="fc" id="L580">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="fc" id="L582">  override protected def sql = &quot;SMALLINT&quot;</span>
+}
+
+class DefaultTimestampColumnDefinition
+<span class="nc" id="L586">    extends ColumnDefinition</span>
+    with ColumnSupportsLimit
+    with ColumnSupportsDefault {
+<span class="nc" id="L589">  override protected def sql = optionallyAddLimitToDataType(&quot;TIMESTAMP&quot;)</span>
+}
+
+class DefaultVarbinaryColumnDefinition
+<span class="fc" id="L593">    extends ColumnDefinition</span>
+    with ColumnSupportsLimit
+    with ColumnSupportsDefault {
+<span class="fc" id="L596">  override protected def sql = optionallyAddLimitToDataType(&quot;VARBINARY&quot;)</span>
+}
+
+class DefaultVarcharColumnDefinition
+<span class="fc" id="L600">    extends ColumnDefinition</span>
+    with ColumnSupportsLimit
+    with ColumnSupportsDefault {
+<span class="fc" id="L603">  override protected def sql = optionallyAddLimitToDataType(&quot;VARCHAR&quot;)</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

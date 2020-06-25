@@ -1,0 +1,1109 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Migration.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">Migration.scala</span></div><h1>Migration.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ * Copyright (c) 2010 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import java.sql.{Connection, PreparedStatement, ResultSet}
+
+import org.slf4j.LoggerFactory
+
+import scala.annotation.tailrec
+import scala.language.implicitConversions
+
+/**
+ * Due to the JVM erasure, the scala.Predef.ArrowAssoc.-&gt;
+ * method generates a Tuple2 and the following cannot be distinguished
+ *
+ *   &quot;table_name&quot; -&gt; &quot;column1&quot;
+ *
+ *   &quot;table_name&quot; -&gt; (&quot;column1&quot;, &quot;column2&quot;)
+ *
+ * After erasure a Tuple2[String,String] is identical to a
+ * Tuple2[String,Tuple2[String,String]].  So to work around this, the
+ * -&gt; operator is redefined to operate only on String's, which
+ * effectively removes the type from the first type of the Tuple2 and
+ * allows it to be overloaded on the second type of the Tuple2.  The
+ * MigrationArrowAssoc class has the new -&gt; method.
+ */
+<span class="fc" id="L60">class MigrationArrowAssoc(s: String) {</span>
+  def `-&gt;`(other: String): TableColumnDefinition = {
+<span class="fc" id="L62">    new TableColumnDefinition(s, Array(other))</span>
+  }
+
+  def `-&gt;`(other: (String, String)): TableColumnDefinition = {
+<span class="nc" id="L66">    new TableColumnDefinition(s, Array(other._1, other._2))</span>
+  }
+}
+
+<span class="fc" id="L70">abstract class Migration {</span>
+<span class="fc" id="L71">  private final val logger = LoggerFactory.getLogger(this.getClass)</span>
+
+  /**
+   * Concrete migration classes must define this method to migrate the
+   * database up to a new migration.
+   */
+  def up()
+
+  /**
+   * Concrete migration classes must define this method to back out of
+   * this migration.  If the migration cannot be reversed, then a
+   * IrreversibleMigrationException should be thrown.
+   */
+  def down()
+
+  /**
+   * The raw connection to the database that underlies the logging
+   * connection.  This is provided in case the real database
+   * connection is needed because the logging connection does not
+   * provide a required feature.  This connection should not be used
+   * in normal use.
+   *
+   * This is set using property style dependency injection instead of
+   * constructor style injection, which makes for cleaner code for the
+   * users of this migration framework.
+   */
+<span class="pc" id="L97">  private[migration] var rawConnectionOpt: Option[Connection] = None</span>
+
+  /**
+   * Get the raw connection to the database the migration can use for
+   * any custom work.  This connection is the raw connection that
+   * underlies the logging connection and does not log any operations
+   * performed on it.  It should only be used when the logging
+   * connection does not provide a required feature.  The Migration
+   * subclass must be careful with this connection and leave it in a
+   * good state, as all of the other migration methods defined in
+   * Migration use the same connection.
+   */
+<span class="nc" id="L109">  def rawConnection = rawConnectionOpt.get</span>
+
+  /**
+   * The connection to the database that is used for the migration.
+   * This connection also logs all operations performed on it.
+   *
+   * This is set using property style dependency injection instead of
+   * constructor style injection, which makes for cleaner code for the
+   * users of this migration framework.
+   */
+<span class="fc" id="L119">  private[migration] var connectionOpt: Option[Connection] = None</span>
+
+  /**
+   * Get the connection to the database the migration can use for any
+   * custom work.  This connection logs all operations performed on
+   * it.  The Migration subclass must be careful with this connection
+   * and leave it in a good state, as all of the other migration
+   * methods defined in Migration use the same connection.
+   */
+<span class="fc" id="L128">  def connection = connectionOpt.get</span>
+
+  /**
+   * The database adapter that will be used for the migration.
+   *
+   * This is set using property style dependency injection instead of
+   * constructor style injection, which makes for cleaner code for the
+   * users of this migration framework.
+   */
+<span class="fc" id="L137">  private[migration] var adapterOpt: Option[DatabaseAdapter] = None</span>
+
+  /**
+   * The database adapter that will be used for the migration.
+   */
+<span class="fc" id="L142">  private def adapter = adapterOpt.get</span>
+
+  /**
+   * The vendor of the database the migration is being run on.
+   */
+<span class="fc" id="L147">  def databaseVendor: Vendor = adapter.vendor</span>
+
+  /**
+   * Override the -&gt; implicit definition to create a
+   * MigrationArrowAssoc instead of a scala.Predef.ArrowAssoc.  See
+   * the above comment on the MigrationArrowAssoc class why this is
+   * done.
+   */
+  implicit def stringToMigrationArrowAssoc(s: String): MigrationArrowAssoc = {
+<span class="fc" id="L156">    new MigrationArrowAssoc(s)</span>
+  }
+
+  /**
+   * Convert a table and column name definition into a On foreign key
+   * instance.
+   */
+  def on(definition: TableColumnDefinition): On = {
+<span class="fc" id="L164">    new On(definition)</span>
+  }
+
+  /**
+   * Convert a table and column name definition into a References
+   * foreign key instance.
+   */
+  def references(definition: TableColumnDefinition): References = {
+<span class="fc" id="L172">    new References(definition)</span>
+  }
+
+  /**
+   * This value is true if the database implicitly adds an index on
+   * the column that has a foreign key constraint added to it.
+   *
+   * The following SQL can be used to test the database.  The last
+   * statement will fail with a message that there already is an index
+   * on the column.
+   *
+   *   create table parent (pk int primary key);
+   *   create table child (pk int primary key, pk_parent int not null);
+   *   alter table child
+   *     add constraint idx_child_pk_parent foreign key (pk_parent)
+   *     references parent (pk);
+   *   create index idx_child_pk_parent on child (pk_parent);
+   */
+  def addingForeignKeyConstraintCreatesIndex: Boolean = {
+<span class="fc" id="L191">    adapter.addingForeignKeyConstraintCreatesIndex</span>
+  }
+
+  /**
+   * Execute the given SQL string using the migration's connection.
+   *
+   * @param sql the SQL to execute
+   */
+  final def execute(sql: String*) {
+<span class="fc" id="L200">    With.autoClosingStatement(connection.createStatement) { s =&gt;</span>
+<span class="fc" id="L201">      sql.foreach(s.execute)</span>
+    }
+  }
+
+  /**
+   * Given a SQL string and a Function1[PreparedStatement,Unit], start
+   * a new transaction by turning off auto-commit mode on the
+   * connection then create a new prepared statement with the SQL
+   * string and pass the prepared statement to the closure argument.
+   * The closure should not perform the commit as this method will
+   * commit the transaction.  If the closure throws an exception then
+   * the transaction is rolled back and the exception that caused the
+   * rollback is re-thrown.  Finally, the auto-commit state is reset
+   * to the value the connection had before this method was called.
+   *
+   * @param sql the SQL text that will be prepared
+   * @param f the Function1[PreparedStatement,Unit] that will be given
+   *        a new prepared statement
+   */
+  final def withPreparedStatement(sql: String)(f: PreparedStatement =&gt; Unit) {
+<span class="nc" id="L221">    With.autoCommittingConnection(connection,</span>
+<span class="nc" id="L222">      CommitUponReturnOrRollbackUponException) { c =&gt;</span>
+<span class="nc" id="L223">        With.autoClosingStatement(c.prepareStatement(sql))(f)</span>
+      }
+  }
+
+  /**
+   * Given a SQL result set and a Function1[ResultSet,R], pass the
+   * result set to the closure.  After the closure has completed,
+   * either normally via a return or by throwing an exception, close
+   * the result set.
+   *
+   * @param rs the SQL result set
+   * @param f the Function1[ResultSet,R] that will be given the result
+   *        set
+   * @return the result of f if f returns normally
+   */
+  final def withResultSet[R](rs: ResultSet)(f: ResultSet =&gt; R): R = {
+<span class="fc" id="L239">    With.autoClosingResultSet(rs)(f)</span>
+  }
+
+  final def createTable(tableName: String,
+                        options: TableOption*)(body: TableDefinition =&gt; Unit) {
+<span class="fc" id="L244">    val tableDefinition = new TableDefinition(adapter, tableName,options:_*)</span>
+
+<span class="fc" id="L246">    body(tableDefinition)</span>
+
+<span class="fc" id="L248">    val sql = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L249">      .append(&quot;CREATE TABLE &quot;)</span>
+<span class="fc" id="L250">      .append(adapter.quoteTableName(tableName))</span>
+<span class="fc" id="L251">      .append(&quot; (&quot;)</span>
+<span class="fc" id="L252">      .append(tableDefinition.toSql)</span>
+<span class="fc" id="L253">      .append(')')</span>
+      .toString
+<span class="fc" id="L255">    execute(sql)</span>
+<span class="fc" id="L256">    val commentSql = tableDefinition.toCommentSql</span>
+<span class="fc" id="L257">    execute(commentSql:_*)</span>
+  }
+
+  final def addColumn(tableName: String,
+                      columnName: String,
+                      columnType: SqlType,
+                      options: ColumnOption*) {
+<span class="fc" id="L264">    val tableDefinition = new TableDefinition(adapter, tableName)</span>
+
+<span class="fc" id="L266">    tableDefinition.column(columnName, columnType, options: _*)</span>
+<span class="fc" id="L267">    val sql = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L268">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L269">      .append(adapter.quoteTableName(tableName))</span>
+<span class="fc" id="L270">      .append(&quot; ADD &quot;)</span>
+<span class="fc" id="L271">      .append(tableDefinition.toSql)</span>
+      .toString
+<span class="fc" id="L273">    execute(sql)</span>
+<span class="fc" id="L274">    val commentSql = tableDefinition.toCommentSql</span>
+<span class="fc" id="L275">    execute(commentSql:_*)</span>
+  }
+
+  /**
+   * comment column
+ *
+   * @param tableName table name
+   * @param columnName column name
+   * @param comment comment
+   */
+  final def commentColumn(tableName:String,
+                          columnName:String,
+                          comment:String): Unit ={
+<span class="fc" id="L288">    val sql = adapter.commentColumnSql(tableName,columnName,comment)</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">    if(sql != null) // some database donen't support comment,such as mysql</span>
+<span class="fc" id="L290">      execute(sql)</span>
+  }
+
+  /**
+   * comment table
+ *
+   * @param tableName table name
+   * @param comment comment
+   */
+  final def commentTable(tableName:String,
+                          comment:String): Unit ={
+<span class="fc" id="L301">    execute(adapter.commentTableSql(tableName,comment))</span>
+  }
+
+  /**
+   * 创建序列
+ *
+   * @param name 序列名称
+   */
+  final def sequence(name:String):Unit={
+<span class="fc" id="L310">    execute(adapter.sequenceSql(name))</span>
+  }
+
+  /**
+   * 删除序列
+ *
+   * @param name 序列的名称
+   */
+  final def dropSequence(name:String):Unit={
+<span class="nc" id="L319">    execute(adapter.dropSequenceSql(name))</span>
+  }
+
+  /**
+   * Alter the definition of an existing column.
+   *
+   * NOTE: if the original column definition uses CharacterSet() then
+   * it must be used here again, unless the base SQL data type is
+   * being changed.  For example, on Oracle, creating a column without
+   * CharacterSet uses VARCHAR2 while using CharacterSet(Unicode) uses
+   * NVARCHAR2, so if the original column used CharacterSet(Unicode)
+   * and #alterColumn() is not passed CharacterSet(Unicode), then the
+   * column's data type will be change from NVARCHAR2 to VARCHAR2.
+   *
+   * @param tableName the name of the table with the column
+   * @param columnName the name of the column
+   * @param columnType the type the column is being altered to
+   * @param options a possibly empty array of column options to
+   *        customize the column
+   */
+  final def alterColumn(tableName: String,
+                        columnName: String,
+                        columnType: SqlType,
+                        options: ColumnOption*) {
+<span class="fc" id="L343">    val sqls = adapter.alterColumnSql(tableName,</span>
+<span class="fc" id="L344">      columnName,</span>
+<span class="fc" id="L345">      columnType,</span>
+<span class="fc" id="L346">      options: _*)</span>
+
+<span class="fc" id="L348">    execute(sqls:_*)</span>
+  }
+
+  final def removeColumn(tableName: String,
+                         columnName: String) {
+<span class="fc" id="L353">    execute(adapter.removeColumnSql(tableName, columnName))</span>
+  }
+
+  final def dropTable(tableName: String) {
+<span class="fc" id="L357">    val sql = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L358">      .append(&quot;DROP TABLE &quot;)</span>
+<span class="fc" id="L359">      .append(adapter.quoteTableName(tableName))</span>
+      .toString
+<span class="fc" id="L361">    execute(sql)</span>
+  }
+
+  private def indexNameFor(tableName: String,
+                           columnNames: Array[String],
+                           options: IndexOption*): (String, List[IndexOption]) = {
+<span class="fc" id="L367">    var opts = options.toList</span>
+
+<span class="fc" id="L369">    var indexNameOpt: Option[String] = None</span>
+
+<span class="pc bpc" id="L371" title="1 of 4 branches missed.">    for (opt @ Name(name) &lt;- opts) {</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">      opts = opts filter { _ ne opt }</span>
+<span class="pc bpc" id="L373" title="7 of 8 branches missed.">      if (indexNameOpt.isDefined &amp;&amp; indexNameOpt.get != name) {</span>
+<span class="nc" id="L374">        logger.warn(&quot;Redefining the index name from '{}' to '{}'.&quot;,</span>
+<span class="nc" id="L375">          Array[AnyRef](indexNameOpt.get, name))</span>
+      }
+<span class="fc" id="L377">      indexNameOpt = Some(name)</span>
+    }
+
+<span class="fc" id="L380">    val name = indexNameOpt.getOrElse {</span>
+<span class="fc" id="L381">      &quot;idx_&quot; +</span>
+<span class="fc" id="L382">        tableName +</span>
+<span class="fc" id="L383">        &quot;_&quot; +</span>
+<span class="fc" id="L384">        columnNames.mkString(&quot;_&quot;)</span>
+    }
+
+<span class="fc" id="L387">    (name, opts)</span>
+  }
+
+  /**
+   * Add an index to a table on a non-empty list of column names.  The
+   * name of the index is automatically generated unless Name() is
+   * given as an option.
+   *
+   * @param tableName the table to add the index to
+   * @param columnNames a list of one or more column names that the
+   *        index will be on
+   * @param options a possibly empty list of index options to
+   *        customize the creation of the index
+   */
+  final def addIndex(tableName: String,
+                     columnNames: Array[String],
+                     options: IndexOption*) {
+<span class="pc bpc" id="L404" title="1 of 2 branches missed.">    if (columnNames.isEmpty) {</span>
+<span class="nc" id="L405">      throw new IllegalArgumentException(&quot;Adding an index requires at &quot; +</span>
+        &quot;least one column name.&quot;)
+    }
+
+<span class="pc bpc" id="L409" title="1 of 2 branches missed.">    var (name, opts) = indexNameFor(tableName, columnNames, options: _*)</span>
+
+<span class="fc" id="L411">    var unique = false</span>
+<span class="pc bpc" id="L412" title="2 of 4 branches missed.">    for (opt @ Unique &lt;- opts) {</span>
+<span class="pc bpc" id="L413" title="1 of 2 branches missed.">      opts = opts filter { _ ne opt }</span>
+<span class="fc" id="L414">      unique = true</span>
+    }
+
+<span class="fc" id="L417">    val a = adapter</span>
+<span class="fc" id="L418">    val quotedColumnNames = columnNames.map {</span>
+<span class="fc" id="L419">      a.quoteColumnName(_)</span>
+<span class="fc" id="L420">    }.mkString(&quot;, &quot;)</span>
+
+<span class="fc" id="L422">    val sql = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L423">      .append(&quot;CREATE &quot;)</span>
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">      .append(if (unique) &quot;UNIQUE &quot; else &quot;&quot;)</span>
+<span class="fc" id="L425">      .append(&quot;INDEX &quot;)</span>
+<span class="fc" id="L426">      .append(a.quoteIndexName(None, name))</span>
+<span class="fc" id="L427">      .append(&quot; ON &quot;)</span>
+<span class="fc" id="L428">      .append(a.quoteTableName(tableName))</span>
+<span class="fc" id="L429">      .append(&quot; (&quot;)</span>
+<span class="fc" id="L430">      .append(quotedColumnNames)</span>
+<span class="fc" id="L431">      .append(&quot;)&quot;)</span>
+      .toString
+
+<span class="fc" id="L434">    execute(sql)</span>
+  }
+
+  /**
+   * Add an index to a table on a column.  The name of the index is
+   * automatically generated unless Name() is given as an option.
+   *
+   * @param tableName the table to add the index to
+   * @param columnName the name of the column that the index will be
+   *        on
+   * @param options a possibly empty list of index options to
+   *        customize the creation of the index
+   */
+  final def addIndex(tableName: String,
+                     columnName: String,
+                     options: IndexOption*) {
+<span class="fc" id="L450">    addIndex(tableName, Array(columnName), options: _*)</span>
+  }
+
+  /**
+   * Remove an index on a table that is composed of a non-empty list
+   * of column names.  The name of the index to remove is
+   * automatically generated unless Name() is given as an option.
+   *
+   * @param tableName the table to remove the index from
+   * @param columnNames a list of one or more column names that the
+   *        index is on
+   * @param options a possibly empty list of index options to
+   *        customize the removal of the index
+   */
+  final def removeIndex(tableName: String,
+                        columnNames: Array[String],
+                        options: Name*) {
+<span class="pc bpc" id="L467" title="1 of 2 branches missed.">    if (columnNames.isEmpty) {</span>
+<span class="nc" id="L468">      throw new IllegalArgumentException(&quot;Removing an index requires at &quot; +</span>
+        &quot;least one column name.&quot;)
+    }
+
+<span class="pc bpc" id="L472" title="1 of 2 branches missed.">    val (name, _) = indexNameFor(tableName, columnNames, options: _*)</span>
+
+<span class="fc" id="L474">    val sql = adapter.removeIndexSql(tableName, name)</span>
+
+<span class="fc" id="L476">    execute(sql)</span>
+  }
+
+  /**
+   * Remove an index on a column in a table.  The name of the index to
+   * remove is automatically generated unless Name() is given as an
+   * option.
+   *
+   * @param tableName the table to remove the index from
+   * @param columnName the name of the column the index is on
+   * @param options a possibly empty list of index options to
+   *        customize the removal of the index
+   */
+  final def removeIndex(tableName: String,
+                        columnName: String,
+                        options: Name*) {
+<span class="fc" id="L492">    removeIndex(tableName, Array(columnName), options: _*)</span>
+  }
+
+  /**
+   * Given a foreign key relationship, create a name for it, using a
+   * Name() if it is provided in the options.
+   *
+   * @param on the table and columns the foreign key constraint is on
+   * @param references the table and columns the foreign key
+   *        constraint references
+   * @param options a varargs list of ForeignKeyOption's
+   * @return a two-tuple with the calculated name or the overridden
+   *         name from a Name and the remaining options
+   */
+  private def foreignKeyNameFor(on: On,
+                                references: References,
+                                options: ForeignKeyOption*): (String, List[ForeignKeyOption]) = {
+<span class="fc" id="L509">    var opts = options.toList</span>
+
+<span class="fc" id="L511">    var fkNameOpt: Option[String] = None</span>
+
+<span class="pc bpc" id="L513" title="1 of 4 branches missed.">    for (opt @ Name(name) &lt;- opts) {</span>
+<span class="fc bfc" id="L514" title="All 2 branches covered.">      opts = opts filter { _ ne opt }</span>
+<span class="pc bpc" id="L515" title="7 of 8 branches missed.">      if (fkNameOpt.isDefined &amp;&amp; fkNameOpt.get != name) {</span>
+<span class="nc" id="L516">        logger.warn(&quot;Redefining the foreign key name from '{}' to '{}'.&quot;,</span>
+<span class="nc" id="L517">          Array[AnyRef](fkNameOpt.get, name))</span>
+      }
+<span class="fc" id="L519">      fkNameOpt = Some(name)</span>
+    }
+
+<span class="fc" id="L522">    val name = fkNameOpt.getOrElse {</span>
+<span class="nc" id="L523">      &quot;fk_&quot; +</span>
+<span class="nc" id="L524">        on.tableName +</span>
+<span class="nc" id="L525">        &quot;_&quot; +</span>
+<span class="nc" id="L526">        on.columnNames.mkString(&quot;_&quot;) +</span>
+<span class="nc" id="L527">        &quot;_&quot; +</span>
+<span class="nc" id="L528">        references.tableName +</span>
+<span class="pc" id="L529">        &quot;_&quot; +</span>
+<span class="nc" id="L530">        references.columnNames.mkString(&quot;_&quot;)</span>
+    }
+
+<span class="fc" id="L533">    (name, opts)</span>
+  }
+
+  /**
+   * Add a foreign key to a table.  The name of the foreign key is
+   * automatically generated unless Name() is given as an option.
+   *
+   * @param on the table and column name(s) to place the foreign key
+   *        on
+   * @param references the table and column name(s) that the foreign
+   *        key references
+   * @param options a possibly empty list of foreign key options to
+   *        customize the creation of the foreign key
+   */
+  def addForeignKey(on: On,
+                    references: References,
+                    options: ForeignKeyOption*) {
+<span class="pc bpc" id="L550" title="1 of 2 branches missed.">    if (on.columnNames.length == 0) {</span>
+<span class="nc" id="L551">      throw new IllegalArgumentException(&quot;Adding a foreign key constraint &quot; +</span>
+<span class="nc" id="L552">        &quot;requires at least one column name &quot; +</span>
+        &quot;in the table adding the constraint.&quot;)
+    }
+
+<span class="pc bpc" id="L556" title="1 of 2 branches missed.">    if (references.columnNames.length == 0) {</span>
+<span class="nc" id="L557">      throw new IllegalArgumentException(&quot;Adding a foreign key constraint &quot; +</span>
+<span class="nc" id="L558">        &quot;requires at least one column name &quot; +</span>
+        &quot;from the table being referenced.&quot;)
+    }
+
+<span class="pc bpc" id="L562" title="1 of 2 branches missed.">    var (name, opts) = foreignKeyNameFor(on, references, options: _*)</span>
+
+<span class="fc" id="L564">    val a = adapter</span>
+<span class="fc" id="L565">    val quotedOnColumnNames = on.columnNames.map {</span>
+<span class="fc" id="L566">      a.quoteColumnName(_)</span>
+<span class="fc" id="L567">    }.mkString(&quot;, &quot;)</span>
+
+<span class="fc" id="L569">    val quotedReferencesColumnNames = references.columnNames.map {</span>
+<span class="fc" id="L570">      a.quoteColumnName(_)</span>
+<span class="fc" id="L571">    }.mkString(&quot;, &quot;)</span>
+
+<span class="fc" id="L573">    var onDeleteOpt: Option[OnDelete] = None</span>
+
+<span class="pc bpc" id="L575" title="1 of 4 branches missed.">    for (opt @ OnDelete(action) &lt;- opts) {</span>
+<span class="pc bpc" id="L576" title="7 of 8 branches missed.">      if (onDeleteOpt.isDefined &amp;&amp; action != onDeleteOpt.get.action) {</span>
+<span class="nc" id="L577">        logger.warn(&quot;Overriding the ON DELETE action from '{}' to '{}'.&quot;,</span>
+<span class="nc" id="L578">          Array[AnyRef](onDeleteOpt.get.action, action))</span>
+      }
+<span class="fc bfc" id="L580" title="All 2 branches covered.">      opts = opts filter { _ ne opt }</span>
+<span class="fc" id="L581">      onDeleteOpt = Some(opt)</span>
+    }
+
+<span class="fc" id="L584">    var onUpdateOpt: Option[OnUpdate] = None</span>
+
+<span class="pc bpc" id="L586" title="2 of 4 branches missed.">    for (opt @ OnUpdate(action) &lt;- opts) {</span>
+<span class="pc bpc" id="L587" title="7 of 8 branches missed.">      if (onUpdateOpt.isDefined &amp;&amp; action != onUpdateOpt.get.action) {</span>
+<span class="nc" id="L588">        logger.warn(&quot;Overriding the ON UPDATE action from '{}' to '{}'.&quot;,</span>
+<span class="nc" id="L589">          Array[AnyRef](onUpdateOpt.get.action, action))</span>
+      }
+<span class="pc bpc" id="L591" title="1 of 2 branches missed.">      opts = opts filter { _ ne opt }</span>
+<span class="fc" id="L592">      onUpdateOpt = Some(opt)</span>
+    }
+
+<span class="fc" id="L595">    val sb = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L596">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L597">      .append(a.quoteTableName(on.tableName))</span>
+<span class="fc" id="L598">      .append(&quot; ADD CONSTRAINT &quot;)</span>
+<span class="fc" id="L599">      .append(name)</span>
+<span class="fc" id="L600">      .append(&quot; FOREIGN KEY (&quot;)</span>
+<span class="fc" id="L601">      .append(quotedOnColumnNames)</span>
+<span class="fc" id="L602">      .append(&quot;) REFERENCES &quot;)</span>
+<span class="fc" id="L603">      .append(a.quoteTableName(references.tableName))</span>
+<span class="fc" id="L604">      .append(&quot; (&quot;)</span>
+<span class="fc" id="L605">      .append(quotedReferencesColumnNames)</span>
+<span class="fc" id="L606">      .append(&quot;)&quot;)</span>
+
+<span class="fc" id="L608">    val onDeleteSql = a.onDeleteSql(onDeleteOpt)</span>
+<span class="pc bpc" id="L609" title="1 of 2 branches missed.">    if (!onDeleteSql.isEmpty) {</span>
+<span class="fc" id="L610">      sb.append(' ')</span>
+<span class="fc" id="L611">        .append(onDeleteSql)</span>
+    }
+
+<span class="fc" id="L614">    val onUpdateSql = a.onUpdateSql(onUpdateOpt)</span>
+<span class="pc bpc" id="L615" title="1 of 2 branches missed.">    if (!onUpdateSql.isEmpty) {</span>
+<span class="fc" id="L616">      sb.append(' ')</span>
+<span class="fc" id="L617">        .append(onUpdateSql)</span>
+    }
+
+<span class="fc" id="L620">    execute(sb.toString)</span>
+  }
+
+  /**
+   * Add a foreign key to a table.  The name of the foreign key is
+   * automatically generated unless Name() is given as an option.
+   *
+   * @param references the table and column name(s) that the foreign
+   *        key references
+   * @param on the table and column name(s) to place the foreign key
+   *        on
+   * @param options a possibly empty list of foreign key options to
+   *        customize the creation of the foreign key
+   */
+  def addForeignKey(references: References,
+                    on: On,
+                    options: ForeignKeyOption*) {
+<span class="nc" id="L637">    addForeignKey(on, references, options: _*)</span>
+  }
+
+  /**
+   * Remove a foreign key from a table.  The name of the foreign key
+   * is automatically generated unless Name() is given as an option.
+   *
+   * @param on the table and column name(s) to remove the foreign key
+   *        from
+   * @param references the table and column name(s) that the foreign
+   *        key references
+   * @param options a possibly empty list of foreign key options to
+   *        customize the removal of the foreign key
+   */
+  def removeForeignKey(on: On,
+                       references: References,
+                       options: Name*) {
+<span class="pc bpc" id="L654" title="1 of 2 branches missed.">    if (on.columnNames.length == 0) {</span>
+<span class="nc" id="L655">      throw new IllegalArgumentException(&quot;Removing a foreign key constraint &quot; +</span>
+<span class="nc" id="L656">        &quot;requires at least one column name &quot; +</span>
+        &quot;in the table adding the constraint.&quot;)
+    }
+
+<span class="pc bpc" id="L660" title="1 of 2 branches missed.">    if (references.columnNames.length == 0) {</span>
+<span class="nc" id="L661">      throw new IllegalArgumentException(&quot;Removing a foreign key constraint &quot; +</span>
+<span class="nc" id="L662">        &quot;requires at least one column name &quot; +</span>
+        &quot;from the table being referenced.&quot;)
+    }
+
+<span class="pc bpc" id="L666" title="1 of 2 branches missed.">    val (name, _) = foreignKeyNameFor(on, references, options: _*)</span>
+
+<span class="fc" id="L668">    execute(&quot;ALTER TABLE &quot; +</span>
+<span class="fc" id="L669">      adapter.quoteTableName(on.tableName) +</span>
+<span class="fc" id="L670">      &quot; DROP &quot; +</span>
+<span class="fc" id="L671">      adapter.alterTableDropForeignKeyConstraintPhrase +</span>
+<span class="fc" id="L672">      ' ' +</span>
+<span class="fc" id="L673">      name)</span>
+  }
+
+  /**
+   * Remove a foreign key from a table.  The name of the foreign key
+   * is automatically generated unless Name() is given as an option.
+   *
+   * @param references the table and column name(s) that the foreign
+   *        key references
+   * @param on the table and column name(s) to remove the foreign key
+   *        from
+   * @param options a possibly empty list of foreign key options to
+   *        customize the removal of the foreign key
+   */
+  def removeForeignKey(references: References,
+                       on: On,
+                       options: Name*) {
+<span class="nc" id="L690">    removeForeignKey(on, references, options: _*)</span>
+  }
+
+  /**
+   * Add a grant on a table to one or more grantees.
+   *
+   * @param tableName the table name to add the grants to
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantees
+   */
+  final def grant(tableName: String,
+                  grantees: Array[User],
+                  privileges: GrantPrivilegeType*) {
+<span class="pc bpc" id="L704" title="1 of 2 branches missed.">    if (grantees.isEmpty) {</span>
+<span class="nc" id="L705">      throw new IllegalArgumentException(&quot;Granting privileges requires &quot; +</span>
+        &quot;at least one grantee.&quot;)
+    }
+
+<span class="fc bfc" id="L709" title="All 2 branches covered.">    if (privileges.isEmpty) {</span>
+<span class="fc" id="L710">      throw new IllegalArgumentException(&quot;Granting privileges requires &quot; +</span>
+        &quot;at least one privilege.&quot;)
+    }
+
+<span class="fc" id="L714">    val sql = adapter.grantOnTableSql(tableName, grantees, privileges: _*)</span>
+
+<span class="fc" id="L716">    execute(sql)</span>
+  }
+
+  /**
+   * Add a grant on a table to one or more grantees.
+   *
+   * @param tableName the table name to add the grants to
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantees
+   */
+  final def grant(tableName: String,
+                  grantees: Array[String],
+                  privileges: GrantPrivilegeType*) {
+<span class="nc" id="L730">    grant(tableName,</span>
+<span class="nc" id="L731">      grantees map { adapter.userFactory.nameToUser(_) },</span>
+<span class="nc" id="L732">      privileges: _*)</span>
+  }
+
+  /**
+   * Add a grant on a table to a grantee.
+   *
+   * @param tableName the table name to add the grants to
+   * @param grantee the grantee to grant the privileges to
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantee
+   */
+  final def grant(tableName: String,
+                  grantee: User,
+                  privileges: GrantPrivilegeType*) {
+<span class="nc" id="L746">    grant(tableName, Array(grantee), privileges: _*)</span>
+  }
+
+  /**
+   * Add a grant on a table to a grantee.
+   *
+   * @param tableName the table name to add the grants to
+   * @param grantee the grantee to grant the privileges to
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantee
+   */
+  final def grant(tableName: String,
+                  grantee: String,
+                  privileges: GrantPrivilegeType*) {
+<span class="fc" id="L760">    grant(tableName,</span>
+<span class="fc" id="L761">      Array[User](adapter.userFactory.nameToUser(grantee)),</span>
+<span class="fc" id="L762">      privileges: _*)</span>
+  }
+
+  /**
+   * Remove privileges on a table from one or more grantees.
+   *
+   * @param tableName the table name to remove the grants from
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to remove from
+   *        the grantees
+   */
+  final def revoke(tableName: String,
+                   grantees: Array[User],
+                   privileges: GrantPrivilegeType*) {
+<span class="pc bpc" id="L776" title="1 of 2 branches missed.">    if (grantees.isEmpty) {</span>
+<span class="nc" id="L777">      throw new IllegalArgumentException(&quot;Revoking privileges requires &quot; +</span>
+        &quot;at least one grantee.&quot;)
+    }
+
+<span class="pc bpc" id="L781" title="1 of 2 branches missed.">    if (privileges.isEmpty) {</span>
+<span class="nc" id="L782">      throw new IllegalArgumentException(&quot;Revoking privileges requires &quot; +</span>
+        &quot;at least one privilege.&quot;)
+    }
+
+<span class="fc" id="L786">    val sql = adapter.revokeOnTableSql(tableName, grantees, privileges: _*)</span>
+
+<span class="fc" id="L788">    execute(sql)</span>
+  }
+
+  /**
+   * Remove privileges on a table from one or more grantees.
+   *
+   * @param tableName the table name to remove the grants from
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to remove from
+   *        the grantees
+   */
+  final def revoke(tableName: String,
+                   grantees: Array[String],
+                   privileges: GrantPrivilegeType*) {
+<span class="nc" id="L802">    revoke(tableName,</span>
+<span class="nc" id="L803">      grantees map { adapter.userFactory.nameToUser(_) },</span>
+<span class="nc" id="L804">      privileges: _*)</span>
+  }
+
+  /**
+   * Remove privileges on a table from a grantee.
+   *
+   * @param tableName the table name to remove the grants from
+   * @param grantee the grantee to revoke privileges from
+   * @param privileges a non-empty array of privileges to remove from
+   *        the grantee
+   */
+  final def revoke(tableName: String,
+                   grantee: User,
+                   privileges: GrantPrivilegeType*) {
+<span class="nc" id="L818">    revoke(tableName, Array(grantee), privileges: _*)</span>
+  }
+
+  /**
+   * Remove privileges on a table from a grantee.
+   *
+   * @param tableName the table name to remove the grants from
+   * @param grantee the grantee to revoke privileges from
+   * @param privileges a non-empty array of privileges to remove from
+   *        the grantee
+   */
+  final def revoke(tableName: String,
+                   grantee: String,
+                   privileges: GrantPrivilegeType*) {
+<span class="fc" id="L832">    revoke(tableName,</span>
+<span class="fc" id="L833">      Array[User](adapter.userFactory.nameToUser(grantee)),</span>
+<span class="fc" id="L834">      privileges: _*)</span>
+  }
+
+  /**
+   * Grant one or more privileges to a schema.
+   *
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantees
+   */
+  final def grantSchemaPrivilege(grantees: Array[User],
+                                 privileges: SchemaPrivilege*) {
+<span class="nc bnc" id="L846" title="All 2 branches missed.">    if (grantees.isEmpty) {</span>
+<span class="nc" id="L847">      throw new IllegalArgumentException(&quot;Granting privileges requires &quot; +</span>
+        &quot;at least one grantee.&quot;)
+    }
+
+<span class="nc bnc" id="L851" title="All 2 branches missed.">    if (privileges.isEmpty) {</span>
+<span class="nc" id="L852">      throw new IllegalArgumentException(&quot;Granting privileges requires &quot; +</span>
+        &quot;at least one privilege.&quot;)
+    }
+
+<span class="nc" id="L856">    val sql = adapter.grantOnSchemaSql(grantees, privileges: _*)</span>
+
+<span class="nc" id="L858">    execute(sql)</span>
+  }
+
+  /**
+   * Grant one or more privileges to a schema.
+   *
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantees
+   */
+  final def grantSchemaPrivilege(grantees: Array[String],
+                                 privileges: SchemaPrivilege*) {
+<span class="nc" id="L870">    grantSchemaPrivilege(grantees map { adapter.userFactory.nameToUser(_) },</span>
+<span class="nc" id="L871">      privileges: _*)</span>
+  }
+
+  /**
+   * Grant one or more privileges to a schema.
+   *
+   * @param grantee the grantee to grant the privileges to
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantee
+   */
+  final def grantSchemaPrivilege(grantee: User,
+                                 privileges: SchemaPrivilege*) {
+<span class="nc" id="L883">    grantSchemaPrivilege(Array(grantee), privileges: _*)</span>
+  }
+
+  /**
+   * Grant one or more privileges to a schema.
+   *
+   * @param grantee the grantee to grant the privileges to
+   * @param privileges a non-empty array of privileges to grant to the
+   *        grantee
+   */
+  final def grantSchemaPrivilege(grantee: String,
+                                 privileges: SchemaPrivilege*) {
+<span class="nc" id="L895">    grantSchemaPrivilege(adapter.userFactory.nameToUser(grantee),</span>
+<span class="nc" id="L896">      privileges: _*)</span>
+  }
+
+  /**
+   * Revoke one or more privileges from a schema.
+   *
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to revoke from the
+   *        grantees
+   */
+  final def revokeSchemaPrivilege(grantees: Array[User],
+                                  privileges: SchemaPrivilege*) {
+<span class="nc bnc" id="L908" title="All 2 branches missed.">    if (grantees.isEmpty) {</span>
+<span class="nc" id="L909">      throw new IllegalArgumentException(&quot;Revoking privileges requires &quot; +</span>
+        &quot;at least one grantee.&quot;)
+    }
+
+<span class="nc bnc" id="L913" title="All 2 branches missed.">    if (privileges.isEmpty) {</span>
+<span class="nc" id="L914">      throw new IllegalArgumentException(&quot;Revoking privileges requires &quot; +</span>
+        &quot;at least one privilege.&quot;)
+    }
+
+<span class="nc" id="L918">    val sql = adapter.revokeOnSchemaSql(grantees, privileges: _*)</span>
+
+<span class="nc" id="L920">    execute(sql)</span>
+  }
+
+  /**
+   * Revoke one or more privileges from a schema.
+   *
+   * @param grantees a non-empty array of grantees
+   * @param privileges a non-empty array of privileges to revoke from the
+   *        grantees
+   */
+  final def revokeSchemaPrivilege(grantees: Array[String],
+                                  privileges: SchemaPrivilege*) {
+<span class="nc" id="L932">    revokeSchemaPrivilege(grantees map { adapter.userFactory.nameToUser(_) },</span>
+<span class="nc" id="L933">      privileges: _*)</span>
+  }
+
+  /**
+   * Revoke one or more privileges from a schema.
+   *
+   * @param grantee the grantee to revoke the privileges from
+   * @param privileges a non-empty array of privileges to revoke from
+   *        the grantee
+   */
+  final def revokeSchemaPrivilege(grantee: User,
+                                  privileges: SchemaPrivilege*) {
+<span class="nc" id="L945">    revokeSchemaPrivilege(Array(grantee), privileges: _*)</span>
+  }
+
+  /**
+   * Revoke one or more privileges from a schema.
+   *
+   * @param grantee the grantee to revoke the privileges from
+   * @param privileges a non-empty array of privileges to revoke from
+   *        the grantee
+   */
+  final def revokeSchemaPrivilege(grantee: String,
+                                  privileges: SchemaPrivilege*) {
+<span class="nc" id="L957">    revokeSchemaPrivilege(adapter.userFactory.nameToUser(grantee),</span>
+<span class="nc" id="L958">      privileges: _*)</span>
+  }
+
+  /**
+   * Add a CHECK constraint on a table and one or more columns.  The
+   * constraint name is automatically generated unless Name() is given
+   * as an option.
+   *
+   * @param on the table and columns to add the CHECK constraint on
+   * @param expr the expression to check
+   * @param options a possibly empty list of check options to
+   *        customize the creation of the CHECK constraint
+   */
+  def addCheck(on: On,
+               expr: String,
+               options: CheckOption*) {
+<span class="pc bpc" id="L974" title="1 of 2 branches missed.">    if (on.columnNames.isEmpty) {</span>
+<span class="nc" id="L975">      throw new IllegalArgumentException(&quot;Adding a check constraint &quot; +</span>
+<span class="nc" id="L976">        &quot;requires at least one column name &quot; +</span>
+        &quot;in the table adding the constraint.&quot;)
+    }
+
+<span class="fc" id="L980">    val a = adapter</span>
+<span class="pc bpc" id="L981" title="1 of 2 branches missed.">    val (name, _) = a.generateCheckConstraintName(on, options: _*)</span>
+
+<span class="fc" id="L983">    val sql = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L984">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L985">      .append(a.quoteTableName(on.tableName))</span>
+<span class="fc" id="L986">      .append(&quot; ADD CONSTRAINT &quot;)</span>
+<span class="fc" id="L987">      .append(name)</span>
+<span class="fc" id="L988">      .append(&quot; CHECK (&quot;)</span>
+<span class="fc" id="L989">      .append(expr)</span>
+<span class="fc" id="L990">      .append(&quot;)&quot;)</span>
+      .toString
+
+<span class="pc bpc" id="L993" title="1 of 2 branches missed.">    if (adapter.supportsCheckConstraints)</span>
+<span class="nc" id="L994">      execute(sql)</span>
+    else
+<span class="fc" id="L996">      logger.warn(&quot;Database does not support CHECK constraints; ignoring &quot; +</span>
+        &quot;request to add a CHECK constraint: {}&quot;,
+<span class="fc" id="L998">        sql)</span>
+  }
+
+  /**
+   * Remove a CHECK constraint on a table and one or more columns.
+   * The constraint name is automatically generated unless Name() is
+   * given as an option.
+   *
+   * @param on the table and columns to remove the CHECK constraint
+   *        from
+   * @param options a possibly empty list of check options to
+   *        customize the removal of the CHECK constraint
+   */
+  def removeCheck(on: On,
+                  options: Name*) {
+<span class="pc bpc" id="L1013" title="1 of 2 branches missed.">    if (on.columnNames.isEmpty) {</span>
+<span class="nc" id="L1014">      throw new IllegalArgumentException(&quot;Removing a check constraint &quot; +</span>
+        &quot;requires at least one column &quot; +
+<span class="nc" id="L1016">        &quot;name in the table removing &quot; +</span>
+        &quot;the constraint.&quot;)
+    }
+
+<span class="pc bpc" id="L1020" title="1 of 2 branches missed.">    val (name, _) = adapter.generateCheckConstraintName(on, options: _*)</span>
+
+<span class="fc" id="L1022">    val sql = new java.lang.StringBuilder(64)</span>
+<span class="fc" id="L1023">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L1024">      .append(adapter.quoteTableName(on.tableName))</span>
+<span class="fc" id="L1025">      .append(&quot; DROP CONSTRAINT &quot;)</span>
+<span class="fc" id="L1026">      .append(name)</span>
+      .toString
+
+<span class="pc bpc" id="L1029" title="1 of 2 branches missed.">    if (adapter.supportsCheckConstraints)</span>
+<span class="nc" id="L1030">      execute(sql)</span>
+    else
+<span class="fc" id="L1032">      logger.warn(&quot;Database does not support CHECK constraints; ignoring &quot; +</span>
+        &quot;request to remove a CHECK constraint: {}&quot;,
+<span class="fc" id="L1034">        sql)</span>
+  }
+
+  /**
+   * droper some trigger
+ *
+   * @param triggerName trigger name
+   */
+  def dropTrigger(triggerName:String): Unit ={
+<span class="nc" id="L1043">    execute(s&quot;DROP TRIGGER ${triggerName}&quot;)</span>
+  }
+  /**
+   * add trigger
+   */
+  def addTrigger(tableName:String,triggerName:String,options:TriggerOption*)(f: =&gt; String): Unit ={
+<span class="fc" id="L1049">    var opts = options</span>
+    @tailrec //tail call
+    def checkOption[T &lt;: TriggerOption: Manifest](tailOptions:Seq[TriggerOption],current:Option[T]): Option[T]={
+<span class="pc" id="L1052">      tailOptions.toList match{</span>
+<span class="fc bfc" id="L1053" title="All 2 branches covered.">        case head::tail=&gt;</span>
+<span class="fc" id="L1054">          var newCurrent = current</span>
+<span class="pc bpc" id="L1055" title="1 of 2 branches missed.">          head match {</span>
+<span class="fc bfc" id="L1056" title="All 2 branches covered.">            case x: T =&gt;</span>
+<span class="pc bpc" id="L1057" title="3 of 6 branches missed.">              opts = opts filterNot (x ==)</span>
+<span class="fc bfc" id="L1058" title="All 2 branches covered.">              if(x.isInstanceOf[TriggerFiring]){ //TriggerFiring 允许有多个值</span>
+<span class="fc" id="L1059">                return Some(x)</span>
+              }else {
+<span class="pc bpc" id="L1061" title="1 of 2 branches missed.">                if (current.isDefined)</span>
+<span class="nc" id="L1062">                  throw new DuplicateTriggerException(&quot;duplicate &quot; + current.get + &quot; and &quot; + x + &quot; definition&quot;)</span>
+
+<span class="fc" id="L1064">                newCurrent = Some(x)</span>
+              }
+<span class="fc" id="L1066">            case _ =&gt;</span>
+          }
+
+<span class="fc" id="L1069">          checkOption(tail,newCurrent)</span>
+<span class="pc bpc" id="L1070" title="1 of 2 branches missed.">        case Nil =&gt;</span>
+<span class="fc" id="L1071">          current</span>
+      }
+    }
+    def findMultiTriggerObjectOption[T &lt;: TriggerOption: Manifest](objects:T*):List[T]={
+<span class="fc" id="L1075">      objects.foldLeft(List[T]()){ (last,currentObject) =&gt;</span>
+<span class="fc" id="L1076">        checkOption[T](opts,Option.empty[T]).foldLeft(last)( _ :+ _)</span>
+      }
+    }
+    def findTriggerObjectOption[T &lt;: TriggerOption: Manifest](objects:T*):Option[T]={
+<span class="fc" id="L1080">      objects.foldLeft(Option.empty[T]){ (last,currentObject) =&gt;</span>
+<span class="fc" id="L1081">        val current = checkOption[T](opts,Option.empty[T])</span>
+<span class="pc bpc" id="L1082" title="1 of 4 branches missed.">        if(current.isDefined &amp;&amp; last.nonEmpty) throw new ConflictingTriggerException(current+&quot; conflict &quot;+last)</span>
+<span class="fc bfc" id="L1083" title="All 2 branches covered.">        if(current.isDefined)  current else last</span>
+      }
+    }
+    def findTriggerValueOption[T &lt;: TriggerOption: Manifest]:Option[T]={
+<span class="fc" id="L1087">        checkOption(opts,Option.empty[T])</span>
+    }
+
+<span class="fc" id="L1090">    val timingPointOpt = findTriggerObjectOption[TriggerTimingPoint](Before,After,INSTEAD_OF)</span>
+<span class="pc bpc" id="L1091" title="1 of 2 branches missed.">    if(timingPointOpt.isEmpty) throw new MissingTriggerOptionException(&quot;missing timing point definition&quot;)</span>
+
+<span class="fc" id="L1093">    val triggerFiringOpt = findMultiTriggerObjectOption[TriggerFiring](Update,Insert,Delete)</span>
+<span class="pc bpc" id="L1094" title="1 of 2 branches missed.">    if(triggerFiringOpt.isEmpty) throw new MissingTriggerOptionException(&quot;missing trigger firing definition&quot;)</span>
+
+<span class="fc" id="L1096">    val referencingOpt = findTriggerValueOption[Referencing]</span>
+
+
+<span class="fc" id="L1099">    val forEachRowOpt = findTriggerObjectOption(ForEachRow)</span>
+<span class="fc" id="L1100">    val whenOpt = findTriggerValueOption[When]</span>
+
+<span class="fc" id="L1102">    val sql = adapter.createTriggerSql(tableName,triggerName,</span>
+<span class="fc" id="L1103">      timingPointOpt,triggerFiringOpt,referencingOpt,forEachRowOpt,whenOpt)(f)</span>
+
+<span class="fc" id="L1105">    execute(sql)</span>
+
+  }
+<span class="fc" id="L1108">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

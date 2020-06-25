@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZkPathCreatorSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZkPathCreatorSupport.scala</span></div><h1>ZkPathCreatorSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import stark.utils.StarkUtilsConstants
+import org.apache.zookeeper.CreateMode
+import org.apache.zookeeper.KeeperException.NodeExistsException
+
+/**
+ * zk path creator
+ */
+<span class="fc" id="L12">trait ZkPathCreatorSupport {</span>
+  this: ZkClientSupport =&gt;
+<span class="nc" id="L14">  def createPersistPathWithString(path: String, data: Option[String] = None) {</span>
+<span class="nc" id="L15">    createPersistPath(path, data.map(_.getBytes(StarkUtilsConstants.UTF8_ENCODING)))</span>
+  }
+
+<span class="fc" id="L18">  def createPersistPath(path: String, data: Option[Array[Byte]] = None) {</span>
+<span class="fc" id="L19">    internalCreatePath(path, data)</span>
+  }
+
+  protected def internalCreatePath(path: String,
+<span class="nc" id="L23">                                   data: Option[Array[Byte]] = None,</span>
+<span class="fc" id="L24">                                   createMode: CreateMode = CreateMode.PERSISTENT) {</span>
+    try {
+<span class="fc" id="L26">      val creator = zkClient.create().</span>
+        creatingParentsIfNeeded().
+<span class="fc" id="L28">        withMode(createMode)</span>
+<span class="pc" id="L29">      data match {</span>
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        case Some(arr) =&gt;</span>
+<span class="fc" id="L31">          creator.forPath(path, arr)</span>
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        case None =&gt;</span>
+<span class="fc" id="L33">          creator.forPath(path)</span>
+      }
+    } catch {
+      case e: NodeExistsException =&gt;
+<span class="pc" id="L37">        data match {</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">          case Some(arr) =&gt;</span>
+<span class="fc" id="L39">            zkClient.setData().forPath(path, arr)</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">          case None =&gt;</span>
+          //do nothing
+        }
+      case other: Throwable =&gt;
+<span class="pc" id="L44">        throw new IllegalStateException(other.getMessage, other)</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

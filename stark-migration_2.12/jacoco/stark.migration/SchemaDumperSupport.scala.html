@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SchemaDumperSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">SchemaDumperSupport.scala</span></div><h1>SchemaDumperSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/**
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ */
+package stark.migration
+
+import java.sql.{DatabaseMetaData, ResultSet}
+import java.text.SimpleDateFormat
+import java.util.Date
+
+import scala.annotation.tailrec
+import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+
+/**
+ * support dump schema
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2015-07-29
+ */
+<span class="fc" id="L21">trait SchemaDumperSupport {</span>
+  this:Migrator =&gt;
+  //private final val TABLE_TYPES =Array[String] ( &quot;TABLE&quot;, &quot;VIEW&quot;, &quot;SYNONYM&quot; )
+<span class="fc" id="L24">  private final val TABLE_TYPE =Array[String] ( &quot;TABLE&quot;)</span>
+<span class="fc" id="L25">  protected val COLUMN_NAME = 4</span>
+<span class="fc" id="L26">  protected val DATA_TYPE = 5</span>
+<span class="fc" id="L27">  protected val TYPE_NAME = 6</span>
+<span class="fc" id="L28">  protected val COLUMN_SIZE = 7</span>
+<span class="fc" id="L29">  protected val DECIMAL_DIGITS = 9</span>
+<span class="fc" id="L30">  protected val COLUMN_DEF = 13</span>
+<span class="fc" id="L31">  protected val IS_NULLABLE = 18</span>
+  //列定义
+<span class="nc bnc" id="L33" title="All 36 branches missed.">  private case class Column(name:String,sqlType:SqlType,options:Array[ColumnOption]) extends Ordered[Column]{</span>
+<span class="nc" id="L34">    override def compare(that: Column): Int = name.compareTo(that.name)</span>
+  }
+<span class="nc bnc" id="L36" title="All 38 branches missed.">  private case class Index(name:String,columns:ArrayBuffer[String],isUnique:Boolean)</span>
+
+  /**
+   * 得到所有的表名
+   * @return 表的集合
+   */
+  def tables():Seq[String]={
+<span class="nc" id="L43">    withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="nc" id="L44">      val schemaPattern = adapter.schemaNameOpt match {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        case Some(n) =&gt; adapter.unquotedNameConverter(n)</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        case None =&gt; null</span>
+      }
+<span class="nc" id="L48">      val metadata = connection.getMetaData</span>
+<span class="nc" id="L49">      With.autoClosingResultSet(metadata.getTables(null,</span>
+<span class="nc" id="L50">        schemaPattern,</span>
+<span class="nc" id="L51">        null,</span>
+<span class="nc" id="L52">        TABLE_TYPE)) { rs =&gt;</span>
+<span class="nc" id="L53">        val buffer  = new ListBuffer[String]()</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        while (rs.next()) {</span>
+<span class="nc" id="L55">          buffer += rs.getString(3)</span>
+        }
+<span class="nc" id="L57">        buffer.sorted.toSeq</span>
+      }
+    }
+  }
+  def sequences():Seq[String]={
+<span class="nc" id="L62">    adapter.findSequencesSql() match {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">      case Some(sql) =&gt;</span>
+<span class="nc" id="L64">        withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="nc" id="L65">          val stmt = connection.createStatement()</span>
+<span class="nc" id="L66">          With.autoClosingStatement(stmt) { s =&gt;</span>
+<span class="nc" id="L67">            val resultSet = s.executeQuery(sql)</span>
+<span class="nc" id="L68">            val buffer = new ListBuffer[String]()</span>
+<span class="nc" id="L69">            With.autoClosingResultSet(resultSet){rs=&gt;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">              while(rs.next())</span>
+<span class="nc" id="L71">                buffer += rs.getString(1)</span>
+            }
+
+<span class="nc" id="L74">            buffer.toSeq</span>
+          }
+        }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">      case None =&gt;</span>
+<span class="nc" id="L78">        Seq()</span>
+    }
+
+  }
+  // NOTE: metaData.getIndexInfo row mappings :
+<span class="fc" id="L83">  protected val INDEX_INFO_TABLE_NAME = 3</span>
+<span class="fc" id="L84">  protected val INDEX_INFO_NON_UNIQUE = 4</span>
+<span class="fc" id="L85">  protected val INDEX_INFO_NAME = 6</span>
+<span class="fc" id="L86">  protected val INDEX_INFO_COLUMN_NAME = 9</span>
+
+  private def indexes(table:String): Seq[Index] ={
+<span class="nc" id="L89">    withLoggingConnection(AutoCommit){connection=&gt;</span>
+<span class="nc" id="L90">      val metaData = connection.getMetaData</span>
+<span class="nc" id="L91">      val schemaPattern = adapter.schemaNameOpt match {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        case Some(n) =&gt; adapter.unquotedNameConverter(n)</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        case None =&gt; null</span>
+      }
+
+<span class="nc" id="L96">      val primaryKeys = findPrimaryKeys(metaData,schemaPattern,table)</span>
+
+      @tailrec
+      def fetchIndexInfo(rs:ResultSet,
+                         currentIndexName:String,
+                         indexColumns:ArrayBuffer[String],
+<span class="nc" id="L102">                         buf:ListBuffer[Index]): Unit ={</span>
+<span class="nc" id="L103">        var columns = indexColumns</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if(rs.next()){</span>
+<span class="nc" id="L105">          val indexName = rs.getString(INDEX_INFO_NAME)</span>
+<span class="nc" id="L106">          val columnName = rs.getString(INDEX_INFO_COLUMN_NAME)</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">          if(indexName != null){</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if(!primaryKeys.contains(columnName)){//非主键字段</span>
+<span class="nc bnc" id="L109" title="All 6 branches missed.">              if(indexName != currentIndexName){//新的</span>
+<span class="nc" id="L110">                columns = new ArrayBuffer[String]()</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">                buf += Index(indexName,columns,!rs.getBoolean(INDEX_INFO_NON_UNIQUE))</span>
+              }
+<span class="nc" id="L113">              columns += columnName</span>
+            }
+          }
+<span class="nc" id="L116">          fetchIndexInfo(rs,indexName,columns,buf)</span>
+        }
+      }
+<span class="nc" id="L119">      val indexInfoSet = metaData.getIndexInfo(null, schemaPattern, table, false, true);</span>
+<span class="nc" id="L120">      With.autoClosingResultSet(indexInfoSet){rs=&gt;</span>
+<span class="nc" id="L121">        val buf = new ListBuffer[Index]()</span>
+<span class="nc" id="L122">        fetchIndexInfo(rs,null,new ArrayBuffer[String](),buf)</span>
+<span class="nc" id="L123">        buf.toSeq</span>
+      }
+    }
+  }
+  private def dumpIndex(tableName:String,index:Index)(implicit sb:mutable.StringBuilder): Unit ={
+<span class="nc" id="L128">    sb.append(s&quot;&quot;&quot;    addIndex(\&quot;${tableName}\&quot;,&quot;&quot;&quot;)</span>
+<span class="nc" id="L129">    sb.append(&quot;Array[String](&quot;)</span>
+<span class="nc" id="L130">    sb.append(index.columns.map(&quot;\&quot;&quot;+_+&quot;\&quot;&quot;).mkString(&quot;,&quot;))</span>
+<span class="nc" id="L131">    sb.append(&quot;)&quot;)</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">    if(index.isUnique)</span>
+<span class="nc" id="L133">      sb.append(&quot;,Unique&quot;)</span>
+<span class="nc" id="L134">    sb.append(s&quot;&quot;&quot;,Name(\&quot;${index.name}\&quot;))\n&quot;&quot;&quot;)</span>
+  }
+  def dumpSequence(sequence:String)(implicit sb:mutable.StringBuilder): Unit ={
+<span class="nc" id="L137">    sb.append(s&quot;&quot;&quot;    sequence(\&quot;${sequence}\&quot;)\n&quot;&quot;&quot;)</span>
+  }
+  def dumpDropSequence(sequence:String)(implicit sb:mutable.StringBuilder): Unit ={
+<span class="nc" id="L140">    sb.append(s&quot;&quot;&quot;    dropSequence(\&quot;${sequence}\&quot;)\n&quot;&quot;&quot;)</span>
+  }
+<span class="fc" id="L142">  private val timestampReg = &quot;TIMESTAMP([\\(\\d+\\)]*)&quot;.r</span>
+  protected def typeFromResultSet(resultSet:ResultSet):SqlType ={
+<span class="nc" id="L144">    resultSet.getString(TYPE_NAME) match{</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">      case &quot;BIGINT&quot;=&gt;</span>
+<span class="nc" id="L146">        BigintType</span>
+<span class="nc bnc" id="L147" title="All 8 branches missed.">      case &quot;BLOB&quot;|&quot;LONGBLOB&quot;|&quot;BYTEA&quot; =&gt;</span>
+<span class="nc" id="L148">        BlobType</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">      case &quot;BOOLEAN&quot; =&gt;</span>
+<span class="nc" id="L150">        BooleanType</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">      case &quot;CHAR&quot; =&gt;</span>
+<span class="nc" id="L152">        CharType</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">      case &quot;DECIMAL&quot; =&gt;</span>
+<span class="nc" id="L154">        DecimalType</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">      case &quot;INTEGER&quot; =&gt;</span>
+<span class="nc" id="L156">        IntegerType</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">      case &quot;SMALLINT&quot; =&gt;</span>
+<span class="nc" id="L158">        SmallintType</span>
+<span class="nc bnc" id="L159" title="All 6 branches missed.">      case timestampReg(n) =&gt;</span>
+<span class="nc" id="L160">        TimestampType</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">      case &quot;DATE&quot; =&gt; //TODO oracle</span>
+<span class="nc" id="L162">        TimestampType</span>
+<span class="nc bnc" id="L163" title="All 8 branches missed.">      case &quot;VARBINARY&quot;|&quot;VARCHAR FOR BIT DATA&quot;|&quot;RAW&quot; =&gt;</span>
+<span class="nc" id="L164">        VarbinaryType</span>
+<span class="nc bnc" id="L165" title="All 6 branches missed.">      case &quot;VARCHAR&quot;|&quot;VARCHAR2&quot; =&gt;</span>
+<span class="nc" id="L166">        VarcharType</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">      case &quot;NUMBER&quot; =&gt; //for oracle number</span>
+<span class="nc" id="L168">        val precision = intFromResultSet(resultSet,COLUMN_SIZE)</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if(precision &lt;=5 )</span>
+<span class="nc" id="L170">          SmallintType</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        else if(precision &lt;=10)</span>
+<span class="nc" id="L172">          IntegerType</span>
+        else
+<span class="nc" id="L174">          BigintType</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">      case &quot;LONG&quot; =&gt; // oracle</span>
+        //throw new UnsupportedColumnTypeException(&quot;LONG&quot;)
+<span class="nc" id="L177">        VarcharType</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">      case &quot;CLOB&quot; =&gt;</span>
+<span class="nc" id="L179">        ClobType</span>
+
+      case other=&gt;
+<span class="nc" id="L182">        throw new UnsupportedColumnTypeException(other)</span>
+    }
+  }
+  protected def intFromResultSet(resultSet:ResultSet, column:Int):Int = {
+<span class="nc" id="L186">    val precision = resultSet.getInt(column)</span>
+<span class="nc bnc" id="L187" title="All 4 branches missed.">    if( precision == 0 &amp;&amp; resultSet.wasNull() )  -1 else precision</span>
+  }
+  private def columns(table:String): Seq[Column] ={
+<span class="nc" id="L190">    withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="nc" id="L191">      val schemaPattern = adapter.schemaNameOpt match {</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        case Some(n) =&gt; adapter.unquotedNameConverter(n)</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        case None =&gt; null</span>
+      }
+<span class="nc" id="L195">      val metaData = connection.getMetaData</span>
+<span class="nc" id="L196">      val primaryKeys = findPrimaryKeys(metaData, schemaPattern,table)</span>
+<span class="nc" id="L197">      val columns = metaData.getColumns(null, schemaPattern, table, null)</span>
+<span class="nc" id="L198">      With.autoClosingResultSet(columns) { rs =&gt;</span>
+<span class="nc" id="L199">        var buffer = new ListBuffer[Column]()</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        while (rs.next()) {</span>
+<span class="nc" id="L201">          val columnOptions = new ArrayBuffer[ColumnOption]()</span>
+<span class="nc" id="L202">          val name = rs.getString(COLUMN_NAME)</span>
+<span class="nc" id="L203">          val defaultValue = rs.getString(COLUMN_DEF)</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">          if (defaultValue != null)</span>
+<span class="nc" id="L205">            columnOptions += Default(defaultValue)</span>
+
+<span class="nc" id="L207">          val sqlType = typeFromResultSet(rs)</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">          if (sqlType == null)</span>
+<span class="nc" id="L209">            throw new RuntimeException(&quot;tableName:&quot; + table + &quot; columnName:&quot; + name)</span>
+
+<span class="nc" id="L211">          val precision = intFromResultSet(rs, COLUMN_SIZE);</span>
+<span class="nc" id="L212">          val scale = intFromResultSet(rs, DECIMAL_DIGITS);</span>
+<span class="nc bnc" id="L213" title="All 6 branches missed.">          if (sqlType == DecimalType) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            if (precision &gt; 0)</span>
+<span class="nc" id="L215">              columnOptions += Precision(precision)</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">            if (scale &gt; 0)</span>
+<span class="nc" id="L217">              columnOptions += Scale(scale)</span>
+          } else {
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            if (precision &gt; 0)</span>
+<span class="nc" id="L220">              columnOptions += Limit(precision)</span>
+          }
+
+          //是否为空
+<span class="nc bnc" id="L224" title="All 6 branches missed.">          val nullable = rs.getString(IS_NULLABLE).trim() != &quot;NO&quot;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">          if (nullable) columnOptions += Nullable else columnOptions += NotNull</span>
+
+          //列注释
+<span class="nc" id="L228">          val colCommentSql = adapter.fetchColumnCommentSql(table, name)</span>
+<span class="nc" id="L229">          val commentOpt = fetchSingleResult(colCommentSql)</span>
+<span class="nc" id="L230">          commentOpt.foreach(x =&gt; columnOptions += Comment(x.replaceAll(&quot;\n&quot;,&quot;\\n&quot;)))</span>
+
+          //是否为主键
+<span class="nc bnc" id="L233" title="All 2 branches missed.">          if (primaryKeys.contains(name)) {</span>
+<span class="nc" id="L234">            columnOptions += PrimaryKey</span>
+          }
+
+<span class="nc" id="L237">          buffer += Column(name, sqlType, columnOptions.toArray)</span>
+        }
+<span class="nc" id="L239">        buffer.toSeq</span>
+      }
+    }
+  }
+  def dumpTable(table:String)(implicit sb:mutable.StringBuilder):Unit = {
+    try {
+<span class="nc" id="L245">      val tableCommentSql = adapter.fetchTableCommentSql(table)</span>
+<span class="nc" id="L246">      val commentOpt = fetchSingleResult(tableCommentSql)</span>
+
+<span class="nc" id="L248">      sb.append( s&quot;&quot;&quot;    createTable(\&quot;${table}\&quot;&quot;&quot;&quot;)</span>
+<span class="nc" id="L249">      commentOpt.foreach(x =&gt; sb.append(&quot;,&quot;).append(Comment(x).toTypeString))</span>
+<span class="nc" id="L250">      sb.append(&quot;){ t=&gt; \n&quot;)</span>
+<span class="nc" id="L251">      columns(table).foreach { c =&gt;</span>
+<span class="nc" id="L252">        sb.append( s&quot;&quot;&quot;      t.column(\&quot;${c.name}\&quot;,${c.sqlType}&quot;&quot;&quot;)</span>
+<span class="nc" id="L253">        c.options.foreach { o =&gt;</span>
+<span class="nc" id="L254">          sb.append(&quot;,&quot;).append(o.toTypeString)</span>
+        }
+<span class="nc" id="L256">        sb.append(&quot;)\n&quot;)</span>
+      }
+<span class="nc" id="L258">      sb.append(&quot;    }\n&quot;)</span>
+
+<span class="nc" id="L260">      indexes(table).foreach(x =&gt; dumpIndex(table, x))</span>
+    }catch{
+      case e:Throwable =&gt;
+<span class="nc" id="L263">        System.err.println(&quot;fail to dump table:&quot;+table+&quot; msg:&quot;+e)</span>
+    }
+  }
+  def dumpDropTable(table:String)(implicit sb:mutable.StringBuilder): Unit ={
+<span class="nc" id="L267">    sb.append(s&quot;&quot;&quot;    dropTable(&quot;${table}&quot;)&quot;&quot;&quot;).append(&quot;\n&quot;)</span>
+  }
+  private def fetchSingleResult(sql:String): Option[String]={
+<span class="nc" id="L270">    withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="nc" id="L271">      val stmt = connection.createStatement();</span>
+<span class="nc" id="L272">      With.autoClosingStatement(stmt) { s =&gt;</span>
+<span class="nc" id="L273">        val resultSet = s.executeQuery(sql)</span>
+<span class="nc" id="L274">        With.autoClosingResultSet(resultSet) { rs =&gt;</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">          if (rs.next()) Option(rs.getString(1)) else None</span>
+        }
+      }
+    }
+  }
+<span class="fc" id="L280">  protected val PRIMARY_KEYS_COLUMN_NAME = 4</span>
+  private def findPrimaryKeys(metaData:DatabaseMetaData , schemaPattern:String, tableName:String): Seq[String]={
+<span class="nc" id="L282">    val resultSet = metaData.getPrimaryKeys(null,schemaPattern,tableName)</span>
+<span class="nc" id="L283">    With.autoClosingResultSet(resultSet){rs=&gt;</span>
+<span class="nc" id="L284">      val buf = new ListBuffer[String]()</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">      while(rs.next()){</span>
+<span class="nc" id="L286">        buf += rs.getString(PRIMARY_KEYS_COLUMN_NAME)</span>
+      }
+<span class="nc" id="L288">      buf.toSeq</span>
+    }
+  }
+  def dumpHead()(implicit sb:mutable.StringBuilder): Unit ={
+
+<span class="nc" id="L293">    val dateStr = new SimpleDateFormat(&quot;YYYYMMddHHmmss&quot;).format(new Date())</span>
+<span class="nc" id="L294">    sb.append(s&quot;&quot;&quot;</span>
+import stark.migration._
+
+<span class="nc" id="L297">class Migrate_${dateStr}_Init</span>
+  extends Migration {
+
+  def up(): Unit = {
+&quot;&quot;&quot;.stripMargin)
+  }
+  def dumpMiddle()(implicit sb:mutable.StringBuilder): Unit = {
+<span class="nc" id="L304">    sb.append(&quot;&quot;&quot;</span>
+  }
+
+  def down() {
+    &quot;&quot;&quot;.stripMargin)
+  }
+  def dumpFooter()(implicit sb:mutable.StringBuilder): Unit ={
+<span class="nc" id="L311">    sb.append(&quot;&quot;&quot;</span>
+      | }
+      |}
+    &quot;&quot;&quot;.stripMargin)
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

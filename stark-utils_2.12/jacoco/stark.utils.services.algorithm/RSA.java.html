@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RSA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services.algorithm</a> &gt; <span class="el_source">RSA.java</span></div><h1>RSA.java</h1><pre class="source lang-java linenums">// Copyright 2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services.algorithm;
+
+import java.math.BigInteger;
+import java.util.Random;
+
+/**
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2015-02-02
+ */
+
+
+public class RSA {
+    KEY ku;//公钥
+    KEY kr;//私钥
+
+<span class="nc" id="L18">    public RSA() {</span>
+<span class="nc" id="L19">        Random r = new Random();</span>
+        BigInteger p, q, n, nn;
+
+<span class="nc" id="L22">        BigInteger e = BigInteger.ONE;// = new BigInteger(3+&quot;&quot;);</span>
+<span class="nc" id="L23">        BigInteger d = BigInteger.ONE;</span>
+        //素数p,q,e,d
+        while (true) {
+<span class="nc" id="L26">            p = BigInteger.probablePrime(17, r);//new BigInteger(7+&quot;&quot;);</span>
+<span class="nc" id="L27">            q = BigInteger.probablePrime(19, r);//new BigInteger(5+&quot;&quot;);</span>
+
+<span class="nc" id="L29">            n = p.multiply(q);</span>
+
+<span class="nc" id="L31">            nn = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            if (nn.longValue() &gt; 65535) {</span>
+
+<span class="nc bnc" id="L34" title="All 2 branches missed.">                for (int i = 3; i &lt; nn.intValue(); i++) {</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                    if (MyMath.gcd(i, nn.intValue()) == 1) {</span>
+<span class="nc" id="L36">                        e = BigInteger.valueOf(i);</span>
+
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                        if (MyMath.exgcd(e, nn).longValue() == -1)</span>
+                            continue;
+                        else
+                            break;
+                    }
+                }
+<span class="nc" id="L44">                d = MyMath.exgcd(e, nn).mod(nn);</span>
+<span class="nc" id="L45">                BigInteger big = d.multiply(d);</span>
+<span class="nc" id="L46">                big = big.multiply(big);</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">                if (big.compareTo(n) &gt; 0) {</span>
+<span class="nc" id="L48">                    break;</span>
+                } else
+                    continue;
+            }
+
+        }
+
+<span class="nc" id="L55">        this.ku = new KEY(e, n);</span>
+<span class="nc" id="L56">        this.kr = new KEY(d, n);</span>
+<span class="nc" id="L57">    }</span>
+
+    public RSA(KEY ku, KEY kr) {
+<span class="nc" id="L60">        super();</span>
+<span class="nc" id="L61">        this.ku = ku;</span>
+<span class="nc" id="L62">        this.kr = kr;</span>
+<span class="nc" id="L63">    }</span>
+
+    class KEY {
+        BigInteger x;
+        BigInteger n;
+
+<span class="nc" id="L69">        public KEY(BigInteger x, BigInteger n) {</span>
+<span class="nc" id="L70">            super();</span>
+<span class="nc" id="L71">            this.x = x;</span>
+<span class="nc" id="L72">            this.n = n;</span>
+<span class="nc" id="L73">        }</span>
+
+    }
+
+    //加密
+    public String Encryption(String s, KEY key) {
+<span class="nc" id="L79">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L80">        char[] cs = s.toCharArray();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (int i = 0; i &lt; cs.length; i++) {</span>
+<span class="nc" id="L82">            int k = cs[i];</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (k &lt; key.n.longValue()) {</span>
+<span class="nc" id="L84">                BigInteger p = new BigInteger(k + &quot;&quot;);</span>
+<span class="nc" id="L85">                int kk = Integer.parseInt(MyMath.reaminder(key.n, p, Long.parseLong(key.x.toString())).toString());</span>
+<span class="nc" id="L86">                char c = (char) kk;</span>
+<span class="nc" id="L87">                sb.append(c);</span>
+<span class="nc" id="L88">            } else {</span>
+<span class="nc" id="L89">                sb.append(cs[i]);</span>
+            }
+        }
+<span class="nc" id="L92">        return sb.toString();</span>
+    }
+
+    //加密成16进制字符串
+    public String Encryption(String s) {
+<span class="nc" id="L97">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L98">        char[] cs = s.toCharArray();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        for (int i = 0; i &lt; cs.length; i++) {</span>
+<span class="nc" id="L100">            int k = cs[i];</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (k &lt; this.ku.n.longValue()) {</span>
+<span class="nc" id="L102">                BigInteger p = new BigInteger(k + &quot;&quot;);</span>
+<span class="nc" id="L103">                long kk = Long.parseLong(MyMath.reaminder(this.ku.n, p, Long.parseLong(this.ku.x.toString())).toString());</span>
+<span class="nc" id="L104">                sb.append(Long.toHexString(kk));</span>
+<span class="nc" id="L105">                sb.append(&quot; &quot;);</span>
+<span class="nc" id="L106">            } else {</span>
+<span class="nc" id="L107">                sb.append(Integer.toHexString(k));</span>
+<span class="nc" id="L108">                sb.append(&quot; &quot;);</span>
+            }
+        }
+<span class="nc" id="L111">        return sb.toString();</span>
+    }
+
+    //解密
+    public String Decryption(String s, KEY key) {
+<span class="nc" id="L116">        return Encryption(s, key);</span>
+    }
+
+    public String Decryption(String s) {
+<span class="nc" id="L120">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L121">        String[] ss = s.split(&quot; &quot;);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        for (int i = 0; i &lt; ss.length; i++) {</span>
+<span class="nc" id="L123">            long k = Long.parseLong(ss[i], 16);</span>
+<span class="nc" id="L124">            BigInteger p = new BigInteger(k + &quot;&quot;);</span>
+<span class="nc" id="L125">            int kk = Integer.parseInt(MyMath.reaminder(this.kr.n, p, Long.parseLong(this.kr.x.toString())).toString());</span>
+<span class="nc" id="L126">            sb.append(Tools.obox(Integer.toHexString(kk), 4));</span>
+        }
+<span class="nc" id="L128">        return Tools.hexStr2Str(sb.toString());</span>
+    }
+
+    public static void main(String[] args) {
+<span class="nc" id="L132">        RSA rsa = new RSA();</span>
+<span class="nc" id="L133">        String s = &quot;大家好abi 是低估 斯蒂芬和欧冠发 蛋糕房女生佛 ,；&quot;;</span>
+<span class="nc" id="L134">        String sa = rsa.Encryption(s);</span>
+<span class="nc" id="L135">        System.out.println(&quot;密文:    &quot; + sa);</span>
+<span class="nc" id="L136">        System.out.println(&quot;明文:    &quot; + rsa.Decryption(sa));</span>
+<span class="nc" id="L137">        System.out.println(&quot;e:&quot; + rsa.kr.x + &quot;  d:&quot; + rsa.ku.x + &quot;   n:&quot; + rsa.kr.n);</span>
+<span class="nc" id="L138">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

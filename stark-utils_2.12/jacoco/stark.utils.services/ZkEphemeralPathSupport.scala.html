@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZkEphemeralPathSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZkEphemeralPathSupport.scala</span></div><h1>ZkEphemeralPathSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent.{CopyOnWriteArrayList, CopyOnWriteArraySet}
+
+import stark.utils.StarkUtilsConstants
+import org.apache.zookeeper.CreateMode
+
+import scala.collection.JavaConversions._
+import scala.util.control.NonFatal
+
+/**
+ * ephemeral path support
+ */
+<span class="fc" id="L16">trait ZkEphemeralPathSupport {</span>
+  this: ZkClientSupport
+    with ZkDeletePathSupport
+    with LoggerSupport
+    with ZkPathCreatorSupport =&gt;
+
+  /**
+   * 记录所有的临时节点,以及异常的临时节点
+   * 临时节点被删除，则watch将失效,
+   * 但是当临时节点重新被创建，则此watch又重新生效
+   */
+<span class="fc" id="L27">  private final val ephemeralNodes = new CopyOnWriteArraySet[Node]()</span>
+<span class="fc" id="L28">  private final val failedEphemeralNodes = new CopyOnWriteArrayList[Node]()</span>
+
+  /**
+   * 创建临时节点
+    *
+    * @param path 目标路径
+   * @param data 原始数据
+   * @param mode 模式
+   * @param isPermanent 永远跟踪
+   */
+  def createEphemeralPathWithStringData(path: String,
+<span class="nc" id="L39">                                        data: Option[String] = None,</span>
+<span class="nc" id="L40">                                        mode: EphemeralMode = NormalEphemeralMode,</span>
+<span class="nc" id="L41">                                        isPermanent: Boolean = true) {</span>
+<span class="nc" id="L42">    data match {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">      case Some(str) =&gt;</span>
+<span class="nc" id="L44">        createEphemeralPath(path,</span>
+<span class="nc" id="L45">          Some(str.getBytes(StarkUtilsConstants.UTF8_ENCODING)),</span>
+<span class="nc" id="L46">          mode,</span>
+<span class="nc" id="L47">          isPermanent)</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">      case None =&gt;</span>
+<span class="nc" id="L49">        createEphemeralPath(path,</span>
+<span class="nc" id="L50">          None,</span>
+<span class="nc" id="L51">          mode,</span>
+<span class="nc" id="L52">          isPermanent)</span>
+    }
+  }
+
+  /**
+   * 创建临时节点
+    *
+    * @param path 目标路径
+   * @param data 原始数据
+   * @param mode 模式
+   * @param isPermanent 永远跟踪
+   */
+  def createEphemeralPath(path: String,
+<span class="fc" id="L65">                          data: Option[Array[Byte]] = None,</span>
+<span class="fc" id="L66">                          mode: EphemeralMode = NormalEphemeralMode,</span>
+<span class="fc" id="L67">                          isPermanent: Boolean = true) {</span>
+<span class="fc" id="L68">    mode match {</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">      case NormalEphemeralMode =&gt;</span>
+<span class="fc" id="L70">        createEphemeralPath(path, data, CreateMode.EPHEMERAL, isPermanent)</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">      case SequenceEphemeralMode =&gt;</span>
+<span class="nc" id="L72">        createEphemeralPath(path, data, CreateMode.EPHEMERAL_SEQUENTIAL, isPermanent)</span>
+      case other =&gt;
+<span class="nc" id="L74">        error(&quot;mode &quot; + other + &quot; unsupported!&quot;)</span>
+    }
+  }
+
+  protected def retryFailedEphemeralNodes() {
+<span class="fc" id="L79">    debug(&quot;retry to create ephemeral nodes&quot;)</span>
+<span class="fc" id="L80">    val it = failedEphemeralNodes.iterator()</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    while (it.hasNext) {</span>
+<span class="fc" id="L82">      val node = it.next()</span>
+<span class="fc" id="L83">      createEphemeralPath(node.path, node.data, node.createMode, isPermanent = true)</span>
+    }
+  }
+
+  protected def recreateEphemeralNodes() {
+    //针对临时节点的再次创建
+<span class="fc" id="L89">    ephemeralNodes.foreach(node =&gt; createEphemeralPath(node.path, node.data, node.createMode, isPermanent = true))</span>
+  }
+
+  private def createEphemeralPath(path: String,
+                                  data: Option[Array[Byte]],
+                                  mode: CreateMode,
+                                  isPermanent: Boolean) {
+    /**
+     * 此处有一个特别的处理，因为在创建临时节点的时候，
+     * 有可能是上一个session未关闭造成此临时节点仍然存在，
+     * 如果只是简单setData，那么当上一个session失效的时候，本临时节点将消失
+     *
+     * @see http://developers.blog.box.com/2012/04/10/a-gotcha-when-using-zookeeper-ephemeral-nodes/
+     */
+<span class="nc" id="L103">    try {</span>
+<span class="pc" id="L104">      delete(path)</span>
+    } catch {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L107">        warn(&quot;fail to delete path when create ephemeral path for &quot; + path)</span>
+    }
+<span class="fc" id="L109">    val node = new Node(path, data, mode)</span>
+<span class="pc" id="L110">    try {</span>
+<span class="fc" id="L111">      failedEphemeralNodes.remove(path)</span>
+<span class="fc" id="L112">      internalCreatePath(path, data, node.createMode)</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">      if (isPermanent) {</span>
+<span class="fc" id="L114">        ephemeralNodes.add(node)</span>
+      }
+    } catch {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L118">        warn(e.getMessage + &quot;,will retry&quot;)</span>
+<span class="nc" id="L119">        failedEphemeralNodes.add(node)</span>
+    }
+  }
+
+  private[stark] def testCreateFailedEphemeral(path: String) {
+<span class="fc" id="L124">    failedEphemeralNodes.add(new Node(path, None, CreateMode.EPHEMERAL))</span>
+  }
+}
+
+sealed class EphemeralMode
+
+<span class="pc" id="L130">case object NormalEphemeralMode extends EphemeralMode</span>
+
+<span class="nc" id="L132">case object SequenceEphemeralMode extends EphemeralMode</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

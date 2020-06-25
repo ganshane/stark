@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>H2DatabaseAdapter.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">H2DatabaseAdapter.scala</span></div><h1>H2DatabaseAdapter.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ *
+ * All rights reserved.
+ */
+package stark.migration
+
+trait H2AutoIncrementingColumnDefinitionMixin
+<span class="fc" id="L11">    extends ColumnDefinition</span>
+    with ColumnSupportsAutoIncrement {
+  override protected abstract def sql: String = {
+<span class="fc bfc" id="L14" title="All 2 branches covered.">    if (isAutoIncrement) super.sql + &quot; AUTO_INCREMENT&quot;</span>
+<span class="fc" id="L15">    else super.sql</span>
+  }
+}
+
+<span class="fc" id="L19">class H2BigintColumnDefinition</span>
+<span class="fc" id="L20">  extends DefaultBigintColumnDefinition</span>
+  with H2AutoIncrementingColumnDefinitionMixin
+
+<span class="fc" id="L23">class H2IntegerColumnDefinition</span>
+<span class="fc" id="L24">  extends DefaultIntegerColumnDefinition</span>
+  with H2AutoIncrementingColumnDefinitionMixin
+
+<span class="fc" id="L27">class H2SmallintColumnDefinition</span>
+<span class="fc" id="L28">  extends DefaultSmallintColumnDefinition</span>
+  with H2AutoIncrementingColumnDefinitionMixin
+
+// H2 does not support size specifiers for the TIMESTAMP data type.
+class H2TimestampColumnDefinition
+<span class="fc" id="L33">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="fc" id="L35">  override val sql = &quot;TIMESTAMP&quot;</span>
+}
+
+<span class="fc" id="L38">class H2DatabaseAdapter(override val schemaNameOpt: Option[String])</span>
+<span class="fc" id="L39">    extends DatabaseAdapter(schemaNameOpt) {</span>
+<span class="fc" id="L40">  override val vendor = H2</span>
+
+<span class="fc" id="L42">  override val quoteCharacter = '`'</span>
+
+<span class="fc" id="L44">  override val unquotedNameConverter = UppercaseUnquotedNameConverter</span>
+
+<span class="fc" id="L46">  override val userFactory = PlainUserFactory</span>
+
+<span class="fc" id="L48">  override val alterTableDropForeignKeyConstraintPhrase = &quot;CONSTRAINT&quot;</span>
+
+<span class="fc" id="L50">  override val addingForeignKeyConstraintCreatesIndex = true</span>
+
+<span class="fc" id="L52">  override val supportsCheckConstraints = false</span>
+
+  override def columnDefinitionFactory(columnType: SqlType,
+                                       characterSetOpt: Option[CharacterSet]): ColumnDefinition = {
+<span class="pc" id="L56">    columnType match {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">      case BigintType =&gt;</span>
+<span class="fc" id="L58">        new H2BigintColumnDefinition</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">      case BlobType =&gt;</span>
+<span class="fc" id="L60">        new DefaultBlobColumnDefinition</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">      case ClobType =&gt;</span>
+<span class="fc" id="L62">        new DefaultClobColumnDefinition</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">      case BooleanType =&gt;</span>
+<span class="nc" id="L64">        new DefaultBooleanColumnDefinition</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">      case CharType =&gt;</span>
+<span class="fc" id="L66">        new DefaultCharColumnDefinition</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">      case DecimalType =&gt;</span>
+<span class="fc" id="L68">        new DefaultDecimalColumnDefinition</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      case IntegerType =&gt;</span>
+<span class="fc" id="L70">        new H2IntegerColumnDefinition</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">      case SmallintType =&gt;</span>
+<span class="fc" id="L72">        new H2SmallintColumnDefinition</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">      case TimestampType =&gt;</span>
+<span class="fc" id="L74">        new H2TimestampColumnDefinition</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">      case VarbinaryType =&gt;</span>
+<span class="fc" id="L76">        new DefaultVarbinaryColumnDefinition</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">      case VarcharType =&gt;</span>
+<span class="fc" id="L78">        new DefaultVarcharColumnDefinition</span>
+    }
+  }
+
+  override def lockTableSql(schemaNameOpt: Option[String],
+                            tableName: String): String = {
+<span class="fc" id="L84">    &quot;SELECT * FROM &quot; + quoteTableName(schemaNameOpt, tableName) + &quot; FOR UPDATE&quot;</span>
+  }
+
+  override protected def alterColumnSql(schemaNameOpt: Option[String],
+                                        columnDefinition: ColumnDefinition): String = {
+<span class="fc" id="L89">    new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L90">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L91">      .append(quoteTableName(schemaNameOpt, columnDefinition.getTableName))</span>
+<span class="fc" id="L92">      .append(&quot; MODIFY COLUMN &quot;)</span>
+<span class="fc" id="L93">      .append(quoteColumnName(columnDefinition.getColumnName))</span>
+<span class="fc" id="L94">      .append(&quot; &quot;+columnDefinition.toSql)</span>
+      .toString
+  }
+
+  override def removeIndexSql(schemaNameOpt: Option[String],
+                              tableName: String,
+                              indexName: String): String = {
+<span class="fc" id="L101">    new java.lang.StringBuilder(128)</span>
+<span class="fc" id="L102">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="fc" id="L103">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="fc" id="L104">      .append(&quot; DROP INDEX &quot;)</span>
+<span class="fc" id="L105">      .append(quoteIndexName(None, indexName))</span>
+      .toString
+  }
+
+  /**
+   * 对某一列增加注释
+   * @param tableName 表名
+   * @param columnName  列名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentColumnSql(tableName: String, columnName: String, comment: String): String = {
+<span class="fc" id="L117">    new java.lang.StringBuffer().append(&quot;COMMENT ON COLUMN &quot;).append(</span>
+<span class="fc" id="L118">      quoteTableName(schemaNameOpt, tableName)).append(&quot;.&quot;).append(columnName.toUpperCase())</span>
+<span class="fc" id="L119">      .append(&quot; IS '&quot;).append(comment).append(&quot;'&quot;).toString();</span>
+  }
+
+  /**
+   * 对表添加注释
+   * @param tableName 表名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentTableSql(tableName: String, comment: String): String = {
+<span class="fc" id="L129">    new java.lang.StringBuffer().append(&quot;COMMENT ON TABLE &quot;).append(</span>
+<span class="fc" id="L130">      quoteTableName(schemaNameOpt, tableName))</span>
+<span class="fc" id="L131">      .append(&quot; IS '&quot;).append(comment).append(&quot;'&quot;).toString();</span>
+  }
+
+  override def createTriggerSql(tableName: String,
+                                triggerName: String,
+                                timingPointOpt: Option[TriggerTimingPoint],
+                                triggerFiringOpt: List[TriggerFiring],
+                                referencingOpt:Option[Referencing],
+                                forEachRowOpt: Option[ForEachRow.type],
+                                whenOpt: Option[When])
+                               (f: =&gt;String):String= {
+<span class="fc" id="L142">    val tableNameQuoted = quoteTableName(tableName)</span>
+<span class="fc" id="L143">    val sb = new StringBuilder</span>
+<span class="fc" id="L144">    sb.append(s&quot;CREATE TRIGGER ${triggerName} ${timingPointOpt.get} &quot;)</span>
+<span class="fc" id="L145">    sb.append(triggerFiringOpt.mkString(&quot; OR &quot;))</span>
+
+<span class="fc" id="L147">    sb.append(s&quot; ON ${tableNameQuoted} &quot;)</span>
+
+<span class="pc" id="L149">    referencingOpt.foreach(x=&gt;sb.append(s&quot; REFERENCING(${x.expr}) &quot;))</span>
+
+<span class="fc" id="L151">    forEachRowOpt.foreach(x=&gt;sb.append(&quot; FOR EACH ROW &quot;))</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">    if(whenOpt.isDefined){</span>
+<span class="nc" id="L153">      logger.warn(&quot;h2 doesn't support when in trigger&quot;)</span>
+    }
+    //whenOpt.foreach(x=&gt;sb.append(s&quot; ${x} &quot;))
+    //sb.append(&quot; BEGIN &quot;)
+<span class="fc" id="L157">    sb.append(f.replaceAll(&quot;\n&quot;,&quot; &quot;))</span>
+    //sb.append(&quot; END;&quot;)
+
+<span class="fc" id="L160">    sb.toString()</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

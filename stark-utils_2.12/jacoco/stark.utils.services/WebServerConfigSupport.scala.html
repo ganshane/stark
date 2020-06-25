@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WebServerConfigSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">WebServerConfigSupport.scala</span></div><h1>WebServerConfigSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import javax.xml.bind.annotation.{XmlAccessType, XmlAccessorType, XmlElement, XmlType}
+
+/**
+ * web server configuration support
+ */
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = &quot;WebServerConfigSupport&quot;)
+<span class="nc" id="L12">trait WebServerConfigSupport {</span>
+  @XmlElement(name = &quot;web&quot;)
+<span class="nc" id="L14">  var web = new WebServerConfig</span>
+}
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = &quot;WebServerConfig&quot;)
+<span class="nc" id="L19">class WebServerConfig {</span>
+  @XmlElement(name = &quot;bind&quot;)
+<span class="nc" id="L21">  var bind: String = _</span>
+  @XmlElement(name = &quot;min_conn_count&quot;)
+<span class="nc" id="L23">  var minConnCount = 5</span>
+  @XmlElement(name = &quot;max_conn_count&quot;)
+<span class="nc" id="L25">  var maxConnCount = 50</span>
+  @XmlElement(name = &quot;keep_alive_time_minutes&quot;)
+<span class="nc" id="L27">  var keepAliveTimeInMinutes = 1</span>
+  @XmlElement(name = &quot;waiting_queue_size&quot;)
+<span class="nc" id="L29">  var waitingQueueSize = 1000</span>
+  @XmlElement(name = &quot;socket_acceptor&quot;)
+<span class="nc" id="L31">  var acceptor = 0</span>
+  @XmlElement(name = &quot;socket_backlog&quot;)
+<span class="nc" id="L33">  var backlog = 50</span>
+  @XmlElement(name = &quot;conn_idle_time_secs&quot;)
+<span class="nc" id="L35">  var idleTimeSecs = 3</span>
+  @XmlElement(name = &quot;request_buffer_size_kb&quot;)
+<span class="nc" id="L37">  var requestBufferSizeKB = 30</span>
+  @XmlElement(name = &quot;response_buffer_size_kb&quot;)
+<span class="nc" id="L39">  var responseBufferSizeKB = 30</span>
+<span class="nc" id="L40">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

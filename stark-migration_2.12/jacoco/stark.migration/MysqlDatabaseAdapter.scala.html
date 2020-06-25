@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MysqlDatabaseAdapter.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">MysqlDatabaseAdapter.scala</span></div><h1>MysqlDatabaseAdapter.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2012 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+/**
+ * Map Unicode to the &quot;utf8&quot; UTF-8 character set.  If Unicode is
+ * specified without a collation then use the &quot;utf8_unicode_ci&quot;
+ * collation.  If a non-Unicode character set is specified then let
+ * MySQL pick its default collation for the character set.  See
+ * http://dev.mysql.com/doc/refman/5.5/en/charset-charsets.html for
+ * more information.
+ */
+<span class="nc" id="L45">trait MysqlAppendCharacterSetToColumnDefinitionMixin {</span>
+  /**
+   * If a character set is specified, then append MySQL specific SQL
+   * to the column definition.
+   *
+   * If Unicode is specified without a collation, then use the
+   * utf8_unicode_ci collation.  While utf8_general_ci is MySQL's
+   * default utf8 collation (at least for 5.5), and is faster, it is
+   * also incorrect; see http://stackoverflow.com/questions/766809/ .
+   *
+   * @param dataTypeSql the SQL for the data type
+   * @param characterSetOpt an optional character set
+   */
+  protected def sql(dataTypeSql: String,
+                    characterSetOpt: Option[CharacterSet]): String = {
+<span class="nc" id="L60">    characterSetOpt match {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">      case Some(charset) =&gt; {</span>
+<span class="nc" id="L62">        val sb = new java.lang.StringBuilder(64)</span>
+<span class="nc" id="L63">        sb.append(dataTypeSql)</span>
+<span class="nc" id="L64">          .append(&quot; CHARACTER SET &quot;)</span>
+
+<span class="nc" id="L66">        charset.name match {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">          case Unicode =&gt; {</span>
+<span class="nc" id="L68">            sb.append(&quot;utf8 COLLATE &quot;)</span>
+<span class="nc" id="L69">              .append(charset.collationOpt.getOrElse(&quot;utf8_unicode_ci&quot;))</span>
+          }
+          case name =&gt; {
+<span class="nc" id="L72">            sb.append(name.toString)</span>
+<span class="nc" id="L73">            charset.collationOpt match {</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">              case Some(collation) =&gt;</span>
+<span class="nc" id="L75">                sb.append(&quot; COLLATE &quot;)</span>
+<span class="nc" id="L76">                  .append(collation)</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">              case None =&gt;</span>
+            }
+          }
+        }
+<span class="nc" id="L81">        sb.toString</span>
+      }
+<span class="nc bnc" id="L83" title="All 2 branches missed.">      case None =&gt; dataTypeSql</span>
+    }
+  }
+}
+
+trait MysqlAutoIncrementingColumnDefinitionMixin
+<span class="nc" id="L89">    extends ColumnDefinition</span>
+    with ColumnSupportsAutoIncrement {
+  override protected abstract def sql: String = {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">    if (isAutoIncrement) super.sql + &quot; AUTO_INCREMENT&quot;</span>
+<span class="nc" id="L93">    else super.sql</span>
+  }
+}
+
+<span class="nc" id="L97">class MysqlBigintColumnDefinition</span>
+<span class="nc" id="L98">  extends DefaultBigintColumnDefinition</span>
+  with MysqlAutoIncrementingColumnDefinitionMixin
+
+/**
+ * Map BlobType to MySQL's LONGBLOB data type.
+ *
+ * MySQL supports four different BlobType data types with the
+ * following properties:
+ *
+ * +------------+--------------------+------------------------------+
+ * | Data Type  | Max Length (bytes) | Storage Requirements (bytes) |
+ * +------------+--------------------+------------------------------+
+ * | TINYBLOB   |           255      | length + 1                   |
+ * | BLOB       |        65,535      | length + 2                   |
+ * | MEDIUMBLOB |    16,777,215      | length + 3                   |
+ * | LONGBLOB   | 4,294,967,295      | length + 4                   |
+ * +------------+--------------------+------------------------------+
+ *
+ * Since the intention of BlobType is to store large amounts of data
+ * and the additional overhead from TINYBLOB to LONGBLOB is three
+ * bytes, LONGBLOB is used.
+ */
+class MysqlBlobColumnDefinition
+<span class="nc" id="L121">    extends DefaultBlobColumnDefinition {</span>
+<span class="nc" id="L122">  override val sql = &quot;LONGBLOB&quot;</span>
+}
+class MysqlClobColumnDefinition
+<span class="nc" id="L125">  extends DefaultBlobColumnDefinition {</span>
+<span class="nc" id="L126">  override val sql = &quot;MEDIUMTEXT&quot;</span>
+}
+
+<span class="nc" id="L129">class MysqlCharColumnDefinition(characterSetOpt: Option[CharacterSet])</span>
+<span class="nc" id="L130">    extends DefaultCharColumnDefinition</span>
+    with MysqlAppendCharacterSetToColumnDefinitionMixin {
+<span class="nc" id="L132">  override protected def sql: String = sql(super.sql, characterSetOpt)</span>
+}
+
+<span class="nc" id="L135">class MysqlIntegerColumnDefinition</span>
+<span class="nc" id="L136">  extends DefaultIntegerColumnDefinition</span>
+  with MysqlAutoIncrementingColumnDefinitionMixin
+
+<span class="nc" id="L139">class MysqlSmallintColumnDefinition</span>
+<span class="nc" id="L140">  extends DefaultSmallintColumnDefinition</span>
+  with MysqlAutoIncrementingColumnDefinitionMixin
+
+// MySQL does not support size specifiers for the TIMESTAMP data type.
+class MysqlTimestampColumnDefinition
+<span class="nc" id="L145">    extends ColumnDefinition</span>
+    with ColumnSupportsDefault {
+<span class="nc" id="L147">  override val sql = &quot;TIMESTAMP&quot;</span>
+}
+
+<span class="nc" id="L150">class MysqlVarcharColumnDefinition(characterSetOpt: Option[CharacterSet])</span>
+<span class="nc" id="L151">    extends DefaultVarcharColumnDefinition</span>
+    with MysqlAppendCharacterSetToColumnDefinitionMixin {
+<span class="nc" id="L153">  override protected def sql: String = sql(super.sql, characterSetOpt)</span>
+}
+
+<span class="pc" id="L156">class MysqlDatabaseAdapter(override val schemaNameOpt: Option[String])</span>
+<span class="fc" id="L157">    extends DatabaseAdapter(schemaNameOpt) {</span>
+<span class="fc" id="L158">  override val vendor = Mysql</span>
+
+  // https://dev.mysql.com/doc/refman/5.5/en/identifiers.html
+<span class="pc" id="L161">  override val quoteCharacter = '`'</span>
+
+  // mysql&gt; create table PaReNt (pk INT PRIMARY KEY);
+  // Query OK, 0 rows affected (0.14 sec)
+  //
+  // mysql&gt; show tables;
+  // +----------------+
+  // | Tables_in_test |
+  // +----------------+
+  // | PaReNt         |
+  // +----------------+
+  // 1 row in set (0.00 sec)
+  //
+  // mysql&gt; select * from parent;
+  // ERROR 1146 (42S02): Table 'test.parent' doesn't exist
+  // mysql&gt; select * from PARENT;
+  // ERROR 1146 (42S02): Table 'test.PARENT' doesn't exist
+  // mysql&gt; select * from PaReNt;
+  // Empty set (0.00 sec)
+<span class="pc" id="L180">  override val unquotedNameConverter = CasePreservingUnquotedNameConverter</span>
+
+<span class="pc" id="L182">  override val userFactory = MysqlUserFactory</span>
+
+  // https://dev.mysql.com/doc/refman/5.5/en/alter-table.html
+<span class="pc" id="L185">  override val alterTableDropForeignKeyConstraintPhrase = &quot;FOREIGN KEY&quot;</span>
+
+  // mysql&gt; CREATE TABLE parent (pk INT PRIMARY KEY);
+  // Query OK, 0 rows affected (0.13 sec)
+  //
+  // mysql&gt; CREATE TABLE child (pk INT PRIMARY KEY, pk_parent INT NOT NULL);
+  // Query OK, 0 rows affected (0.10 sec)
+  //
+  // mysql&gt; ALTER TABLE child
+  //     -&gt;   ADD CONSTRAINT idx_child_pk_parent FOREIGN KEY (pk_parent)
+  //     -&gt;   REFERENCES parent (pk);
+  // Query OK, 0 rows affected (0.22 sec)
+  // Records: 0  Duplicates: 0  Warnings: 0
+  //
+  // mysql&gt; SHOW CREATE TABLE child;
+  // | Table | Create Table
+  // | child | CREATE TABLE `child` (
+  //   `pk` int(11) NOT NULL,
+  //   `pk_parent` int(11) NOT NULL,
+  //   PRIMARY KEY (`pk`),
+  //   KEY `idx_child_pk_parent` (`pk_parent`),
+  //   CONSTRAINT `idx_child_pk_parent` FOREIGN KEY (`pk_parent`) REFERENCES `parent` (`pk`)
+  // ) ENGINE=InnoDB DEFAULT CHARSET=latin1 |
+  // 1 row in set (0.00 sec)
+  //
+  // mysql&gt; CREATE INDEX idx_child_pk_parent ON child (pk_parent);
+  // ERROR 1280 (42000): Incorrect index name 'idx_child_pk_parent'
+<span class="pc" id="L212">  override val addingForeignKeyConstraintCreatesIndex = true</span>
+
+  // https://dev.mysql.com/doc/refman/5.5/en/alter-table.html
+<span class="pc" id="L215">  override val supportsCheckConstraints = false</span>
+
+  override def columnDefinitionFactory(columnType: SqlType,
+                                       characterSetOpt: Option[CharacterSet]): ColumnDefinition = {
+<span class="nc" id="L219">    columnType match {</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">      case BigintType =&gt;</span>
+<span class="nc" id="L221">        new MysqlBigintColumnDefinition</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">      case BlobType =&gt;</span>
+<span class="nc" id="L223">        new MysqlBlobColumnDefinition</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">      case ClobType =&gt;</span>
+<span class="nc" id="L225">        new MysqlClobColumnDefinition</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">      case BooleanType =&gt;</span>
+<span class="nc" id="L227">        new DefaultBooleanColumnDefinition</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">      case CharType =&gt;</span>
+<span class="nc" id="L229">        new MysqlCharColumnDefinition(characterSetOpt)</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">      case DecimalType =&gt;</span>
+<span class="nc" id="L231">        new DefaultDecimalColumnDefinition</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">      case IntegerType =&gt;</span>
+<span class="nc" id="L233">        new MysqlIntegerColumnDefinition</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">      case SmallintType =&gt;</span>
+<span class="nc" id="L235">        new MysqlSmallintColumnDefinition</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">      case TimestampType =&gt;</span>
+<span class="nc" id="L237">        new MysqlTimestampColumnDefinition</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">      case VarbinaryType =&gt;</span>
+<span class="nc" id="L239">        new DefaultVarbinaryColumnDefinition</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">      case VarcharType =&gt;</span>
+<span class="nc" id="L241">        new MysqlVarcharColumnDefinition(characterSetOpt)</span>
+    }
+  }
+
+  override def lockTableSql(schemaNameOpt: Option[String],
+                            tableName: String): String = {
+<span class="nc" id="L247">    val sb = new java.lang.StringBuilder(64)</span>
+<span class="nc" id="L248">    sb.append(&quot;LOCK TABLES &quot;)</span>
+<span class="nc" id="L249">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L250">      .append(&quot; WRITE&quot;)</span>
+      .toString
+  }
+
+
+  override def unlockTableSql(schemaNameOpt: Option[String], tableName: String): Option[String] = {
+<span class="nc" id="L256">    Some(&quot;UNLOCK TABLES&quot;)</span>
+  }
+
+  override protected def alterColumnSql(schemaNameOpt: Option[String],
+                                        columnDefinition: ColumnDefinition): String = {
+<span class="nc" id="L261">    new java.lang.StringBuilder(512)</span>
+<span class="nc" id="L262">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="nc" id="L263">      .append(quoteTableName(schemaNameOpt, columnDefinition.getTableName))</span>
+<span class="nc" id="L264">      .append(&quot; MODIFY COLUMN &quot;)</span>
+<span class="nc" id="L265">      .append(quoteColumnName(columnDefinition.getColumnName))</span>
+<span class="nc" id="L266">      .append(columnDefinition.toSql)</span>
+      .toString
+  }
+
+  override def removeIndexSql(schemaNameOpt: Option[String],
+                              tableName: String,
+                              indexName: String): String = {
+<span class="nc" id="L273">    new java.lang.StringBuilder(128)</span>
+<span class="nc" id="L274">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="nc" id="L275">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L276">      .append(&quot; DROP INDEX &quot;)</span>
+<span class="nc" id="L277">      .append(quoteIndexName(None, indexName))</span>
+      .toString
+  }
+
+  /**
+   * 对某一列增加注释
+ *
+   * @param tableName 表名
+   * @param columnName  列名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentColumnSql(tableName: String, columnName: String, comment: String): String = {
+    //super.commentColumnSql(tableName, columnName, comment)
+<span class="nc" id="L291">    logger.warn(&quot;comment column unsupported on mysql database&quot;)</span>
+<span class="nc" id="L292">    null</span>
+  }
+
+  /**
+   * 对表添加注释
+ *
+   * @param tableName 表名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentTableSql(tableName: String, comment: String): String = {
+<span class="nc" id="L303">    new java.lang.StringBuffer().append(&quot;ALTER TABLE &quot;).append(</span>
+<span class="nc" id="L304">      quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L305">      .append(&quot; COMMENT '&quot;).append(comment).append(&quot;'&quot;).toString();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

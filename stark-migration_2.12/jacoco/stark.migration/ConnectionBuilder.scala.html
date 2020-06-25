@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConnectionBuilder.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">ConnectionBuilder.scala</span></div><h1>ConnectionBuilder.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2011 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import java.sql.{
+  Connection,
+  DriverManager
+}
+import javax.sql.DataSource
+
+/**
+ * Adapter class for getting a Connection from either the
+ * DriverManager or a DataSource.
+ */
+<span class="fc" id="L47">class ConnectionBuilder private (either: Either[DataSource, String],</span>
+<span class="fc" id="L48">                                 loginOpt: Option[(String, String)]) {</span>
+  /**
+   * Construct a connection builder for a database that does not need
+   * a username and password.
+   *
+   * @param url the JDBC URL to connect to the database
+   */
+<span class="nc" id="L55">  def this(url: String) {</span>
+<span class="nc" id="L56">    this(Right(url), None)</span>
+  }
+
+  /**
+   * Construct a connection builder for a database that needs a
+   * username and password.
+   *
+   * @param url the JDBC URL to connect to the database
+   * @param username the username to log into the database
+   * @param password the password associated with the database
+   *        username
+   */
+  def this(url: String,
+           username: String,
+<span class="fc" id="L70">           password: String) {</span>
+<span class="fc" id="L71">    this(Right(url), Some((username, password)))</span>
+  }
+
+  /**
+   * Construct a connection builder with a DataSource for a database
+   * that does not need a username and password.
+   *
+   * @param datasource the JDBC DataSource to connect to the
+   *        database
+   */
+<span class="nc" id="L81">  def this(datasource: DataSource) {</span>
+<span class="nc" id="L82">    this(Left(datasource), None)</span>
+  }
+
+  /**
+   * Construct a connection builder with a DataSource and override the
+   * default username and password.
+   *
+   * @param datasource the JDBC DataSource to connect to the database
+   * @param username the username to log into the database
+   * @param password the password associated with the database
+   *        username
+   */
+  def this(datasource: DataSource,
+           username: String,
+<span class="nc" id="L96">           password: String) {</span>
+<span class="nc" id="L97">    this(Left(datasource), Some((username, password)))</span>
+  }
+
+  def withConnection[R](commitBehavior: CommitBehavior)(f: Function[Connection, R]): R = {
+    val connection =
+<span class="pc bpc" id="L102" title="5 of 8 branches missed.">      (either, loginOpt) match {</span>
+<span class="pc bpc" id="L103" title="5 of 6 branches missed.">        case (Left(datasource), Some((username, password))) =&gt;</span>
+<span class="nc" id="L104">          datasource.getConnection(username, password)</span>
+<span class="pc bpc" id="L105" title="3 of 4 branches missed.">        case (Left(datasource), None) =&gt;</span>
+<span class="nc" id="L106">          datasource.getConnection</span>
+<span class="pc bpc" id="L107" title="3 of 6 branches missed.">        case (Right(url), Some((username, password))) =&gt;</span>
+<span class="fc" id="L108">          DriverManager.getConnection(url, username, password)</span>
+<span class="nc bnc" id="L109" title="All 4 branches missed.">        case (Right(url), None) =&gt;</span>
+<span class="nc" id="L110">          DriverManager.getConnection(url)</span>
+      }
+
+<span class="fc" id="L113">    With.autoClosingConnection(connection) { c =&gt;</span>
+<span class="fc" id="L114">      With.autoCommittingConnection(c, commitBehavior)(f)</span>
+    }
+  }
+<span class="fc" id="L117">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

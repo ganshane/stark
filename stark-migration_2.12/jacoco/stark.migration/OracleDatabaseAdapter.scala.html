@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OracleDatabaseAdapter.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">OracleDatabaseAdapter.scala</span></div><h1>OracleDatabaseAdapter.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2010 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+/**
+ * Map the BIGINT SQL type to a NUMBER(19, 0).
+ *
+ * A few other databases, such as Derby, MySQL and PostgreSQL, treat
+ * BIGINT as a 8-byte signed integer type.  On Oracle a NUMBER(19, 0)
+ * is large enough to store any integers from -9223372036854775808 to
+ * 9223372036854775807 but not any integers with more digits.  A
+ * NUMBER(19, 0) does allow a larger range of values than the other
+ * databases, from -9999999999999999999 to 9999999999999999999, but
+ * this seems like an acceptable solution without using a CHECK
+ * constraint.
+ *
+ * This behavior is different than Oracle's default.  If a column is
+ * defined using &quot;INTEGER&quot; and not a &quot;NUMBER&quot;, Oracle uses a
+ * NUMBER(38) to store it:
+ *
+ * http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14200/sql_elements001.htm#sthref218
+ *
+ * Using a NUMBER(19, 0) helps ensure the compatibility of any code
+ * running against an Oracle database so that is does not assume it
+ * can use 38-digit integer values in case the data needs to be
+ * exported to another database or if the code needs to work with
+ * other databases.  Columns wishing to use a NUMBER(38) should use a
+ * DecimalType column.
+ */
+class OracleBigintColumnDefinition
+<span class="nc" id="L63">    extends DefaultBigintColumnDefinition {</span>
+<span class="nc" id="L64">  override protected def sql = &quot;NUMBER(19, 0)&quot;</span>
+}
+
+<span class="nc" id="L67">class OracleCharColumnDefinition(useNcharType: Boolean)</span>
+<span class="nc" id="L68">    extends DefaultCharColumnDefinition {</span>
+  override protected def sql = {
+<span class="nc bnc" id="L70" title="All 2 branches missed.">    optionallyAddLimitToDataType(if (useNcharType) &quot;NCHAR&quot; else &quot;CHAR&quot;)</span>
+  }
+}
+
+class OracleDecimalColumnDefinition
+<span class="nc" id="L75">    extends AbstractDecimalColumnDefinition {</span>
+<span class="nc" id="L76">  override val decimalSqlName = &quot;NUMBER&quot;</span>
+}
+
+/**
+ * Map the INTEGER SQL type to a NUMBER(10, 0).
+ *
+ * A few other databases, such as Derby, MySQL and PostgreSQL, treat
+ * INTEGER as a 4-byte signed integer type.  On Oracle a NUMBER(10, 0)
+ * is large enough to store any integers from -2147483648 to
+ * 2147483647 but not any integers with more digits.  A NUMBER(10, 0)
+ * does allow a larger range of values than the other databases, from
+ * -9999999999 to 9999999999, but this seems like an acceptable
+ * solution without using a CHECK constraint.
+ *
+ * This behavior is different than Oracle's default.  If a column is
+ * defined using &quot;INTEGER&quot; and not a &quot;NUMBER&quot;, Oracle uses a
+ * NUMBER(38) to store it:
+ *
+ * http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14200/sql_elements001.htm#sthref218
+ *
+ * Using a NUMBER(10, 0) helps ensure the compatibility of any code
+ * running against an Oracle database so that is does not assume it
+ * can use 38-digit integer values in case the data needs to be
+ * exported to another database or if the code needs to work with
+ * other databases.  Columns wishing to use a NUMBER(38) should use a
+ * DecimalType column.
+ */
+class OracleIntegerColumnDefinition
+<span class="nc" id="L104">    extends DefaultIntegerColumnDefinition {</span>
+<span class="nc" id="L105">  override protected def sql = &quot;NUMBER(10, 0)&quot;</span>
+}
+
+/**
+ * Map the SMALLINT SQL type to a NUMBER(5, 0).
+ *
+ * A few other databases, such as Derby, MySQL and PostgreSQL, treat
+ * SMALLINT as a 2-byte signed integer type.  On Oracle a NUMBER(5, 0)
+ * is large enough to store any integers from -32768 to 32767 but not
+ * any integers with more digits.  A NUMBER(5, 0) does allow a larger
+ * range of values than the other databases, from -99999 to 99999, but
+ * this seems like an acceptable solution without using a CHECK
+ * constraint.
+ *
+ * This behavior is different than Oracle's default.  If a column is
+ * defined using &quot;INTEGER&quot; and not a &quot;NUMBER&quot;, Oracle uses a
+ * NUMBER(38) to store it:
+ *
+ * http://download-west.oracle.com/docs/cd/B19306_01/server.102/b14200/sql_elements001.htm#sthref218
+ *
+ * Using a NUMBER(5, 0) helps ensure the compatibility of any code
+ * running against an Oracle database so that is does not assume it
+ * can use 38-digit integer values in case the data needs to be
+ * exported to another database or if the code needs to work with
+ * other databases.  Columns wishing to use a NUMBER(38) should use a
+ * DecimalType column.
+ */
+class OracleSmallintColumnDefinition
+<span class="nc" id="L133">    extends DefaultSmallintColumnDefinition {</span>
+<span class="nc" id="L134">  override protected def sql = &quot;NUMBER(5, 0)&quot;</span>
+}
+
+class OracleVarbinaryColumnDefinition
+<span class="nc" id="L138">    extends DefaultVarbinaryColumnDefinition {</span>
+  override protected def sql = {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">    if (!limit.isDefined) {</span>
+<span class="nc" id="L141">      val message = &quot;In Oracle, a RAW column must always specify its size.&quot;</span>
+<span class="nc" id="L142">      throw new IllegalArgumentException(message)</span>
+    }
+
+<span class="nc" id="L145">    optionallyAddLimitToDataType(&quot;RAW&quot;)</span>
+  }
+}
+
+<span class="nc" id="L149">class OracleVarcharColumnDefinition(useNcharType: Boolean)</span>
+<span class="nc" id="L150">    extends DefaultVarcharColumnDefinition {</span>
+  override protected def sql = {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">    optionallyAddLimitToDataType(if (useNcharType) &quot;NVARCHAR2&quot; else &quot;VARCHAR2&quot;)</span>
+  }
+}
+
+<span class="pc" id="L156">class OracleDatabaseAdapter(override val schemaNameOpt: Option[String])</span>
+<span class="fc" id="L157">    extends DatabaseAdapter(schemaNameOpt) {</span>
+<span class="fc" id="L158">  override val vendor = Oracle</span>
+
+<span class="pc" id="L160">  override val quoteCharacter = '&quot;'</span>
+
+<span class="pc" id="L162">  override val unquotedNameConverter = UppercaseUnquotedNameConverter</span>
+
+<span class="pc" id="L164">  override val userFactory = PlainUserFactory</span>
+
+<span class="pc" id="L166">  override val alterTableDropForeignKeyConstraintPhrase = &quot;CONSTRAINT&quot;</span>
+
+<span class="pc" id="L168">  override val addingForeignKeyConstraintCreatesIndex = false</span>
+
+<span class="pc" id="L170">  override val supportsCheckConstraints = true</span>
+
+  override def columnDefinitionFactory(columnType: SqlType,
+                                       characterSetOpt: Option[CharacterSet]): ColumnDefinition = {
+    val useNcharType =
+<span class="nc" id="L175">      characterSetOpt match {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        case None =&gt; {</span>
+<span class="nc" id="L177">          false</span>
+        }
+<span class="nc bnc" id="L179" title="All 8 branches missed.">        case Some(CharacterSet(Unicode, None)) =&gt; {</span>
+<span class="nc" id="L180">          true</span>
+        }
+<span class="nc bnc" id="L182" title="All 8 branches missed.">        case Some(charset @ CharacterSet(Unicode, Some(collation))) =&gt; {</span>
+<span class="nc" id="L183">          logger.warn(&quot;Ignoring collation '{}' in '{}' as Oracle only &quot; +</span>
+<span class="nc" id="L184">            &quot;supports setting the collation using the NLS_SORT &quot; +</span>
+            &quot;session parameter.&quot;,
+<span class="nc" id="L186">            Array[AnyRef](collation, charset))</span>
+<span class="nc" id="L187">          true</span>
+        }
+<span class="nc bnc" id="L189" title="All 4 branches missed.">        case Some(charset @ CharacterSet(_, _)) =&gt; {</span>
+<span class="nc" id="L190">          logger.warn(&quot;Ignoring '{}' as Oracle only supports specifying no &quot; +</span>
+            &quot;explicit character set encoding, which defaults the &quot; +
+<span class="nc" id="L192">            &quot;column to use the database's character set, or &quot; +</span>
+            &quot;Unicode.&quot;,
+<span class="nc" id="L194">            charset)</span>
+<span class="nc" id="L195">          false</span>
+        }
+      }
+
+<span class="nc" id="L199">    columnType match {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">      case BigintType =&gt;</span>
+<span class="nc" id="L201">        new OracleBigintColumnDefinition</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">      case BlobType =&gt;</span>
+<span class="nc" id="L203">        new DefaultBlobColumnDefinition</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">      case ClobType =&gt;</span>
+<span class="nc" id="L205">        new DefaultClobColumnDefinition</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">      case BooleanType =&gt; {</span>
+<span class="nc" id="L207">        val message = &quot;Oracle does not support a boolean type, you must &quot; +</span>
+          &quot;choose a mapping your self.&quot;
+<span class="nc" id="L209">        throw new UnsupportedColumnTypeException(message)</span>
+      }
+<span class="nc bnc" id="L211" title="All 2 branches missed.">      case CharType =&gt;</span>
+<span class="nc" id="L212">        new OracleCharColumnDefinition(useNcharType)</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">      case DecimalType =&gt;</span>
+<span class="nc" id="L214">        new OracleDecimalColumnDefinition</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">      case IntegerType =&gt;</span>
+<span class="nc" id="L216">        new OracleIntegerColumnDefinition</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">      case SmallintType =&gt;</span>
+<span class="nc" id="L218">        new OracleSmallintColumnDefinition</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">      case TimestampType =&gt;</span>
+<span class="nc" id="L220">        new DefaultTimestampColumnDefinition</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">      case VarbinaryType =&gt;</span>
+<span class="nc" id="L222">        new OracleVarbinaryColumnDefinition</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">      case VarcharType =&gt;</span>
+<span class="nc" id="L224">        new OracleVarcharColumnDefinition(useNcharType)</span>
+    }
+  }
+
+  override protected def alterColumnSql(schemaNameOpt: Option[String],
+                                        columnDefinition: ColumnDefinition): String = {
+<span class="nc" id="L230">    new java.lang.StringBuilder(512)</span>
+<span class="nc" id="L231">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="nc" id="L232">      .append(quoteTableName(schemaNameOpt, columnDefinition.getTableName))</span>
+<span class="nc" id="L233">      .append(&quot; MODIFY (&quot;)</span>
+<span class="nc" id="L234">      .append(quoteColumnName(columnDefinition.getColumnName))</span>
+<span class="nc" id="L235">      .append(' ')</span>
+<span class="nc" id="L236">      .append(columnDefinition.toSql)</span>
+<span class="nc" id="L237">      .append(')')</span>
+      .toString
+  }
+
+  override def removeColumnSql(schemaNameOpt: Option[String],
+                               tableName: String,
+                               columnName: String): String = {
+    // Oracle requires COLUMN keyword.
+<span class="nc" id="L245">    new java.lang.StringBuilder(512)</span>
+<span class="nc" id="L246">      .append(&quot;ALTER TABLE &quot;)</span>
+<span class="nc" id="L247">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L248">      .append(&quot; DROP COLUMN &quot;)</span>
+<span class="nc" id="L249">      .append(quoteColumnName(columnName))</span>
+      .toString
+  }
+
+  override def grantOnTableSql(schemaNameOpt: Option[String],
+                               tableName: String,
+                               grantees: Array[User],
+                               privileges: GrantPrivilegeType*): String = {
+    // Check that no columns are defined for any SELECT privs
+    for {
+<span class="nc bnc" id="L259" title="All 6 branches missed.">      SelectPrivilege(columns) &lt;- privileges</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">      if !columns.isEmpty</span>
+    } {
+<span class="nc" id="L262">      val message = &quot;Oracle does not support granting select to &quot; +</span>
+        &quot;individual columns&quot;
+<span class="nc" id="L264">      throw new IllegalArgumentException(message)</span>
+    }
+
+<span class="nc" id="L267">    super.grantOnTableSql(schemaNameOpt, tableName, grantees, privileges: _*)</span>
+  }
+
+  override def revokeOnTableSql(schemaNameOpt: Option[String],
+                                tableName: String,
+                                grantees: Array[User],
+                                privileges: GrantPrivilegeType*): String = {
+    // Check that no columns are defined for any privs with columns
+    for {
+<span class="nc bnc" id="L276" title="All 6 branches missed.">      PrivilegeWithColumns(columns) &lt;- privileges</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">      if !columns.isEmpty</span>
+    } {
+<span class="nc" id="L279">      val message = &quot;Oracle does not support revoking permissions from &quot; +</span>
+        &quot;individual columns&quot;
+<span class="nc" id="L281">      throw new IllegalArgumentException(message)</span>
+    }
+
+<span class="nc" id="L284">    super.revokeOnTableSql(schemaNameOpt, tableName, grantees, privileges: _*)</span>
+  }
+
+  /**
+   * Return the SQL text for the ON DELETE clause for a foreign key
+   * relationship.
+   *
+   * Oracle rejects adding a foreign key relationship containing the
+   * &quot;ON DELETE RESTRICT&quot; text, so do not generate any SQL text for
+   * it.  The behavior is the same though.  Let any other unsupported
+   * options pass through, such as &quot;ON DELETE NO ACTION&quot;, in case
+   * Oracle ever does support that clause, which it does not in 10g.
+   *
+   * @param onDeleteOpt an Option[OnDelete]
+   * @return the SQL text to append to the SQL to create a foreign key
+   *         relationship
+   */
+  override def onDeleteSql(onDeleteOpt: Option[OnDelete]): String = {
+<span class="nc" id="L302">    onDeleteOpt match {</span>
+<span class="nc bnc" id="L303" title="All 6 branches missed.">      case Some(OnDelete(Restrict)) =&gt; &quot;&quot;</span>
+<span class="nc" id="L304">      case opt =&gt; super.onDeleteSql(opt)</span>
+    }
+  }
+
+  /**
+   * 对某一列增加注释
+   * @param tableName 表名
+   * @param columnName  列名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentColumnSql(tableName: String, columnName: String, comment: String): String = {
+<span class="nc" id="L316">    new java.lang.StringBuffer().append(&quot;COMMENT ON COLUMN &quot;)</span>
+<span class="nc" id="L317">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L318">      .append(&quot;.&quot;).append(columnName.toUpperCase())</span>
+<span class="nc" id="L319">      .append(&quot; IS '&quot;).append(comment).append(&quot;'&quot;).toString();</span>
+  }
+
+  /**
+   * 对表添加注释
+   * @param tableName 表名
+   * @param comment 注释
+   * @return 注释的sql
+   */
+  override def commentTableSql(tableName: String, comment: String): String = {
+<span class="nc" id="L329">    new StringBuffer().append(&quot;COMMENT ON TABLE &quot;)</span>
+<span class="nc" id="L330">      .append(quoteTableName(schemaNameOpt, tableName))</span>
+<span class="nc" id="L331">      .append(&quot; IS '&quot;)</span>
+<span class="nc" id="L332">      .append(comment).append(&quot;'&quot;).toString</span>
+  }
+
+  override def fetchTableCommentSql(tableName: String): String = {
+<span class="nc" id="L336">    s&quot;SELECT COMMENTS FROM USER_TAB_COMMENTS where TABLE_NAME='${tableName}'&quot;</span>
+  }
+
+  override def fetchColumnCommentSql(tableName: String, columnName: String): String = {
+<span class="nc" id="L340">    s&quot;SELECT COMMENTS FROM USER_COL_COMMENTS where TABLE_NAME='${tableName}' AND COLUMN_NAME='${columnName}'&quot;</span>
+  }
+
+  override def findSequencesSql(): Option[String] = {
+<span class="nc" id="L344">    Some(&quot;SELECT SEQUENCE_NAME FROM USER_SEQUENCES&quot;)</span>
+  }
+  def findTriggersSql():Option[String] ={
+<span class="nc" id="L347">    Some(&quot;SELECT TABLE_NAME,TRIGGER_NAME,TRIGGER_TYPE,TRIGGERING_EVENT,REFERENCING_NAMES,WHEN_CLAUSE,TRIGGER_BODY FROM USER_TRIGGERS&quot;)</span>
+  }
+
+  override def createTriggerSql(tableName: String,
+                                triggerName: String,
+                                timingPointOpt: Option[TriggerTimingPoint],
+                                triggerFiringOpt: List[TriggerFiring],
+                                referencingOpt:Option[Referencing],
+                                forEachRowOpt: Option[ForEachRow.type],
+                                whenOpt: Option[When])
+                               (f: =&gt;String):String= {
+<span class="nc" id="L358">    val tableNameQuoted = quoteTableName(tableName)</span>
+<span class="nc" id="L359">    val sb = new StringBuilder</span>
+<span class="nc" id="L360">    sb.append(s&quot;CREATE TRIGGER ${triggerName} ${timingPointOpt.get} &quot;)</span>
+<span class="nc" id="L361">    sb.append(triggerFiringOpt.mkString(&quot; OR &quot;))</span>
+
+<span class="nc" id="L363">    sb.append(s&quot; ON ${tableNameQuoted} &quot;)</span>
+
+<span class="nc" id="L365">    referencingOpt.foreach(x=&gt;sb.append(s&quot; REFERENCING(${x.expr}) &quot;))</span>
+
+<span class="nc" id="L367">    forEachRowOpt.foreach(x=&gt;sb.append(&quot; FOR EACH ROW &quot;))</span>
+<span class="nc" id="L368">    whenOpt.foreach(x=&gt;sb.append(s&quot; ${x} &quot;))</span>
+<span class="nc" id="L369">    sb.append(&quot; BEGIN &quot;)</span>
+<span class="nc" id="L370">    sb.append(f.replaceAll(&quot;\n&quot;,&quot; &quot;))</span>
+<span class="nc" id="L371">    sb.append(&quot; END;&quot;)</span>
+
+<span class="nc" id="L373">    sb.toString()</span>
+  }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

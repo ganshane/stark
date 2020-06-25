@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppBootstrap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">AppBootstrap.java</span></div><h1>AppBootstrap.java</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * application bootstrap
+ */
+<span class="nc" id="L15">public class AppBootstrap {</span>
+    protected static void start(String mainClassName, String[] args) throws Exception {
+        //get server home
+<span class="nc" id="L18">        String serverHome = System.getProperty(&quot;server.home&quot;, &quot;support&quot;);</span>
+<span class="nc" id="L19">        String LIB = serverHome + File.separator + &quot;lib&quot;;</span>
+
+<span class="nc" id="L21">        List&lt;URL&gt; urls = new ArrayList&lt;URL&gt;();</span>
+<span class="nc" id="L22">        File[] files = new File(LIB).listFiles();</span>
+
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        if (files != null) {</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">            for (File f : files) {</span>
+<span class="nc" id="L26">                urls.add(f.toURI().toURL());</span>
+            }
+        }
+        // feed your URLs to a URLClassLoader!
+<span class="nc" id="L30">        ClassLoader classloader = new URLClassLoader(</span>
+<span class="nc" id="L31">                urls.toArray(new URL[urls.size()]),</span>
+<span class="nc" id="L32">                ClassLoader.getSystemClassLoader().getParent());</span>
+
+        // well-behaved Java packages work relative to the
+        // context classloader.  Others don't (like commons-logging)
+<span class="nc" id="L36">        Thread.currentThread().setContextClassLoader(classloader);</span>
+
+        // relative to that classloader, find the main class
+        // you want to bootstrap, which is the first cmd line arg
+<span class="nc" id="L40">        Class mainClass = classloader.loadClass(mainClassName);</span>
+<span class="nc" id="L41">        Method main = mainClass.getMethod(&quot;main&quot;,</span>
+<span class="nc" id="L42">                new Class[]{args.getClass()});</span>
+
+<span class="nc" id="L44">        main.invoke(null, new Object[]{args});</span>
+<span class="nc" id="L45">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

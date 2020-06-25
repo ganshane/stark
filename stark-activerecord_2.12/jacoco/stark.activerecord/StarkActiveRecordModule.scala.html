@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StarkActiveRecordModule.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord</a> &gt; <span class="el_source">StarkActiveRecordModule.scala</span></div><h1>StarkActiveRecordModule.scala</h1><pre class="source lang-java linenums">package stark.activerecord
+
+import java.util.Properties
+import javax.persistence.{EntityManager, EntityManagerFactory}
+import javax.sql.DataSource
+
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory
+import org.springframework.context.annotation.{Bean, Configuration}
+import org.springframework.orm.jpa.support.SharedEntityManagerBean
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter
+import org.springframework.orm.jpa.{JpaTransactionManager, JpaVendorAdapter, LocalContainerEntityManagerFactoryBean}
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.annotation.EnableTransactionManagement
+import stark.activerecord.config.ActiveRecordConfigSupport
+import stark.activerecord.internal.EntityServiceImpl
+import stark.activerecord.services.{ActiveRecord, EntityService}
+
+/**
+  * 实现了简单方便的ORM模块
+  * 利用了Spring-orm和JPA相关东西
+  *
+  * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-01-02
+ */
+@Configuration
+@EnableTransactionManagement
+<span class="fc" id="L27">class StarkActiveRecordModule(beanFactory: AutowireCapableBeanFactory) {</span>
+<span class="fc" id="L28">  ActiveRecord.objectLocator = beanFactory</span>
+ // private var springBeanFactoryOpt:Option[LocalContainerEntityManagerFactoryBean] =  None
+ @Bean
+ def entityService(): EntityService ={
+<span class="fc" id="L32">   beanFactory.createBean(classOf[EntityServiceImpl])</span>
+ }
+  @Bean
+  def buildEntityManagerFactory(dataSource: DataSource,
+                                activeRecordConfig:ActiveRecordConfigSupport):LocalContainerEntityManagerFactoryBean = {
+<span class="fc" id="L37">    val entityManagerFactoryBean = new LocalContainerEntityManagerFactoryBean</span>
+
+<span class="fc" id="L39">    entityManagerFactoryBean.setDataSource(dataSource)</span>
+
+
+<span class="fc" id="L42">    val jpaIt = activeRecordConfig.jpaProperties.iterator()</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">    while(jpaIt.hasNext){</span>
+<span class="fc" id="L44">      val jpaProperty = jpaIt.next()</span>
+<span class="pc bpc" id="L45" title="3 of 6 branches missed.">      if(jpaProperty.name == StarkActiveRecordConstants.PACKAGE_SCAN_KEY){</span>
+<span class="fc" id="L46">        val packages = jpaProperty.value.split(&quot;,&quot;)</span>
+<span class="fc" id="L47">        entityManagerFactoryBean.setPackagesToScan(packages:_*)</span>
+      }
+    }
+
+<span class="fc" id="L51">    val properties = new Properties</span>
+<span class="fc" id="L52">    val it = activeRecordConfig.jpaProperties.iterator()</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    while(it.hasNext){</span>
+<span class="fc" id="L54">      val jpaProperty = it.next()</span>
+<span class="pc bpc" id="L55" title="3 of 6 branches missed.">      if(jpaProperty.name != StarkActiveRecordConstants.PACKAGE_SCAN_KEY) {</span>
+<span class="fc" id="L56">        properties.put(jpaProperty.name, jpaProperty.value)</span>
+      }
+    }
+<span class="fc" id="L59">    entityManagerFactoryBean.setJpaProperties(properties)</span>
+
+<span class="fc" id="L61">    val vendorClassName = properties.getProperty(StarkActiveRecordConstants.JPA_VENDOR_KEY)</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">    if( vendorClassName != null)</span>
+<span class="nc" id="L63">      entityManagerFactoryBean.setJpaVendorAdapter(Thread.currentThread().getContextClassLoader.loadClass(vendorClassName).newInstance().asInstanceOf[JpaVendorAdapter])</span>
+    else
+<span class="fc" id="L65">      entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter)</span>
+
+<span class="fc" id="L67">    entityManagerFactoryBean</span>
+  }
+
+  //@Scope(ScopeConstants.PERTHREAD)
+  @Bean
+  def buildEntityManager(entityManagerFactory: EntityManagerFactory):SharedEntityManagerBean={
+<span class="fc" id="L73">    val shared = new SharedEntityManagerBean()</span>
+<span class="fc" id="L74">    shared.setEntityManagerFactory(entityManagerFactory)</span>
+<span class="fc" id="L75">    shared.setEntityManagerInterface(classOf[EntityManager])</span>
+
+<span class="fc" id="L77">    shared</span>
+
+  }
+  @Bean
+  def buildJpaTransactionManager(entityManagerFactory:EntityManagerFactory,
+                                 dataSource: DataSource
+                                 ):PlatformTransactionManager={
+<span class="fc" id="L84">    val transactionManager = new JpaTransactionManager()</span>
+    //保证全局事务使用的key都是自身申明的对象
+<span class="fc" id="L86">    transactionManager.setEntityManagerFactory(entityManagerFactory)</span>
+    //设置JPA厂商
+//    springBeanFactoryOpt.foreach(x=&gt;transactionManager.setJpaDialect(x.getJpaDialect))
+
+<span class="fc" id="L90">    transactionManager</span>
+  }
+
+  /*
+   def buildTransactionInterceptor(@Local transactionManager: PlatformTransactionManager): TransactionInterceptor = {
+    val transactionAttributeSource = new AnnotationTransactionAttributeSource
+    val transactionInterceptor = new TransactionInterceptor(transactionManager, transactionAttributeSource)
+    transactionInterceptor.afterPropertiesSet()
+    transactionInterceptor
+  }
+
+  @Match(Array(&quot;*&quot;))
+  def adviseTransactional(receiver: MethodAdviceReceiver, @Local transactionInterceptor: TransactionInterceptor) {
+    for (m &lt;- receiver.getInterface.getMethods) {
+      if (receiver.getMethodAnnotation(m, classOf[Transactional]) != null)
+        receiver.adviseMethod(m, new EntityManagerTransactionAdvice(transactionInterceptor, m))
+    }
+  };
+  */
+<span class="fc" id="L109">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tools.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services.algorithm</a> &gt; <span class="el_source">Tools.java</span></div><h1>Tools.java</h1><pre class="source lang-java linenums">// Copyright 2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services.algorithm;
+
+/**
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2015-02-02
+ */
+<span class="nc" id="L9">public class Tools {</span>
+    //字符串左边补0直到长度为i
+    public static String obox(String s, int i) {
+<span class="nc" id="L12">        String ss = s;</span>
+<span class="nc bnc" id="L13" title="All 2 branches missed.">        while (ss.length() &lt; i) {</span>
+<span class="nc" id="L14">            ss = &quot;0&quot; + ss;</span>
+        }
+<span class="nc" id="L16">        return ss;</span>
+    }
+
+    //字符串右边补0直到长度为i
+    public static String boxo(String s, int i) {
+<span class="nc" id="L21">        String ss = s;</span>
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        while (ss.length() &lt; i) {</span>
+<span class="nc" id="L23">            ss += &quot;0&quot;;</span>
+        }
+<span class="nc" id="L25">        return ss;</span>
+    }
+
+    //将字符串变成16进制字符串
+    public static String Str2hexStr(String s) {
+<span class="nc" id="L30">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length(); i++) {</span>
+<span class="nc" id="L32">            sb.append(obox(Integer.toHexString(s.charAt(i)), 4));</span>
+        }
+<span class="nc" id="L34">        return sb.toString();</span>
+    }
+
+    //将16进制字符串变成字符串
+    public static String hexStr2Str(String s) {
+<span class="nc" id="L39">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L40">        int index = 0;</span>
+<span class="nc" id="L41">        int length = s.length();</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        while (index + 4 &lt;= length) {</span>
+<span class="nc" id="L43">            String sh = s.substring(index, index + 4);</span>
+<span class="nc" id="L44">            sb.append((char) Integer.parseInt(sh, 16));</span>
+<span class="nc" id="L45">            index += 4;</span>
+<span class="nc" id="L46">        }</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if (sb.charAt(sb.length() - 1) == 0) {</span>
+<span class="nc" id="L48">            sb.deleteCharAt(sb.length() - 1);</span>
+        }
+<span class="nc" id="L50">        return sb.toString();</span>
+    }
+
+    //String数组转换为char数组
+    public static char[] Ss2Cs(String[] s) {
+<span class="nc" id="L55">        char[] result = new char[s.length];</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length; i++) {</span>
+<span class="nc" id="L57">            result[i] = (char) Integer.parseInt(s[i], 16);</span>
+        }
+<span class="nc" id="L59">        return result;</span>
+    }
+
+    //String转换为char数组
+    public static char[] Str2Cs(String s) {
+<span class="nc" id="L64">        char[] result = new char[s.length() / 2];</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length() / 2; i++) {</span>
+<span class="nc" id="L66">            StringBuffer sb = new StringBuffer();//(char)s.charAt(i)+s.charAt(i+1);</span>
+<span class="nc" id="L67">            sb.append(s.charAt(i * 2));</span>
+<span class="nc" id="L68">            sb.append(s.charAt(i * 2 + 1));</span>
+<span class="nc" id="L69">            result[i] = (char) Integer.parseInt(sb.toString(), 16);</span>
+        }
+<span class="nc" id="L71">        return result;</span>
+    }
+
+    //hexString转换为数组
+    public static char[] hexStr2Cs(String s) {
+        //System.out.println(&quot;hexStr:&quot; + s);
+<span class="nc" id="L77">        char[] result = new char[s.length() / 2];</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length() / 2; i++) {</span>
+<span class="nc" id="L79">            StringBuffer sb = new StringBuffer();//(char)s.charAt(i)+s.charAt(i+1);</span>
+<span class="nc" id="L80">            sb.append(s.charAt(i * 2));</span>
+<span class="nc" id="L81">            sb.append(s.charAt(i * 2 + 1));</span>
+<span class="nc" id="L82">            result[i] = (char) Integer.parseInt(sb.toString(), 16);</span>
+        }
+<span class="nc" id="L84">        return result;</span>
+    }
+
+    //char数组转换为String数组
+    public static String[] Cs2Ss(char[] s) {
+<span class="nc" id="L89">        String[] result = new String[s.length];</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length; i++) {</span>
+<span class="nc" id="L91">            result[i] = Integer.toHexString(s[i]);</span>
+        }
+<span class="nc" id="L93">        return result;</span>
+    }
+
+    //char数组转换为hexString
+    public static String Cs2hexStr(char[] s) {
+<span class="nc" id="L98">        StringBuffer sb = new StringBuffer();</span>
+        //String[] result = new String[s.length];
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        for (int i = 0; i &lt; s.length; i++) {</span>
+<span class="nc" id="L101">            sb.append(obox(Integer.toHexString(s[i]), 2));</span>
+        }
+<span class="nc" id="L103">        return sb.toString();</span>
+    }
+
+    //long转换为hexString
+    public static String long2hexStr(long lo) {
+        //String s = Long.toHexString(lo);
+        //s =
+<span class="nc" id="L110">        return Long.toHexString(lo);</span>
+    }
+
+    //longs数组转换为hexString
+    public static String longs2hexStr(long[] lo) {
+<span class="nc" id="L115">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        for (int i = 0; i &lt; lo.length; i++) {</span>
+<span class="nc" id="L117">            sb.append(Long.toHexString(lo[0]));</span>
+<span class="nc" id="L118">            sb.append(&quot; &quot;);</span>
+        }
+<span class="nc" id="L120">        return sb.toString();</span>
+    }
+
+    //hexString转换为long
+    public static long hexStr2long(String s) {
+<span class="nc" id="L125">        return Long.parseLong(s, 16);</span>
+    }
+
+    //hexString转换为long数组
+    public static long[] hexStr2longs(String s) {
+<span class="nc" id="L130">        String[] ss = s.split(&quot; &quot;);</span>
+<span class="nc" id="L131">        long[] ls = new long[ss.length];</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        for (int i = 0; i &lt; ls.length; i++) {</span>
+<span class="nc" id="L133">            ls[i] = Long.parseLong(ss[i], 16);</span>
+        }
+<span class="nc" id="L135">        return ls;</span>
+    }
+
+    public static void main(String[] args) {
+<span class="nc" id="L139">        String hexs1 = long2hexStr(Long.MAX_VALUE);</span>
+<span class="nc" id="L140">        String hexs2 = long2hexStr(456);</span>
+<span class="nc" id="L141">        String s = hexs1 + &quot; &quot; + hexs2;</span>
+<span class="nc" id="L142">        System.out.println(s);</span>
+<span class="nc" id="L143">        long[] l = hexStr2longs(s);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        for (int i = 0; i &lt; l.length; i++)</span>
+<span class="nc" id="L145">            System.out.println(l[i]);</span>
+<span class="nc" id="L146">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

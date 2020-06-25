@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>With.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">With.scala</span></div><h1>With.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2010 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import org.slf4j.LoggerFactory
+
+import java.sql.{
+  Connection,
+  ResultSet,
+  Statement
+}
+import java.util.jar.JarFile
+
+/**
+ * Utility object that contains functions that ensure a resource is
+ * released once it has been used.  Each function takes resource
+ * object that has a method to release the resource, such as close(),
+ * and a closure to that operates on the resource.  After the closure
+ * has completed, either normally via a return or by throwing an
+ * exception, the resource is released.
+ */
+<span class="fc" id="L54">object With {</span>
+<span class="fc" id="L55">  private final val logger = LoggerFactory.getLogger(this.getClass)</span>
+
+  /**
+   * Given a resource and two functions, the first, a closer function
+   * that closes or releases the resource, and the second, a body
+   * function that uses the resource, invoke the body function on the
+   * resource and then ensure that the closer function closes the
+   * resource, regardless if the body function returns normally or
+   * throws an exception.
+   *
+   * @param resource a resource to use and then close
+   * @param closerDescription a textual description of what the closer
+   *        does; used to log any exception thrown by closer when the
+   *        body also throws an exception since in that case the
+   *        closer's exception will be suppressed and not thrown to
+   *        the caller
+   * @param closer the function that closes the resource
+   * @param body the function that uses the resource
+   * @return the result of invoking body on the resource
+   * @throws any exception that invoking body on the resource throws
+   */
+  def resource[A, B](resource: A, closerDescription: String)(closer: A =&gt; Unit)(body: A =&gt; B): B = {
+<span class="fc" id="L77">    var primaryException: Throwable = null</span>
+    try {
+<span class="fc" id="L79">      body(resource)</span>
+    }
+    catch {
+      case e: Throwable =&gt; {
+<span class="fc" id="L83">        primaryException = e</span>
+<span class="fc" id="L84">        throw e</span>
+      }
+    }
+    finally {
+<span class="pc bpc" id="L88" title="2 of 4 branches missed.">      if (primaryException eq null) {</span>
+<span class="pc" id="L89">        closer(resource)</span>
+      }
+      else {
+        try {
+<span class="pc" id="L93">          closer(resource)</span>
+        }
+        catch {
+          case e: Throwable =&gt;
+<span class="pc" id="L97">            logger.warn(&quot;Suppressing exception when &quot; +</span>
+<span class="pc" id="L98">              closerDescription +</span>
+<span class="pc" id="L99">              ':',</span>
+<span class="pc" id="L100">              e)</span>
+        }
+      }
+    }
+  }
+
+  /**
+   * Take a SQL connection, pass it to a closure and ensure that the
+   * connection is closed after the closure returns, either normally
+   * or by an exception.  If the closure returns normally, return its
+   * result.
+   *
+   * @param connection a SQL connection
+   * @param f a Function1[C &lt;: Connection,R] that operates on the
+   *        connection
+   * @return the result of f
+   */
+  def autoClosingConnection[C &lt;: Connection, R](connection: C)(f: C =&gt; R): R = {
+<span class="fc" id="L118">    resource(connection, &quot;closing connection&quot;)(_.close())(f)</span>
+  }
+
+  /**
+   * Take a SQL connection, save its current auto-commit mode, put the
+   * connection into the requested auto-commit mode, pass the
+   * connection to a closure and ensure that the connection's
+   * auto-commit mode is restored after the closure returns, either
+   * normally or by an exception.  If the closure returns normally,
+   * return its result.
+   *
+   * The connection's auto-commit mode is always set, even if it is
+   * the same as the requested mode.  This is done to ensure any work
+   * the database would normally do when setting the auto-commit mode
+   * is always done.
+   *
+   * @param connection a SQL connection
+   * @param mode the auto-commit mode the connection's state should be
+   *        put in
+   * @param f a Function1[C &lt;: Connection,R] that operates on the
+   *        connection
+   * @return the result of f
+   */
+  def autoRestoringConnection[C &lt;: Connection, R](connection: C,
+                                                  mode: Boolean)(f: C =&gt; R): R = {
+<span class="fc" id="L143">    val currentMode = connection.getAutoCommit</span>
+<span class="fc" id="L144">    With.resource(connection, &quot;restoring connection auto-commit&quot;)(_.setAutoCommit(currentMode)) { c =&gt;</span>
+<span class="fc" id="L145">      c.setAutoCommit(mode)</span>
+<span class="fc" id="L146">      f(c)</span>
+    }
+  }
+
+  /**
+   * Take a SQL connection, pass it to a closure and ensure that any
+   * work done on the connection after the closure returns is either
+   * left alone, committed or rolled back depending upon the given
+   * setting.  If the closure returns normally, return its result.
+   * The connection's auto-commit mode will be set and restored.
+   *
+   * @param connection a SQL connection
+   * @param commitBehavior the operation to implement on the
+   *        connection after f returns normally or via throwing an
+   *        exception
+   * @param f a Function1[C &lt;: Connection,R] that operates on the
+   *        connection
+   * @return the result of f
+   */
+  def autoCommittingConnection[C &lt;: Connection, R](connection: C,
+                                                   commitBehavior: CommitBehavior)(f: C =&gt; R): R = {
+    val newCommitBehavior =
+<span class="pc" id="L168">      commitBehavior match {</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">        case AutoCommit =&gt; true</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        case CommitUponReturnOrException =&gt; false</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        case CommitUponReturnOrRollbackUponException =&gt; false</span>
+      }
+
+<span class="fc" id="L174">    With.autoRestoringConnection(connection, newCommitBehavior) { c =&gt;</span>
+<span class="pc" id="L175">      commitBehavior match {</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        case AutoCommit =&gt; {</span>
+<span class="fc" id="L177">          f(connection)</span>
+        }
+
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        case CommitUponReturnOrException =&gt; {</span>
+<span class="fc" id="L181">          With.resource(connection, &quot;committing transaction&quot;)(_.commit())(f)</span>
+        }
+
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        case CommitUponReturnOrRollbackUponException =&gt; {</span>
+          val result =
+            try {
+<span class="nc" id="L187">              f(connection)</span>
+            }
+            catch {
+              case e1: Throwable =&gt; {
+                try {
+<span class="nc" id="L192">                  connection.rollback()</span>
+                }
+                catch {
+                  case e2: Throwable =&gt;
+<span class="nc" id="L196">                    logger.warn(&quot;Suppressing exception when rolling back&quot; +</span>
+<span class="nc" id="L197">                      &quot;transaction:&quot;, e2)</span>
+                }
+<span class="nc" id="L199">                throw e1</span>
+              }
+            }
+
+<span class="nc" id="L203">          connection.commit()</span>
+
+<span class="nc" id="L205">          result</span>
+        }
+      }
+    }
+  }
+
+  /**
+   * Take a SQL statement, pass it to a closure and ensure that the
+   * statement is closed after the closure returns, either normally or
+   * by an exception.  If the closure returns normally, return its
+   * result.
+   *
+   * @param statement a SQL statement
+   * @param f a Function1[S &lt;: Statement,R] that operates on the
+   *        statement
+   * @return the result of f
+   */
+  def autoClosingStatement[S &lt;: Statement, R](statement: S)(f: S =&gt; R): R = {
+<span class="fc" id="L223">    resource(statement, &quot;closing statement&quot;)(_.close())(f)</span>
+  }
+
+  /**
+   * Take a SQL result set, pass it to a closure and ensure that the
+   * result set is closed after the closure returns, either normally
+   * or by an exception.  If the closure returns normally, return its
+   * result.
+   *
+   * @param resultSet a SQL result set
+   * @param f a Function1[RS &lt;: ResultSet,R] that operates on the
+   *        result set
+   * @return the result of f
+   */
+  def autoClosingResultSet[RS &lt;: ResultSet, R](resultSet: RS)(f: RS =&gt; R): R = {
+<span class="fc" id="L238">    resource(resultSet, &quot;closing result set&quot;)(_.close())(f)</span>
+  }
+
+  /**
+   * Take a jar file, pass it to a closure and ensure that the jar
+   * file is closed after the closure returns, either normally or by
+   * an exception.  If the closure returns normally, return its
+   * result.
+   *
+   * @param jarFile a jar file
+   * @param f a Function1[J &lt;: JarFile,R] that operates on the jar
+   *        file
+   * @return the result of f
+   */
+  def jarFile[J &lt;: JarFile, R](jarFile: J)(f: J =&gt; R): R = {
+<span class="nc" id="L253">    resource(jarFile, &quot;closing jar file&quot;)(_.close())(f)</span>
+  }
+<span class="fc" id="L255">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MyMath.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services.algorithm</a> &gt; <span class="el_source">MyMath.java</span></div><h1>MyMath.java</h1><pre class="source lang-java linenums">// Copyright 2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services.algorithm;
+
+import java.math.BigInteger;
+
+/**
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2015-02-02
+ */
+
+<span class="nc" id="L12">public class MyMath {</span>
+    //此方法求余数。prime:素数，primitive：本原元，random：随机数。
+    public static long reaminder(long prime, long primitive, long random) {
+<span class="nc" id="L15">        long reamin = primitive % prime;</span>
+<span class="nc" id="L16">        long currentreamin = reamin;</span>
+<span class="nc" id="L17">        String binary = Long.toBinaryString(random);</span>
+<span class="nc" id="L18">        System.out.println(binary);</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        for (int i = 0; i &lt; binary.length() - 1; i++) {</span>
+<span class="nc bnc" id="L20" title="All 2 branches missed.">            if (binary.charAt(i + 1) == '0') {</span>
+<span class="nc" id="L21">                currentreamin = (currentreamin * currentreamin) % prime;</span>
+            } else {
+<span class="nc" id="L23">                currentreamin = (currentreamin * currentreamin * reamin) % prime;</span>
+            }
+
+        }
+        //
+        /*if(random == 1) {
+			return reamin;
+		}
+
+		for(long i=2; i&lt;=random; i++) {
+			currentreamin = currentreamin * reamin % prime;
+		}*/
+<span class="nc" id="L35">        return currentreamin;</span>
+    }
+
+    public static BigInteger reaminder(BigInteger prime, BigInteger primitive, long random) {
+<span class="nc" id="L39">        BigInteger reamin = primitive.mod(prime);//primitive%prime;</span>
+<span class="nc" id="L40">        BigInteger currentreamin = reamin;</span>
+<span class="nc" id="L41">        String binary = Long.toBinaryString(random);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">        for (int i = 0; i &lt; binary.length() - 1; i++) {</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">            if (binary.charAt(i + 1) == '0') {</span>
+<span class="nc" id="L44">                currentreamin = currentreamin.multiply(currentreamin).mod(prime);//(currentreamin * currentreamin) % prime;</span>
+            } else {
+<span class="nc" id="L46">                currentreamin = currentreamin.multiply(currentreamin).multiply(reamin).mod(prime);//(currentreamin * currentreamin * reamin) % prime;</span>
+            }
+
+        }
+<span class="nc" id="L50">        return currentreamin;</span>
+    }
+
+    public static BigInteger reaminder(String prim, String primitiv, String rand) {
+<span class="nc" id="L54">        BigInteger prime = new BigInteger(prim);</span>
+<span class="nc" id="L55">        BigInteger primitive = new BigInteger(primitiv);</span>
+<span class="nc" id="L56">        Long random = new Long(rand);</span>
+<span class="nc" id="L57">        BigInteger reamin = primitive.mod(prime);//primitive%prime;</span>
+<span class="nc" id="L58">        BigInteger currentreamin = reamin;</span>
+<span class="nc" id="L59">        String binary = Long.toBinaryString(random);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (int i = 0; i &lt; binary.length() - 1; i++) {</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (binary.charAt(i + 1) == '0') {</span>
+<span class="nc" id="L62">                currentreamin = currentreamin.multiply(currentreamin).mod(prime);//(currentreamin * currentreamin) % prime;</span>
+            } else {
+<span class="nc" id="L64">                currentreamin = currentreamin.multiply(currentreamin).multiply(reamin).mod(prime);//(currentreamin * currentreamin * reamin) % prime;</span>
+            }
+
+        }
+<span class="nc" id="L68">        return currentreamin;</span>
+    }
+
+    //此方法判断素数
+    public static boolean isPrime(long num) {
+<span class="nc" id="L73">        boolean flag = true;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        for (long i = 2; i &lt; num / 2; i++) {</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">            if (num == 2) break;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">            if (num % i == 0) {</span>
+<span class="nc" id="L77">                flag = false;</span>
+<span class="nc" id="L78">                break;</span>
+            }
+        }
+<span class="nc" id="L81">        return flag;</span>
+    }
+
+    //求最大公约数:欧几里得算法，辗转相除法
+    public static long gcd(long a, long b) {
+<span class="nc" id="L86">        long reamin = a % b;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (reamin == 0) {</span>
+<span class="nc" id="L88">            return b;</span>
+        } else {
+<span class="nc" id="L90">            return gcd(b, reamin);</span>
+        }
+    }
+
+    //扩展的欧几里得算法求逆元，如果有返回值，没有返回-1
+    public static long exgcd(long a, long b) {
+<span class="nc" id="L96">        long x1 = 1, x2 = 0, x3 = b,</span>
+<span class="nc" id="L97">                y1 = 0, y2 = 1, y3 = a;</span>
+        while (true) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (y3 == 0) {</span>
+<span class="nc" id="L100">                return -1;</span>
+            }
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (y3 == 1) {</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                return y2 &gt; 0 ? y2 : y2 + b;</span>
+            }
+            long t1, t2, t3;
+<span class="nc" id="L106">            long q = x3 / y3;</span>
+<span class="nc" id="L107">            t1 = x1 - q * y1;</span>
+<span class="nc" id="L108">            t2 = x2 - q * y2;</span>
+<span class="nc" id="L109">            t3 = x3 - q * y3;</span>
+<span class="nc" id="L110">            x1 = y1;</span>
+<span class="nc" id="L111">            x2 = y2;</span>
+<span class="nc" id="L112">            x3 = y3;</span>
+<span class="nc" id="L113">            y1 = t1;</span>
+<span class="nc" id="L114">            y2 = t2;</span>
+<span class="nc" id="L115">            y3 = t3;</span>
+<span class="nc" id="L116">        }</span>
+    }
+
+    public static BigInteger exgcd(BigInteger a, BigInteger b) {
+<span class="nc" id="L120">        BigInteger x1 = BigInteger.ONE, x2 = BigInteger.ZERO, x3 = b,</span>
+<span class="nc" id="L121">                y1 = BigInteger.ZERO, y2 = BigInteger.ONE, y3 = a;</span>
+        while (true) {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            if (y3.equals(BigInteger.ZERO)) {</span>
+<span class="nc" id="L124">                return BigInteger.ZERO.subtract(BigInteger.ONE);</span>
+            }
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            if (y3.equals(BigInteger.ONE)) {</span>
+<span class="nc" id="L127">                return y2;</span>
+            }
+            BigInteger t1, t2, t3;
+<span class="nc" id="L130">            BigInteger q = x3.divide(y3);//x3/y3;</span>
+<span class="nc" id="L131">            t1 = x1.subtract(q.multiply(y1));//x1-q*y1;</span>
+<span class="nc" id="L132">            t2 = x2.subtract(q.multiply(y2));//x2 - q*y2;</span>
+<span class="nc" id="L133">            t3 = x3.subtract(q.multiply(y3));//x3 - q*y3;</span>
+<span class="nc" id="L134">            x1 = y1;</span>
+<span class="nc" id="L135">            x2 = y2;</span>
+<span class="nc" id="L136">            x3 = y3;</span>
+<span class="nc" id="L137">            y1 = t1;</span>
+<span class="nc" id="L138">            y2 = t2;</span>
+<span class="nc" id="L139">            y3 = t3;</span>
+<span class="nc" id="L140">        }</span>
+    }
+
+    public static void main(String[] args) {
+        //System.out.println(exgcd(new BigInteger(5+&quot;&quot;),new BigInteger(96+&quot;&quot;)));
+        //System.out.println((int)'，');
+        //System.out.println((char)(34382));
+        //System.out.println(-19 % 96);
+        //System.out.println(Character.getNumericValue('虎'));
+        //System.out.println(reaminder(&quot;561&quot;,&quot;7&quot;,&quot;560&quot;));
+        //System.out.println(reaminder(561,7,560));
+        //System.out.println(new BigInteger(7+&quot;&quot;).modPow(new BigInteger(&quot;560&quot;), new BigInteger(&quot;561&quot;)));
+        //System.out.println(exgcd(-2,3));
+        //System.out.println((int)' ');
+<span class="nc" id="L154">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

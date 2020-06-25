@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BootstrapTextSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">BootstrapTextSupport.scala</span></div><h1>BootstrapTextSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2012,2013,2014,2015 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.io.{BufferedInputStream, IOException}
+import java.util.Properties
+
+import org.fusesource.jansi.{Ansi, AnsiConsole}
+import org.slf4j.Logger
+
+/**
+ * 输出版本
+  *
+  * @author jcai
+ */
+<span class="nc" id="L16">trait BootstrapTextSupport {</span>
+  def readClientVersionNumber(resourcePath: String): String = {
+<span class="nc" id="L18">    var result = &quot;UNKNOWN&quot;</span>
+
+<span class="nc" id="L20">    var stream = Thread.currentThread().getContextClassLoader.getResourceAsStream(</span>
+<span class="nc" id="L21">      resourcePath)</span>
+
+
+<span class="nc bnc" id="L24" title="All 2 branches missed.">    if (stream != null) {</span>
+<span class="nc" id="L25">      val properties = new Properties()</span>
+
+
+      try {
+<span class="nc" id="L29">        stream = new BufferedInputStream(stream)</span>
+
+<span class="nc" id="L31">        properties.load(stream)</span>
+      }
+      catch {
+<span class="nc" id="L34">        case ex: IOException =&gt;</span>
+        // Just ignore it.
+      }
+
+<span class="nc" id="L38">      val version = properties.getProperty(&quot;version&quot;)</span>
+<span class="nc" id="L39">      val buildNumber = properties.getProperty(&quot;buildNumber&quot;)</span>
+<span class="nc" id="L40">      val buildId = properties.getProperty(&quot;buildId&quot;)</span>
+
+<span class="nc bnc" id="L42" title="All 2 branches missed.">      if (version != null) result = version</span>
+<span class="nc bnc" id="L43" title="All 4 branches missed.">      if (buildNumber != null &amp;&amp; !buildNumber.contains(&quot;$&quot;)) result += &quot;_&quot; + buildNumber</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">      if (buildId != null &amp;&amp; !buildId.contains(&quot;$&quot;)) result += &quot;_&quot; + buildId</span>
+    }
+
+<span class="nc" id="L47">    result</span>
+
+  }
+
+  def readVersionNumber(resourcePath: String): String = {
+<span class="nc" id="L52">    var result = &quot;UNKNOWN&quot;</span>
+
+<span class="nc" id="L54">    var stream = Thread.currentThread().getContextClassLoader.getResourceAsStream(</span>
+<span class="nc" id="L55">      resourcePath)</span>
+
+
+<span class="nc bnc" id="L58" title="All 2 branches missed.">    if (stream != null) {</span>
+<span class="nc" id="L59">      val properties = new Properties()</span>
+
+
+      try {
+<span class="nc" id="L63">        stream = new BufferedInputStream(stream)</span>
+
+<span class="nc" id="L65">        properties.load(stream)</span>
+      }
+      catch {
+<span class="nc" id="L68">        case ex: IOException =&gt;</span>
+        // Just ignore it.
+      }
+
+<span class="nc" id="L72">      val version = properties.getProperty(&quot;version&quot;)</span>
+<span class="nc" id="L73">      val buildNumber = properties.getProperty(&quot;buildNumber&quot;)</span>
+<span class="nc" id="L74">      val buildId = properties.getProperty(&quot;buildId&quot;)</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">      if (version != null) result = version</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">      if (buildNumber != null) result += &quot;#&quot; + buildNumber</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">      if (buildId != null) result += &quot;@&quot; + buildId</span>
+
+    }
+
+<span class="nc" id="L82">    result</span>
+  }
+
+  protected[services] def printTextWithNative(logger: Logger,
+                                           logo: String,
+                                           values: Any*) {
+    /*
+    //val version = readVersionNumber(versionPath)
+    var str = &quot;&quot;&quot;
+   _  _________ _   _____   _  _____
+  / |/ /  _/ _ \ | / / _ | / |/ / _ | module : %s
+ /    // // , _/ |/ / __ |/    / __ | version: %s
+/_/|_/___/_/|_||___/_/ |_/_/|_/_/ |_| native : %s
+
+              &quot;&quot;&quot;
+     */
+<span class="nc" id="L98">    var str = logo</span>
+    try {
+<span class="nc" id="L100">      AnsiConsole.systemInstall();</span>
+
+<span class="nc" id="L102">      str = Ansi.ansi().render(logo, values.map(_.asInstanceOf[Object]): _ *).toString</span>
+      /*
+      val className = &quot;org.fusesource.jansi.Ansi&quot;
+      val clazz = Thread.currentThread().getContextClassLoader.loadClass(className)
+      //ansi()
+      val obj = clazz.getMethod(&quot;ansi&quot;).invoke(null)
+      //ansi().render
+      str = clazz.
+        getMethod(&quot;render&quot;, classOf[String]).
+        invoke(obj, &quot;@|green &quot; + str.
+        format(&quot;|@ @|red &quot; + text + &quot;|@ @|green &quot;, &quot;|@ @|yellow &quot; + version + &quot;|@ @|green &quot;, &quot;|@ @|cyan &quot; + nativeVersion + &quot;|@&quot;)).toString
+      */
+<span class="nc" id="L114">      logger.info(str)</span>
+    } finally {
+<span class="nc" id="L116">      AnsiConsole.systemUninstall()</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

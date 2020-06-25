@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CodingHelper.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">CodingHelper.scala</span></div><h1>CodingHelper.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.nio.ByteBuffer
+
+/**
+ * 针对数据进行转换
+ */
+<span class="fc" id="L10">object CodingHelper {</span>
+  def EncodeInt32WithBigEndian(i: Int): Array[Byte] = {
+<span class="fc" id="L12">    ByteBuffer.allocate(4).putInt(i).array()</span>
+  }
+
+<span class="fc" id="L15">  def DecodeInt32WithBigEndian(bytes: Array[Byte], offset: Int = 0): Int = {</span>
+<span class="fc" id="L16">    ByteBuffer.wrap(bytes).getInt</span>
+  }
+
+<span class="nc" id="L19">  def DecodeInt32WithLittleEndian(bytes: Array[Byte], offset: Int = 0): Int = {</span>
+<span class="nc" id="L20">    var i = 0</span>
+<span class="nc" id="L21">    i |= bytes(offset) &amp; 0xff</span>
+<span class="nc" id="L22">    i |= (bytes(offset + 1) &lt;&lt; 8) &amp; 0xffff</span>
+<span class="nc" id="L23">    i |= (bytes(offset + 2) &lt;&lt; 16) &amp; 0xffffff</span>
+<span class="nc" id="L24">    i |= (bytes(offset + 3) &lt;&lt; 24) &amp; 0xffffffff</span>
+
+<span class="nc" id="L26">    i</span>
+  }
+
+  def convertAsBytes(i: Int): Array[Byte] = {
+<span class="fc" id="L30">    val bytes = new Array[Byte](4)</span>
+<span class="fc" id="L31">    bytes(0) = (i &gt;&gt;&gt; 24).asInstanceOf[Byte]</span>
+<span class="fc" id="L32">    bytes(1) = (i &gt;&gt;&gt; 16).asInstanceOf[Byte]</span>
+<span class="fc" id="L33">    bytes(2) = (i &gt;&gt;&gt; 8).asInstanceOf[Byte]</span>
+<span class="fc" id="L34">    bytes(3) = i.asInstanceOf[Byte]</span>
+
+<span class="fc" id="L36">    bytes</span>
+  }
+
+<span class="fc" id="L39">  def convertAsInt(bytes: Array[Byte], offset: Int = 0): Int = {</span>
+<span class="fc" id="L40">    var i = 0</span>
+<span class="fc" id="L41">    i |= bytes(offset) &lt;&lt; 24</span>
+<span class="fc" id="L42">    i |= bytes(offset + 1) &lt;&lt; 16</span>
+<span class="fc" id="L43">    i |= bytes(offset + 2) &lt;&lt; 8</span>
+<span class="fc" id="L44">    i |= bytes(offset + 3)</span>
+
+<span class="fc" id="L46">    i</span>
+  }
+<span class="fc" id="L48">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

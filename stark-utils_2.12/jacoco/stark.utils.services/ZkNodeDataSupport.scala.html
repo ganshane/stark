@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZkNodeDataSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZkNodeDataSupport.scala</span></div><h1>ZkNodeDataSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent.{ConcurrentHashMap, CopyOnWriteArrayList, CopyOnWriteArraySet}
+
+import stark.utils.StarkUtilsConstants
+import org.apache.curator.framework.api.CuratorWatcher
+import org.apache.zookeeper.KeeperException.NoNodeException
+import org.apache.zookeeper.WatchedEvent
+import org.apache.zookeeper.Watcher.Event.EventType
+import org.apache.zookeeper.data.Stat
+
+import scala.collection.JavaConversions._
+import scala.util.control.NonFatal
+
+/**
+ * zookeeper node data support
+ */
+<span class="fc" id="L20">trait ZkNodeDataSupport {</span>
+  this: ZkClientSupport
+    with ZkPathCreatorSupport
+    with ZkDeletePathSupport
+    with RunInNoExceptionThrown
+    with LoggerSupport =&gt;
+
+  /**
+   * 对所有对节点数据的监听者,
+   * 节点被删除，节点数据的watcher将失效,
+   */
+<span class="fc" id="L31">  private final val nodeDataWatcher = new ConcurrentHashMap[String, NodeDataWatcherList]()</span>
+<span class="fc" id="L32">  private final val failedNodeDataWatcher = new CopyOnWriteArraySet[String]()</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">  private val nodeCuratorWatcher = new CuratorWatcher {</span>
+    def process(event: WatchedEvent) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">      if (event.getPath == null) return</span>
+<span class="fc" id="L36">      val selfWatchers = nodeDataWatcher.get(event.getPath)</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (selfWatchers == null) return</span>
+<span class="fc" id="L38">      event.getType match {</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        case EventType.NodeDataChanged =&gt;</span>
+<span class="fc" id="L40">          val data = internalWatchNodeData(event.getPath, this)</span>
+<span class="fc" id="L41">          selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="fc" id="L42">            x.handleDataChanged(data)</span>
+          })
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        case EventType.NodeDeleted =&gt;</span>
+          try {
+<span class="fc" id="L46">            selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="fc" id="L47">              x.handleNodeDeleted()</span>
+            })
+          } finally {
+            //节点已经删除，同时删除此节点相关的watcher
+<span class="fc" id="L51">            nodeDataWatcher.remove(event.getPath)</span>
+          }
+        case other =&gt;
+<span class="nc" id="L54">          debug(&quot;other event:{}&quot;, other)</span>
+      }
+    }
+  }
+
+  /**
+   * 得到节点内容作为一个字符串
+    *
+    * @param path 节点路径
+   * @param stat 节点的stat信息,作为返回信息
+   * @return 作为String返回节点的数据
+   */
+<span class="fc" id="L66">  def getDataAsString(path: String, stat: Option[Stat] = None): Option[String] = {</span>
+<span class="pc" id="L67">    getData(path, stat) match {</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">      case Some(arr) =&gt;</span>
+<span class="fc" id="L69">        Some(new String(arr, StarkUtilsConstants.UTF8_ENCODING))</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">      case None =&gt;</span>
+<span class="nc" id="L71">        None</span>
+    }
+  }
+
+  /**
+   * 把字符串设置到某一节点
+    *
+    * @param path 节点路径
+   * @param data 数据
+   * @param stat 节点的状态信息
+   * @param encoding 字符串的编码格式
+   */
+<span class="fc" id="L83">  def setStringData(path: String, data: String, stat: Option[Stat] = None,</span>
+<span class="fc" id="L84">                    encoding: String = StarkUtilsConstants.UTF8_ENCODING) {</span>
+<span class="fc" id="L85">    setData(path, data.getBytes(encoding), stat)</span>
+  }
+
+  /**
+   * 设置某一节点的数据
+    *
+    * @param path 节点路径
+   * @param data 节点数据
+   * @param stat 节点的状态
+   */
+<span class="nc" id="L95">  def setData(path: String, data: Array[Byte], stat: Option[Stat] = None) {</span>
+<span class="fc" id="L96">    stat match {</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">      case Some(s) =&gt;</span>
+<span class="fc" id="L98">        zkClient.setData().withVersion(s.getVersion).forPath(path, data)</span>
+      case _ =&gt;
+<span class="fc" id="L100">        zkClient.setData().forPath(path, data)</span>
+    }
+  }
+
+  /**
+   * 得到某一节点信息
+    *
+    * @param path 节点路径
+   * @return 节点信息
+   */
+  def stat(path: String): Option[Stat] = {
+<span class="fc" id="L111">    val data = zkClient.checkExists().forPath(path)</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">    if (data == null) None else Some(data)</span>
+  }
+
+  /**
+   * watch某一节点数据
+    *
+    * @param path 节点路径
+   * @param watcher 节点watcher
+   */
+  def watchNodeData(path: String,
+                    watcher: NodeDataWatcher) {
+<span class="fc" id="L123">    var isHandleData = false</span>
+<span class="fc" id="L124">    var watchers = nodeDataWatcher.get(path)</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">    if (watchers == null) {</span>
+<span class="fc" id="L126">      val arrayList = NodeDataWatcherList(nodeCuratorWatcher, new CopyOnWriteArrayList[NodeDataWatcher]())</span>
+
+<span class="fc" id="L128">      watchers = nodeDataWatcher.putIfAbsent(path, arrayList)</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">      if (watchers == null) {</span>
+        //说明首次添加，需要进行watcher
+<span class="fc" id="L131">        watchers = arrayList</span>
+        //通过watcher之后的值进行回调
+<span class="fc" id="L133">        val data = internalWatchNodeData(path, nodeCuratorWatcher)</span>
+<span class="fc" id="L134">        isHandleData = true</span>
+<span class="fc" id="L135">        runInNotExceptionThrown {</span>
+<span class="fc" id="L136">          watcher.handleDataChanged(data)</span>
+        }
+      }
+    }
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">    if (!isHandleData) {</span>
+<span class="nc" id="L141">      runInNotExceptionThrown {</span>
+<span class="nc" id="L142">        watcher.handleDataChanged(getData(path))</span>
+      }
+    }
+<span class="fc" id="L145">    watchers.watchers.add(watcher)</span>
+  }
+
+  /**
+   * 获取节点数据
+    *
+    * @param path 节点的路径
+   * @param stat 节点的stat状态信息,作为返回值返回
+   * @return 节点数据
+   */
+<span class="fc" id="L155">  def getData(path: String, stat: Option[Stat] = None): Option[Array[Byte]] = {</span>
+    try {
+      val data =
+<span class="fc" id="L158">        stat match {</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">          case Some(s) =&gt;</span>
+<span class="fc" id="L160">            zkClient.getData.storingStatIn(s).forPath(path)</span>
+          case _ =&gt;
+<span class="fc" id="L162">            zkClient.getData.forPath(path)</span>
+        }
+<span class="pc bpc" id="L164" title="1 of 4 branches missed.">      if (data == null || data.length == 0) None else Some(data)</span>
+    } catch {
+      case e: NoNodeException =&gt;
+<span class="fc" id="L167">        warn(&quot;no node for path:{}&quot;, path)</span>
+<span class="fc" id="L168">        None</span>
+    }
+  }
+
+  protected def rewatchNodeData() {
+    //针对节点数据的观察器
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">    nodeDataWatcher.foreach {</span>
+<span class="fc" id="L175">      case (k, v) =&gt;</span>
+<span class="fc" id="L176">        val data = internalWatchNodeData(k, v.internalWatcher)</span>
+        //针对各个watcher调用数据
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if (data.isDefined)</span>
+<span class="fc" id="L179">          v.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="fc" id="L180">            x.handleDataChanged(data)</span>
+          })
+    }
+  }
+
+  private def internalWatchNodeData(path: String,
+                                    curatorWatcher: CuratorWatcher): Option[Array[Byte]] = {
+<span class="pc" id="L187">    try {</span>
+<span class="fc" id="L188">      failedNodeDataWatcher.remove(path)</span>
+<span class="fc" id="L189">      val data = zkClient.getData.usingWatcher(curatorWatcher).forPath(path)</span>
+<span class="pc bpc" id="L190" title="2 of 4 branches missed.">      if (data == null || data.length == 0) None else Some(data)</span>
+    } catch {
+<span class="nc bnc" id="L192" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L193">        warn(&quot;fail to watch node data,will retry,msg:{}&quot;, e.getMessage)</span>
+<span class="nc" id="L194">        failedNodeDataWatcher.add(path)</span>
+<span class="nc" id="L195">        None</span>
+    }
+  }
+
+  protected def retryFailedWatchNodeData() {
+<span class="fc" id="L200">    debug(&quot;retry to watch node data&quot;)</span>
+<span class="fc" id="L201">    val it = failedNodeDataWatcher.iterator()</span>
+<span class="pc bpc" id="L202" title="1 of 2 branches missed.">    while (it.hasNext) {</span>
+<span class="nc" id="L203">      val path = it.next()</span>
+<span class="nc" id="L204">      val watcherList = nodeDataWatcher.get(path)</span>
+<span class="nc" id="L205">      val data = internalWatchNodeData(path, watcherList.internalWatcher)</span>
+      //针对各个watcher调用数据
+<span class="nc bnc" id="L207" title="All 2 branches missed.">      if (data.isDefined)</span>
+<span class="nc" id="L208">        watcherList.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="nc" id="L209">          x.handleDataChanged(data)</span>
+        })
+    }
+  }
+
+<span class="pc bpc" id="L214" title="32 of 33 branches missed.">  private case class NodeDataWatcherList(internalWatcher: CuratorWatcher, watchers: CopyOnWriteArrayList[NodeDataWatcher])</span>
+
+}
+
+/**
+ * 针对节点数据的查看器
+ */
+trait NodeDataWatcher {
+  /**
+   * 针对数据发生变化的处理
+    *
+    * @param data 变化后的数据
+   */
+  def handleDataChanged(data: Option[Array[Byte]])
+
+  /**
+   * 针对节点删除的处理
+   */
+  def handleNodeDeleted()
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

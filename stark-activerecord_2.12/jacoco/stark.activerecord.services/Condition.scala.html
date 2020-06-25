@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Condition.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">Condition.scala</span></div><h1>Condition.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
+
+import javax.persistence.criteria.{Path, Predicate}
+import stark.activerecord.services.Condition._
+
+import scala.language.implicitConversions
+
+/**
+ * condition
+ *
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-03-09
+ */
+<span class="fc" id="L14">object Condition{</span>
+<span class="fc" id="L15">  implicit def conditionToPredicate(condition:Condition):Predicate = condition.toPredicate</span>
+<span class="fc" id="L16">  implicit def predicateToCondition(predicate: Predicate):Condition= new PredicateCondition(predicate)</span>
+
+  private def findFieldPath[T](name:String):Path[T]={
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    if(DSL.joinContext.value != null){</span>
+<span class="fc" id="L20">      DSL.joinContext.value.join.get(name)</span>
+    }else{
+<span class="fc" id="L22">      val fieldPaths = name.split(&quot;\\.&quot;)</span>
+<span class="fc" id="L23">      var path:Path[_] = DSL.dslContext.value.root</span>
+
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">      if(fieldPaths.isEmpty) {</span>
+<span class="nc" id="L26">        path=path.get(name)</span>
+      }
+      else{
+<span class="fc" id="L29">        fieldPaths.foreach(p =&gt; {</span>
+<span class="fc" id="L30">          path = path.get(p)</span>
+        })
+      }
+<span class="fc" id="L33">      path.asInstanceOf[Path[T]]</span>
+    }
+  }
+  def eq[T](field:Field[T],value:T): Condition ={
+<span class="fc" id="L37">    new PredicateCondition(</span>
+<span class="fc" id="L38">      DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)</span>
+    )
+  }
+  def notEq[T](field:Field[T],value:Field[T]):Condition={
+<span class="nc" id="L42">    new PredicateCondition(</span>
+<span class="nc" id="L43">      DSL.dslContext.value.builder.notEqual(</span>
+<span class="nc" id="L44">        findFieldPath(field.fieldName),</span>
+<span class="nc" id="L45">        findFieldPath(value.fieldName)</span>
+      )
+    )
+  }
+  def notEq[T](field:Field[T],value:T):Condition={
+<span class="nc" id="L50">    new PredicateCondition(</span>
+<span class="nc" id="L51">      DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)</span>
+    )
+  }
+  def gt[T](field:Field[T],value:T): Condition={
+<span class="fc" id="L55">    new PredicateCondition(</span>
+<span class="pc" id="L56">      value match{</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
+<span class="fc" id="L58">          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L60">          DSL.dslContext.value.builder.greaterThan(findFieldPath(field.fieldName),other)</span>
+      }
+    )
+  }
+  def ge[T](field:Field[T],value:T): Condition={
+<span class="nc" id="L65">    new PredicateCondition(</span>
+<span class="nc" id="L66">      value match{</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        case v:Number =&gt;</span>
+<span class="nc" id="L68">          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L70">          val expression:Path[Comparable[Any]] = findFieldPath(field.fieldName) //.as(classOf[T])</span>
+<span class="nc" id="L71">          DSL.dslContext.value.builder.greaterThanOrEqualTo(expression,other)</span>
+      }
+    )
+  }
+  def lt[T](field:Field[T],value:T): Condition={
+<span class="fc" id="L76">    new PredicateCondition(</span>
+<span class="pc" id="L77">      value match {</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
+<span class="fc" id="L79">          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L81">          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),other)</span>
+      }
+    )
+  }
+  def le[T](field:Field[T],value:T): Condition={
+<span class="nc" id="L86">    new PredicateCondition(</span>
+<span class="nc" id="L87">      value match {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        case v: Number =&gt;</span>
+<span class="nc" id="L89">          DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        case other: Comparable[Any] =&gt;</span>
+<span class="nc" id="L91">          DSL.dslContext.value.builder.lessThanOrEqualTo(findFieldPath(field.fieldName), other)</span>
+      }
+    )
+  }
+  def notNull[T](field:Field[T]):Condition={
+<span class="nc" id="L96">    new PredicateCondition(</span>
+<span class="nc" id="L97">      DSL.dslContext.value.builder.isNotNull(findFieldPath(field.fieldName))</span>
+    )
+  }
+  def isNull[T](field:Field[T]):Condition={
+<span class="fc" id="L101">    new PredicateCondition(</span>
+<span class="fc" id="L102">      DSL.dslContext.value.builder.isNull(findFieldPath(field.fieldName))</span>
+    )
+  }
+  def between[T&lt;:Comparable[T]](field:Field[T],v1:T,v2:T):Condition={
+<span class="nc" id="L106">    new PredicateCondition(</span>
+<span class="nc" id="L107">      DSL.dslContext.value.builder.between(findFieldPath[T](field.fieldName),v1,v2)</span>
+    )
+  }
+  def like[T](field:Field[T],value:String):Condition={
+<span class="nc" id="L111">    new PredicateCondition(</span>
+<span class="nc" id="L112">      DSL.dslContext.value.builder.like(findFieldPath[String](field.fieldName),value)</span>
+    )
+  }
+  def notLike[T](field:Field[T],value:String):Condition={
+<span class="nc" id="L116">    new PredicateCondition(</span>
+<span class="nc" id="L117">      DSL.dslContext.value.builder.notLike(findFieldPath[String](field.fieldName),value)</span>
+    )
+  }
+}
+<span class="fc" id="L121">trait Condition{</span>
+  def and(condition: Condition):Condition
+  def or(condition: Condition):Condition
+  def or(conditionFun: ()=&gt;Condition):Condition
+  def toPredicate:Predicate
+}
+<span class="fc" id="L127">class PredicateCondition(predicateFun: =&gt; Predicate) extends Condition{</span>
+<span class="pc bpc" id="L128" title="2 of 4 branches missed.">  private lazy val expression:Predicate = predicateFun</span>
+  override def and(condition: Condition): Condition =
+<span class="nc" id="L130">    DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)</span>
+  override def or(condition: Condition): Condition =
+<span class="fc" id="L132">    DSL.dslContext.value.builder.or(Seq[Predicate](expression,condition):_*)</span>
+
+
+<span class="nc" id="L135">  override def or(conditionFun: () =&gt; Condition): Condition = ???</span>
+
+<span class="fc" id="L137">  override def toPredicate: Predicate = expression</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

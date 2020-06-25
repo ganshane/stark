@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DSL.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">DSL.scala</span></div><h1>DSL.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
+
+import javax.persistence.criteria._
+
+import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
+import stark.activerecord.services.DSL.{JoinQueryContext, DSLExecuteQuery, DSLSelectionQuery, QueryContext}
+
+import scala.collection.JavaConversions
+import scala.language.dynamics
+import scala.language.experimental.macros
+import scala.reflect.runtime.universe._
+import scala.reflect.{ClassTag, classTag}
+
+/**
+ * ActiveRecord DSL
+ *
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-03-09
+ */
+<span class="fc" id="L20">object DSL {</span>
+  //DSL Context using DynamicVariable method
+<span class="fc" id="L22">  private[activerecord] val dslContext = new scala.util.DynamicVariable[QueryContext](null)</span>
+<span class="fc" id="L23">  private[activerecord] val joinContext = new scala.util.DynamicVariable[JoinQueryContext](null)</span>
+  //Execute Query type
+  type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause with UtilSupport
+  //Selection Query
+  type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport
+
+  //Query Context
+<span class="pc bnc" id="L30" title="All 30 branches missed.">  private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])</span>
+  //Join Query Context
+<span class="pc bnc" id="L32" title="All 27 branches missed.">  private[activerecord] case class JoinQueryContext(joinRoot:Path[_],join:Join[_,_])</span>
+
+  /**
+    *  select method
+    *
+    * @tparam T entity type
+    * @return Selection step
+    */
+  def select[T:ClassTag]: SelectStep[T,T]={
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">    lazy val query  = queryBuilder.createQuery(clazz)</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">    lazy val root = query.from(clazz)</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)</span>
+
+<span class="fc" id="L47">    new SelectStep[T,T](clazz)</span>
+  }
+
+  /**
+    * selection field
+    *
+    * @param fields selection field
+    * @tparam T entity type
+    * @return selection step
+    */
+  def select[T:ClassTag](fields:SelectionField*): SelectStep[T,Array[Any]]={
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">    lazy val query  = queryBuilder.createQuery(clazz)</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">    lazy val root = query.from(clazz)</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)</span>
+<span class="fc" id="L63">    new SelectStep[T,Array[Any]](clazz).apply(fields:_*)</span>
+  }
+
+  /**
+    * delete entity
+    *
+    * @tparam T entity type
+    * @return delete step
+    */
+  def delete[T:ClassTag]: DeleteStep[T]={
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    lazy val query  = queryBuilder.createCriteriaDelete(clazz)</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">    lazy val root = query.from(clazz)</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)</span>
+
+<span class="fc" id="L79">    new DeleteStep[T]()</span>
+  }
+
+  /**
+    * update entity
+    *
+    * @tparam T entity type
+    * @return update step
+    */
+  def update[T:ClassTag]:UpdateStep[T]={
+<span class="fc bfc" id="L89" title="All 2 branches covered.">    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    lazy val query  = queryBuilder.createCriteriaUpdate(clazz)</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    lazy val root = query.from(clazz)</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)</span>
+
+<span class="fc" id="L95">    new UpdateStep[T]()</span>
+  }
+
+  /**
+    * create field
+    *
+    * @param name field name
+    * @tparam T field type
+    * @return
+    */
+  def column[T : TypeTag](name:String):Field[T]={
+<span class="fc" id="L106">    new JPAField[T](name)</span>
+  }
+}
+<span class="fc" id="L109">class ConditionClause[R](implicit val context: QueryContext) extends ConditionsGetter {</span>
+<span class="fc" id="L110">  private var condition:Option[Predicate] = None</span>
+  def apply(fun: =&gt;Condition):this.type={
+<span class="fc" id="L112">    and(fun)</span>
+<span class="fc" id="L113">    this</span>
+  }
+  def or(fun: =&gt;Condition):this.type={
+<span class="fc" id="L116">    DSL.dslContext.withValue(context){</span>
+<span class="fc" id="L117">      val currentCondition = fun</span>
+<span class="pc" id="L118">      condition =Some(condition.fold(currentCondition){p=&gt;context.builder.or(Array[Predicate](p,currentCondition):_*)})</span>
+    }
+<span class="fc" id="L120">    this</span>
+  }
+  def and(fun: =&gt;Condition):this.type={
+<span class="fc" id="L123">    DSL.dslContext.withValue(context){</span>
+<span class="fc" id="L124">      val currentCondition = fun</span>
+<span class="fc" id="L125">      condition =Some(condition.fold(currentCondition){p=&gt;context.builder.and(Array[Predicate](p,currentCondition):_*)})</span>
+    }
+<span class="fc" id="L127">    this</span>
+  }
+<span class="fc" id="L129">  def join[F](field:Field[F],joinType: JoinType=JoinType.LEFT)(fun: =&gt;Condition):this.type={</span>
+<span class="fc" id="L130">    DSL.dslContext.withValue(context){</span>
+<span class="fc" id="L131">      val join = context.root.join(field.fieldName,joinType)</span>
+<span class="fc" id="L132">      val joinContext = JoinQueryContext(context.root.get(field.fieldName),join)</span>
+<span class="fc" id="L133">      DSL.joinContext.withValue(joinContext) {</span>
+<span class="fc" id="L134">        val currentCondition = fun</span>
+<span class="pc" id="L135">        condition = Some(condition.fold(currentCondition) { p =&gt; context.builder.and(Array[Predicate](p, currentCondition): _*) })</span>
+      }
+    }
+<span class="fc" id="L138">    this</span>
+  }
+<span class="fc" id="L140">  override private[activerecord] def conditionOpt: Option[Predicate] = condition</span>
+}
+<span class="pc bpc" id="L142" title="3 of 8 branches missed.">class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extends Fetch[R] with LimitClause with ConditionsGetter with OrderByClause with UtilSupport with GroupByClause{</span>
+<span class="pc bpc" id="L143" title="1 of 4 branches missed.">  private lazy val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[T]]</span>
+<span class="pc bpc" id="L144" title="3 of 8 branches missed.">  def where:DSLSelectionQuery[T,R]=new ConditionClause[T] with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport</span>
+  def apply(f:SelectionField*):this.type={
+<span class="fc" id="L146">    DSL.dslContext.withValue(context){</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">      if(f.nonEmpty) {</span>
+<span class="fc" id="L148">        val index = f.indexWhere(_.isInstanceOf[DistinctSelectionField])</span>
+<span class="pc bpc" id="L149" title="1 of 2 branches missed.">        if(index &gt; 0)</span>
+<span class="nc" id="L150">          throw new RuntimeException(&quot;distinct field must in first field&quot;)</span>
+<span class="fc" id="L151">        val selection = context.builder.array(f.map(_.toSelection): _*).asInstanceOf[Selection[T]]</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">        criteriaQuery.select(selection).distinct(index == 0)</span>
+
+        /*
+        f.foreach{
+          case dsf:DistinctSelectionField =&gt;
+             criteriaQuery = criteriaQuery.select(dsf.toSelection).distinct(true)
+          case sf:SelectionField =&gt;
+//          val selection = context.builder.array(f.map(_.toSelection): _*)
+            criteriaQuery = criteriaQuery.select(sf.toSelection)
+        }
+        */
+      }
+<span class="fc" id="L164">      context.query = criteriaQuery</span>
+    }
+<span class="fc" id="L166">    this</span>
+  }
+}
+<span class="fc" id="L169">class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T] with Dynamic{</span>
+<span class="pc bpc" id="L170" title="2 of 4 branches missed.">  private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]</span>
+  def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
+  def setWithType[F](field:String,value:F):this.type={
+<span class="nc" id="L173">    criteriaUpdate.set(field,value)</span>
+<span class="nc" id="L174">    this</span>
+  }
+  def setWithType[F](field:Field[F],value:F):this.type={
+<span class="nc" id="L177">    criteriaUpdate.set(field.fieldName,value)</span>
+<span class="nc" id="L178">    this</span>
+  }
+  def internalUpdate(params: (String, Any)*):this.type = {
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">    params.foreach{</span>
+<span class="fc" id="L182">      case (field,value) =&gt;</span>
+<span class="fc" id="L183">        criteriaUpdate.set(field,value)</span>
+    }
+<span class="fc" id="L185">    this</span>
+  }
+}
+<span class="fc" id="L188">class DeleteStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T]{}</span>
+
+<span class="pc" id="L190">sealed abstract class AbstractExecuteStep[T](implicit context:QueryContext) extends ConditionsGetter with Execute[T] with LimitClause{</span>
+<span class="pc" id="L191">  def where:DSLExecuteQuery[T]=new ConditionClause[T] with Execute[T] with LimitClause with UtilSupport</span>
+}
+<span class="fc" id="L193">private[activerecord] trait GroupByClause{</span>
+  val context:QueryContext
+  def groupBy[T](field: Field[T]): this.type ={
+<span class="fc" id="L196">      context.query.asInstanceOf[CriteriaQuery[_]].groupBy(context.root.get(field.fieldName))</span>
+<span class="fc" id="L197">    this</span>
+  }
+}
+<span class="fc" id="L200">private[activerecord] trait UtilSupport{</span>
+  val context:QueryContext
+  def getPath(paths: String*):Path[_] ={
+<span class="fc" id="L203">    var path:Path[_] = context.root</span>
+
+<span class="fc" id="L205">    paths.foreach(p=&gt;{</span>
+<span class="fc" id="L206">      path = path.get(p)</span>
+    })
+
+<span class="fc" id="L209">    path</span>
+  }
+}
+<span class="fc" id="L212">private[activerecord] trait OrderByClause {</span>
+  this:UtilSupport=&gt;
+  val context:QueryContext
+  def orderBy[T](field: Field[T]): this.type ={
+<span class="fc" id="L216">    orderBy(field.asc)</span>
+<span class="fc" id="L217">    this</span>
+  }
+  def orderBy[T](field: SortField[T]): this.type ={
+<span class="fc" id="L220">    val fieldPaths = field.field.fieldName.split(&quot;\\.&quot;)</span>
+    val finalPath =
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">      if(fieldPaths.isEmpty) getPath(field.field.fieldName)</span>
+<span class="fc" id="L223">      else getPath(fieldPaths:_*)</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">    if(field.isAsc)</span>
+<span class="fc" id="L225">      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(finalPath))</span>
+    else
+<span class="fc" id="L227">      context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.desc(finalPath))</span>
+<span class="fc" id="L228">    this</span>
+  }
+}
+<span class="fc" id="L231">private[activerecord] trait LimitClause{</span>
+<span class="fc" id="L232">  private[services] var limitNum:Int = 0</span>
+<span class="fc" id="L233">  private[services] var offsetNum:Int = 0</span>
+  def limit(limit:Int):this.type={
+<span class="fc" id="L235">    this.limitNum = limit</span>
+<span class="fc" id="L236">    this</span>
+  }
+  def offset(offset:Int):this.type={
+<span class="fc" id="L239">    this.offsetNum = offset</span>
+<span class="fc" id="L240">    this</span>
+  }
+}
+<span class="fc" id="L243">private[activerecord]trait ConditionsGetter{</span>
+<span class="fc" id="L244">  private[activerecord] def conditionOpt:Option[Predicate]=None</span>
+}
+<span class="fc" id="L246">private[activerecord] trait Execute[A]{</span>
+  this:LimitClause with ConditionsGetter =&gt;
+  val context:QueryContext
+  def execute: Int ={
+<span class="fc" id="L250">    ActiveRecord.executeInTransaction{entityManager=&gt;</span>
+<span class="pc" id="L251">    val query = context.query match{</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">      case q:CriteriaUpdate[A] =&gt;</span>
+<span class="fc" id="L253">        val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[A]]</span>
+<span class="fc" id="L254">        conditionOpt.foreach(criteriaUpdate.where)</span>
+<span class="fc" id="L255">        entityManager.createQuery(criteriaUpdate)</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">      case q:CriteriaDelete[A] =&gt;</span>
+<span class="fc" id="L257">        val criteriaDelete = context.query.asInstanceOf[CriteriaDelete[A]]</span>
+<span class="fc" id="L258">        conditionOpt.foreach(criteriaDelete.where)</span>
+<span class="fc" id="L259">        entityManager.createQuery(criteriaDelete)</span>
+
+    }
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">    if(limitNum &gt;0 )</span>
+<span class="nc" id="L263">      query.setMaxResults(limitNum)</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">    if(offsetNum &gt; 0)</span>
+<span class="nc" id="L265">      query.setFirstResult(offsetNum)</span>
+
+<span class="fc" id="L267">      query.executeUpdate()</span>
+    }
+  }
+}
+<span class="fc" id="L271">private[activerecord] trait Fetch[A] extends Iterable[A]{</span>
+  this:LimitClause with ConditionsGetter =&gt;
+  val context:QueryContext
+<span class="fc" id="L274">  private lazy val executeQuery:Stream[A]= fetchAsStream</span>
+<span class="fc" id="L275">  private lazy val totalNum:Long = executeCount</span>
+  private def fetchAsStream: Stream[A]={
+<span class="fc" id="L277">    val entityManager = ActiveRecord.entityManager</span>
+<span class="fc" id="L278">    val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]</span>
+<span class="fc" id="L279">    conditionOpt.foreach(criteriaQuery.where)</span>
+<span class="fc" id="L280">    val query = entityManager.createQuery(criteriaQuery)</span>
+<span class="fc bfc" id="L281" title="All 2 branches covered.">    if(limitNum &gt;0 )</span>
+<span class="fc" id="L282">      query.setMaxResults(limitNum)</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">    if(offsetNum &gt; 0)</span>
+<span class="fc" id="L284">      query.setFirstResult(offsetNum)</span>
+
+<span class="fc" id="L286">    JavaConversions.asScalaBuffer(query.getResultList).toStream</span>
+  }
+
+<span class="fc" id="L289">  override def iterator: Iterator[A] = executeQuery.toIterator</span>
+
+  /**
+    * count all records
+    * @return
+    */
+<span class="fc" id="L295">  def count:Long=totalNum</span>
+  private def findFirstExpression(selection:Selection[_]): Expression[_] ={
+<span class="pc" id="L297">    selection match{</span>
+<span class="fc bfc" id="L298" title="All 2 branches covered.">      case e:Expression[_]=&gt; e</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">      case s:CompoundSelection[_] =&gt; findFirstExpression(s.getCompoundSelectionItems.get(0))</span>
+    }
+  }
+  private def executeCount:Long={
+<span class="fc" id="L303">    val entityManager = ActiveRecord.entityManager</span>
+<span class="fc" id="L304">    val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]</span>
+
+    val countSelection =
+<span class="fc bfc" id="L307" title="All 2 branches covered.">      if(criteriaQuery.isDistinct){</span>
+<span class="fc" id="L308">        val querySelection = criteriaQuery.getSelection</span>
+<span class="fc" id="L309">        val expression = findFirstExpression(querySelection)</span>
+<span class="fc" id="L310">        context.builder.countDistinct(expression)</span>
+      }
+      else
+<span class="fc" id="L313">        context.builder.count(context.root)</span>
+    //remove distinct expression
+<span class="fc" id="L315">    criteriaQuery.select(countSelection.asInstanceOf[Selection[A]]).distinct(false)</span>
+<span class="fc" id="L316">    conditionOpt.foreach(criteriaQuery.where)</span>
+<span class="fc" id="L317">    val query = entityManager.createQuery(criteriaQuery)</span>
+
+<span class="fc" id="L319">    query.getSingleResult.asInstanceOf[Long]</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemEnvDetectorSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">SystemEnvDetectorSupport.scala</span></div><h1>SystemEnvDetectorSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.lang.management.ManagementFactory
+import java.net.{InetAddress, UnknownHostException}
+import java.util
+
+import org.slf4j.Logger
+
+import scala.util.control.NonFatal
+
+/**
+ * detect system information
+ */
+<span class="nc" id="L16">trait SystemEnvDetectorSupport {</span>
+  protected def detectAndPrintSystemEnv(logger: Logger) {
+<span class="nc" id="L18">    val l = new util.ArrayList[Entry]()</span>
+    try {
+<span class="nc" id="L20">      put(l, &quot;host.name&quot;, InetAddress.getLocalHost.getCanonicalHostName)</span>
+    } catch {
+      case e: UnknownHostException =&gt;
+<span class="nc" id="L23">        put(l, &quot;host.name&quot;, &quot;&lt;NA&gt;&quot;)</span>
+    }
+<span class="nc" id="L25">    put(l, &quot;java.version&quot;,</span>
+<span class="nc" id="L26">      System.getProperty(&quot;java.version&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L27">    put(l, &quot;java.vendor&quot;,</span>
+<span class="nc" id="L28">      System.getProperty(&quot;java.vendor&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L29">    put(l, &quot;java.home&quot;,</span>
+<span class="nc" id="L30">      System.getProperty(&quot;java.home&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L31">    put(l, &quot;java.class.path&quot;,</span>
+<span class="nc" id="L32">      System.getProperty(&quot;java.class.path&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L33">    put(l, &quot;java.library.path&quot;,</span>
+<span class="nc" id="L34">      System.getProperty(&quot;java.library.path&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L35">    put(l, &quot;java.io.tmpdir&quot;,</span>
+<span class="nc" id="L36">      System.getProperty(&quot;java.io.tmpdir&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L37">    put(l, &quot;java.compiler&quot;,</span>
+<span class="nc" id="L38">      System.getProperty(&quot;java.compiler&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L39">    put(l, &quot;os.name&quot;,</span>
+<span class="nc" id="L40">      System.getProperty(&quot;os.name&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L41">    put(l, &quot;os.arch&quot;,</span>
+<span class="nc" id="L42">      System.getProperty(&quot;os.arch&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L43">    put(l, &quot;os.version&quot;,</span>
+<span class="nc" id="L44">      System.getProperty(&quot;os.version&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L45">    put(l, &quot;user.name&quot;,</span>
+<span class="nc" id="L46">      System.getProperty(&quot;user.name&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L47">    put(l, &quot;user.home&quot;,</span>
+<span class="nc" id="L48">      System.getProperty(&quot;user.home&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L49">    put(l, &quot;user.dir&quot;,</span>
+<span class="nc" id="L50">      System.getProperty(&quot;user.dir&quot;, &quot;&lt;NA&gt;&quot;))</span>
+<span class="nc" id="L51">    val it = l.iterator()</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">    while (it.hasNext) {</span>
+<span class="nc" id="L53">      val entry = it.next()</span>
+<span class="nc" id="L54">      logger.info(&quot;{}={}&quot;, Array[Object](entry.k, entry.v))</span>
+    }
+<span class="nc" id="L56">    try {</span>
+<span class="nc" id="L57">      val runtimemxBean = ManagementFactory.getRuntimeMXBean</span>
+<span class="nc" id="L58">      val arguments = runtimemxBean.getInputArguments.toArray.mkString(&quot; &quot;)</span>
+<span class="nc" id="L59">      logger.info(&quot;args={}&quot;, arguments)</span>
+    } catch {
+<span class="nc bnc" id="L61" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+    }
+  }
+
+  private def put(l: util.ArrayList[Entry], k: String, v: String) {
+<span class="nc" id="L66">    l.add(Entry(k, v))</span>
+  }
+
+<span class="nc bnc" id="L69" title="All 33 branches missed.">  case class Entry(k: String, v: String)</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

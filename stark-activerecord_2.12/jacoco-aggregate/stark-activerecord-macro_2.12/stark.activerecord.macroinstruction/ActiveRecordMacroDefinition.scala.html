@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ActiveRecordMacroDefinition.scala</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="../index.html" class="el_bundle">stark-activerecord-macro_2.12</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.macroinstruction</a> &gt; <span class="el_source">ActiveRecordMacroDefinition.scala</span></div><h1>ActiveRecordMacroDefinition.scala</h1><pre class="source lang-java linenums">package stark.activerecord.macroinstruction
+
+import scala.language.dynamics
+import scala.language.experimental.macros
+import scala.reflect.macros.whitebox
+
+/**
+ * hall orm macro definition
+  *
+  * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-01-01
+ */
+<span class="nc" id="L13">object ActiveRecordMacroDefinition {</span>
+<span class="nc" id="L14">  private val find_by_pattern = &quot;(?i)find_by_([_a-zA-Z0-9]*)&quot;.r</span>
+
+  /**
+   * find method
+   */
+<span class="nc" id="L19">  def findByMethodImpl[E: c.WeakTypeTag,R](c: whitebox.Context)</span>
+<span class="nc" id="L20">                                          (name: c.Expr[String])</span>
+<span class="nc" id="L21">                                          (params:c.Expr[Any]*) : c.Expr[R] = {</span>
+    import c.universe._
+<span class="nc bnc" id="L23" title="All 8 branches missed.">    val Literal(Constant(findMethod)) = name.tree</span>
+<span class="nc" id="L24">    val paramsTree = params.map(_.tree).toList</span>
+<span class="nc" id="L25">    findMethod.toString.trim match{</span>
+<span class="nc bnc" id="L26" title="All 6 branches missed.">      case find_by_pattern(attributes) =&gt;</span>
+        //gather class field
+<span class="nc" id="L28">        val expectedNames =  findMembers[E](c).map(_.name.toString.trim)</span>
+<span class="nc" id="L29">        val attrs =  attributes.split(&quot;_and_&quot;)</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">        if(attrs.length != params.length){</span>
+<span class="nc" id="L31">          c.error(c.enclosingPosition, s&quot;name's length ${attrs.length} !=  parameter's length ${params.length}.&quot;)</span>
+        }
+        //validate parameter name
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        attrs.zipWithIndex.foreach{case (attr,index)=&gt;</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">          if(!expectedNames.contains(attr)){</span>
+<span class="nc" id="L36">            c.error(c.enclosingPosition, s&quot;${c.weakTypeOf[E]}#$attr not found. Expected fields are ${expectedNames.mkString(&quot;#&quot;, &quot;, #&quot;, &quot;&quot;)}.&quot;)</span>
+          }
+        }
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        val tupleParameters = attrs.zip(paramsTree).map{</span>
+<span class="nc" id="L40">          case (attr,parameterTree) =&gt;</span>
+<span class="nc" id="L41">            val field = findField(c)(c.Expr[String](Literal(Constant(attr))))</span>
+<span class="nc" id="L42">            q&quot;($field === $parameterTree)&quot;</span>
+        }.toList
+
+
+<span class="nc" id="L46">        executeInternalWhere[c.type,R](c)(tupleParameters)</span>
+      case other=&gt;
+<span class="nc" id="L48">        c.error(c.enclosingPosition, s&quot;unsupport operation&quot;)</span>
+<span class="nc" id="L49">        c.Expr[R](Literal(Constant(Nil)))</span>
+    }
+
+  }
+<span class="nc" id="L53">  private def findMembers[E:c.WeakTypeTag](c:whitebox.Context):Seq[c.universe.TermSymbol]={</span>
+    /**
+      * find all members included inherited members
+      *
+      */
+//    println(c.weakTypeOf[E].members.filter(_.isTerm).filter(_.asTerm.isAccessor))
+//    println(c.weakTypeOf[E].decls.filter(_.isTerm))
+<span class="nc" id="L60">    c.weakTypeOf[E].members.filter(_.isTerm)</span>
+<span class="nc" id="L61">      .filter(_.asTerm.isAccessor)</span>
+<span class="nc" id="L62">      .map(x=&gt;{</span>
+<span class="nc" id="L63">        x.asTerm</span>
+        /*
+        println(&quot;xxx&quot;,x)
+        println(x.asTerm.accessed)
+        val accessor = x.asTerm.accessed
+        println(&quot;fullName&quot;,accessor.fullName)
+        if(accessor.fullName == &quot;&lt;none&gt;&quot;){
+          println(&quot;parent==&gt;&quot;,x.asTerm.getClass)
+          println(x.asTerm.getter.asTerm.typeSignature)
+          x.asTerm
+        }else{
+          println(&quot;xxxx=&gt; &quot;,x.asTerm.accessed.asTerm.typeSignature)
+          x.asTerm //.accessed.asTerm
+        }
+         */
+      })
+      .toStream.distinct
+  }
+  /**
+   * find method
+   */
+<span class="nc" id="L84">  def findField[E: c.WeakTypeTag,R](c: whitebox.Context)</span>
+<span class="nc" id="L85">                                       (fieldName: c.Expr[String]):c.Expr[R]  = {</span>
+    import c.universe._
+<span class="nc bnc" id="L87" title="All 10 branches missed.">    val Literal(Constant(field:String)) = fieldName.tree</span>
+    //gather class field
+
+<span class="nc" id="L90">    val expectedNames =  findMembers[E](c)</span>
+
+    //validate field name
+//    c.error(c.enclosingPosition,s&quot;field: $field&quot;)
+<span class="nc bnc" id="L94" title="All 6 branches missed.">    val termOpt =  expectedNames.find(_.name.decodedName.toString.trim == field)</span>
+<span class="nc" id="L95">    termOpt match{</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">      case Some(term) =&gt;</span>
+<span class="nc" id="L97">        val termType = term.typeSignature</span>
+<span class="nc" id="L98">        c.Expr[R](q&quot;stark.activerecord.services.DSL.column[$termType]($field)&quot;)</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">      case None=&gt;</span>
+<span class="nc" id="L100">        c.error(c.enclosingPosition, s&quot;${c.weakTypeOf[E]}#$field not found. Expected fields are ${expectedNames.mkString(&quot;#&quot;, &quot;, #&quot;, &quot;&quot;)}.&quot;)</span>
+<span class="nc" id="L101">        c.Expr[R](Literal(Constant(Nil)))</span>
+    }
+  }
+<span class="nc" id="L104">  private def executeInternalWhere[C &lt;: whitebox.Context,R](c:C)(paramsTree:List[c.universe.Tree]): c.Expr[R]={</span>
+    import c.universe._
+
+<span class="nc" id="L107">    val clazzTree = Select(c.prefix.tree,TermName(&quot;clazz&quot;))</span>
+<span class="nc" id="L108">    val primaryKeyTree = Select(c.prefix.tree,TermName(&quot;primaryKey&quot;))</span>
+
+<span class="nc" id="L110">    c.Expr[R](q&quot;stark.activerecord.services.ActiveRecord.createCriteriaRelation($clazzTree,$primaryKeyTree,..$paramsTree)&quot;)</span>
+
+    //c.Expr[R](Apply(Apply(Select(objectTree, TermName(&quot;internalWhere&quot;)), List(clazzTree,primaryKeyTree,qlTree)),paramsTree))
+  }
+
+  /**
+   * implement update(name=xxx,sex=xxx)
+   */
+<span class="nc" id="L118">  def updateMethodImpl[E: c.WeakTypeTag,R](c: whitebox.Context)</span>
+<span class="nc" id="L119">                                           (name: c.Expr[String])</span>
+<span class="nc" id="L120">                                           (params:c.Expr[(String,Any)]*):c.Expr[R] = {</span>
+    import c.universe._
+<span class="nc bnc" id="L122" title="All 10 branches missed.">    val Literal(Constant(methodName:String)) = name.tree</span>
+    //find class field
+<span class="nc" id="L124">    val expectedNames =  findMembers[E](c)</span>
+
+<span class="nc" id="L126">    val trees = params.map(_.tree).toList</span>
+<span class="nc" id="L127">    trees.foreach{</span>
+<span class="nc bnc" id="L128" title="All 18 branches missed.">      case Apply(_,Literal(Constant(_name: String))::value::_) =&gt;</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if(_name.isEmpty)</span>
+<span class="nc" id="L130">          c.error(c.enclosingPosition, s&quot;name parameter is empty.&quot;)</span>
+<span class="nc bnc" id="L131" title="All 6 branches missed.">        val termOpt = expectedNames.find(_.name.decodedName.toString.trim == _name)</span>
+<span class="nc" id="L132">        termOpt match{</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">          case Some(term) =&gt;</span>
+<span class="nc" id="L134">            val termName = _name</span>
+<span class="nc" id="L135">            val termType = term.typeSignature</span>
+<span class="nc" id="L136">            val valueType = value.tpe</span>
+            //TODO check termValue Type
+//            println(show(trees))
+//            println(showRaw(value))
+//            //if(!(termType weak_&lt;:&lt; valueType))
+//            if(!(valueType weak_&lt;:&lt; termType))
+//              c.error(value.pos, s&quot;$termType expected,but $valueType occur.&quot;)
+<span class="nc" id="L143">            q&quot;($termName,$value.asInstanceOf[$termType])&quot;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">          case None =&gt;</span>
+<span class="nc" id="L145">            c.error(c.enclosingPosition, s&quot;${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString(&quot;#&quot;, &quot;, #&quot;, &quot;&quot;)}.&quot;)</span>
+        }
+      case other =&gt;
+<span class="nc" id="L148">        c.error(c.enclosingPosition, s&quot;$other unsupported.&quot;)</span>
+     }
+    //c.error(c.enclosingPosition,&quot;asdf&quot;)
+
+<span class="nc" id="L152">    methodName match{</span>
+<span class="nc bnc" id="L153" title="All 6 branches missed.">      case &quot;update&quot; | &quot;set&quot;=&gt;</span>
+<span class="nc" id="L154">        c.Expr[R](Apply(Select(c.prefix.tree, TermName(&quot;internalUpdate&quot;)), trees))</span>
+      case other=&gt;
+<span class="nc" id="L156">        c.error(c.enclosingPosition, s&quot;${other} unsupported.&quot;)</span>
+<span class="nc" id="L157">        c.Expr[R](Literal(Constant(Nil)))</span>
+    }
+  }
+
+  /**
+   * implement find_by(name=&quot;xxx&quot;)
+   */
+<span class="nc" id="L164">  def findByNamedParameterImpl[E: c.WeakTypeTag,R](c: whitebox.Context)</span>
+<span class="nc" id="L165">                                            (name: c.Expr[String])</span>
+<span class="nc" id="L166">                                            (params:c.Expr[(String,Any)]*): c.Expr[R] = {</span>
+    import c.universe._
+
+<span class="nc bnc" id="L169" title="All 10 branches missed.">    val Literal(Constant(methodName:String)) = name.tree</span>
+    //find class field
+<span class="nc" id="L171">    val expectedNames =  findMembers[E](c).map(_.name.toString.trim)</span>
+
+    //validate params
+<span class="nc" id="L174">    val trees = params.map(_.tree).toList</span>
+<span class="nc" id="L175">    val finalTrees = trees.map{</span>
+<span class="nc bnc" id="L176" title="All 20 branches missed.">      case Apply(_,Literal(Constant(_name: String))::value::Nil) =&gt;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        if(_name.isEmpty)</span>
+<span class="nc" id="L178">          c.error(c.enclosingPosition, s&quot;name parameter is empty.&quot;)</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        else if(!expectedNames.contains(_name))</span>
+<span class="nc" id="L180">          c.error(c.enclosingPosition, s&quot;${c.weakTypeOf[E]}#${_name} not found. Expected fields are ${expectedNames.mkString(&quot;#&quot;, &quot;, #&quot;, &quot;&quot;)}.&quot;)</span>
+
+<span class="nc" id="L182">        val field = findField(c)(c.Expr[String](Literal(Constant(_name))))</span>
+<span class="nc" id="L183">        q&quot;($field === $value)&quot;</span>
+      case other =&gt;
+<span class="nc" id="L185">          c.error(c.enclosingPosition, s&quot;$other unsupported.&quot;)</span>
+
+    }.asInstanceOf[List[c.universe.Tree]]
+
+<span class="nc" id="L189">    methodName match{</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">      case &quot;find_by&quot; =&gt;</span>
+<span class="nc" id="L191">        executeInternalWhere[c.type,R](c)(finalTrees.toList)</span>
+      case other=&gt;
+<span class="nc" id="L193">        c.error(c.enclosingPosition, s&quot;$other unsupported.&quot;)</span>
+<span class="nc" id="L194">        c.Expr[R](Literal(Constant(Nil)))</span>
+    }
+  }
+<span class="nc" id="L197">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

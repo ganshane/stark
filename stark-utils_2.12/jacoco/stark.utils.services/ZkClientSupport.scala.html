@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZkClientSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZkClientSupport.scala</span></div><h1>ZkClientSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent.locks.ReentrantLock
+import javax.annotation.PostConstruct
+
+import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.retry.RetryNTimes
+import org.apache.tapestry5.ioc.services.RegistryShutdownHub
+import org.apache.tapestry5.ioc.services.cron.{IntervalSchedule, PeriodicExecutor}
+
+/**
+ * zookeeper的客户端
+ */
+<span class="fc" id="L17">trait ZkClientSupport extends ServiceWaitingInitSupport {</span>
+  this: ZookeeperTemplate =&gt;
+
+<span class="fc" id="L20">  private final val lock = new ReentrantLock()</span>
+<span class="fc" id="L21">  private var client: Option[CuratorFramework] = None</span>
+
+  /**
+   * 得到Zookeeper的客户端
+   * @return zookeeper client
+   */
+  def zkClient: CuratorFramework = {
+<span class="fc" id="L28">    awaitServiceInit()</span>
+<span class="fc" id="L29">    client.getOrElse {</span>
+<span class="pc" id="L30">      throw new StarkException(&quot;zk client not be initialized&quot;, StarkUtilsErrorCode.ZK_NOT_BE_INITIALIZED)</span>
+    }
+  }
+
+  /**
+   * 启动对象实例
+   */
+
+  @PostConstruct
+  def start(hub: RegistryShutdownHub) {
+<span class="fc" id="L40">    throwExceptionIfServiceInitialized()</span>
+
+<span class="fc" id="L42">    val builder = CuratorFrameworkFactory.builder()</span>
+<span class="fc" id="L43">      .connectString(address)</span>
+<span class="fc" id="L44">      .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))</span>
+<span class="fc" id="L45">      .connectionTimeoutMs(sessionTimeout).</span>
+<span class="fc" id="L46">      defaultData(null)</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (basePath.isDefined) {</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">      if (basePath.get.charAt(0) == '/') {</span>
+        //curator中的namespace前端没有 / 开头
+<span class="fc" id="L50">        builder.namespace(basePath.get.substring(1))</span>
+      } else {
+<span class="pc" id="L52">        builder.namespace(basePath.get)</span>
+      }
+    }
+
+<span class="fc" id="L56">    val tmpClient = builder.build()</span>
+    //增加统一的状态监听，方便对watcher进行再次监控
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">    tmpClient.getConnectionStateListenable.addListener(new ConnectionStateListener() {</span>
+      def stateChanged(client: CuratorFramework, state: ConnectionState) {
+        try {
+          //不支持多线程进行watch，避免过多的watch
+<span class="fc" id="L62">          lock.lock()</span>
+<span class="fc" id="L63">          doStateChanged(state)</span>
+        } finally {
+<span class="fc" id="L65">          lock.unlock()</span>
+        }
+      }
+    })
+<span class="fc" id="L69">    tmpClient.start()</span>
+
+<span class="fc" id="L71">    client = Some(tmpClient)</span>
+
+<span class="fc" id="L73">    serviceInitialized()</span>
+
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">    if (hub != null) {</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">      hub.addRegistryShutdownListener(new Runnable {</span>
+<span class="nc" id="L77">        override def run(): Unit = shutdown()</span>
+      })
+    }
+  }
+
+  private def doStateChanged(state: ConnectionState) {
+<span class="pc bpc" id="L83" title="3 of 6 branches missed.">    if (state == ConnectionState.CONNECTED) {</span>
+      //第一次连接
+      //connectedFun.apply(this)
+<span class="pc bpc" id="L86" title="3 of 6 branches missed.">    } else if (state == ConnectionState.RECONNECTED) {</span>
+      //重新连接上，通常是session过期造成的
+<span class="fc" id="L88">      info(&quot;cloud server reconnected&quot;)</span>
+      //针对临时节点的再次创建
+<span class="fc" id="L90">      recreateEphemeralNodes()</span>
+
+<span class="fc" id="L92">      rewatchNodeData()</span>
+<span class="fc" id="L93">      rewatchChildren()</span>
+
+      //connectedFun.apply(this)
+    }
+  }
+
+  /**
+   * 关闭对象
+   */
+  def shutdown() {
+<span class="fc" id="L103">    debug(&quot;closing zk client....&quot;)</span>
+<span class="fc" id="L104">    client.foreach(_.close)</span>
+  }
+
+  /**
+   * 启动对异常数据的检测,实现FailBack功能
+   * @param periodExecutor 定时执行器
+   */
+  def startCheckFailed(periodExecutor: PeriodicExecutor) {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">    if (periodExecutor == null) {</span>
+<span class="nc" id="L113">      error(&quot;periodExecutor is null!&quot;)</span>
+<span class="nc" id="L114">      return</span>
+    }
+    //启动定时器
+<span class="nc bnc" id="L117" title="All 2 branches missed.">    periodExecutor.addJob(new IntervalSchedule(1L * 60 * 1000), &quot;check-zk&quot;, new Runnable {</span>
+      def run() {
+<span class="nc" id="L119">        retry()</span>
+      }
+    })
+  }
+
+  //尝试修正失败的数据
+  private[stark] def retry() {
+<span class="fc" id="L126">    retryFailedEphemeralNodes()</span>
+<span class="fc" id="L127">    retryFailedWatchNodeData()</span>
+<span class="fc" id="L128">    retryFailedChildrenWatcher()</span>
+  }
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">  sealed class WatchMode</span>
+
+<span class="nc" id="L133">  case object OnceWatch extends WatchMode</span>
+
+<span class="nc" id="L135">  case object PermanentWatch extends WatchMode</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

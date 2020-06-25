@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SpringMvcServerCreator.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">SpringMvcServerCreator.scala</span></div><h1>SpringMvcServerCreator.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.net.BindException
+import java.util.concurrent._
+
+import org.eclipse.jetty.server.nio.SelectChannelConnector
+import org.eclipse.jetty.server.{Connector, Server}
+import org.eclipse.jetty.servlet.{ServletContextHandler, ServletHolder}
+import org.eclipse.jetty.util.thread.QueuedThreadPool
+import org.springframework.core.io.ClassPathResource
+import org.springframework.web.context.ContextLoaderListener
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
+import org.springframework.web.servlet.DispatcherServlet
+
+<span class="nc" id="L17">trait SpringMvcServerCreator{</span>
+<span class="nc" id="L18">  private var serverOpt: Option[Server] = None</span>
+
+  protected def startServer(config: WebServerConfig, pkg: String, classes: Class[_]*): Server = {
+    try {
+<span class="nc" id="L22">      val bind = StarkUtils.parseBind(config.bind)</span>
+<span class="nc" id="L23">      val context = new AnnotationConfigWebApplicationContext</span>
+<span class="nc" id="L24">      classes.foreach(c=&gt;context.register(c))</span>
+
+<span class="nc" id="L26">      val server = SpringMvcServerCreator.createSpringWebapp(bind._1, bind._2, context)</span>
+<span class="nc" id="L27">      SpringMvcServerCreator.configServer(server, config)</span>
+<span class="nc" id="L28">      server.start()</span>
+<span class="nc" id="L29">      serverOpt = Some(server)</span>
+<span class="nc" id="L30">      server</span>
+    } catch {
+      case e: BindException =&gt;
+<span class="nc" id="L33">        throw new StarkException(e.getMessage, StarkUtilsErrorCode.SERVER_FAIL_BIND)</span>
+    }
+  }
+
+  protected def join() {
+<span class="nc" id="L38">    serverOpt.foreach(_.join())</span>
+  }
+
+  protected def shutdownServer() {
+<span class="nc" id="L42">    serverOpt.foreach(_.stop())</span>
+  }
+}
+
+/**
+ * jetty servelt container
+ */
+<span class="nc" id="L49">object SpringMvcServerCreator {</span>
+  /**
+    * create spring web application
+    *
+    * @param host listen host
+    * @param port listen port
+    * @param webContext  web application
+    * @return server instance
+    */
+  def createSpringWebapp(host: String,
+                         port: Int,
+                         webContext: AnnotationConfigWebApplicationContext): Server = {
+<span class="nc" id="L61">    val contextHandler = new ServletContextHandler()</span>
+<span class="nc" id="L62">    contextHandler.setErrorHandler(null)</span>
+<span class="nc" id="L63">    contextHandler.setContextPath(&quot;/&quot;)</span>
+<span class="nc" id="L64">    contextHandler.addServlet(new ServletHolder(new DispatcherServlet(webContext)), &quot;/*&quot;)</span>
+<span class="nc" id="L65">    contextHandler.addEventListener(new ContextLoaderListener(webContext))</span>
+<span class="nc" id="L66">    contextHandler.setResourceBase(new ClassPathResource(&quot;webapp&quot;).getURI().toString())</span>
+
+<span class="nc" id="L68">    val server = new Server()</span>
+    //对connector进行配置
+<span class="nc" id="L70">    val connector = new SelectChannelConnector</span>
+<span class="nc" id="L71">    connector.setHost(host)</span>
+<span class="nc" id="L72">    connector.setPort(port)</span>
+
+
+<span class="nc" id="L75">    server.setConnectors(Array[Connector](connector))</span>
+
+
+<span class="nc" id="L78">    server.setSendServerVersion(false)</span>
+<span class="nc" id="L79">    server.setHandler(contextHandler)</span>
+
+<span class="nc" id="L81">    server</span>
+  }
+
+  def configServer(server: Server, webServerConfig: WebServerConfig) {
+    /*
+    val executorService = ThreadPoolCreator.newSaturatingThreadPool(
+      webServerConfig.minConnCount,
+      webServerConfig.maxConnCount,
+      webServerConfig.waitingQueueSize,
+      webServerConfig.keepAliveTimeInMinutes,
+      TimeUnit.MINUTES,
+      &quot;monad-web&quot;,
+      new RejectedExecutionHandler {
+        override def rejectedExecution(r: Runnable, executor: ThreadPoolExecutor): Unit = {
+          throw new RejectedExecutionException(&quot;reach max connection&quot;)
+        }
+      })
+    val threadPool = new ExecutorThreadPool(executorService)
+    */
+<span class="nc" id="L100">    val threadPool = new QueuedThreadPool(new ArrayBlockingQueue[Runnable](6000))</span>
+<span class="nc" id="L101">    threadPool.setMinThreads(webServerConfig.minConnCount)</span>
+<span class="nc" id="L102">    threadPool.setMaxThreads(webServerConfig.maxConnCount)</span>
+<span class="nc" id="L103">    threadPool.setMaxIdleTimeMs(TimeUnit.MINUTES.toMillis(webServerConfig.keepAliveTimeInMinutes).asInstanceOf[Int])</span>
+<span class="nc" id="L104">    threadPool.setDaemon(true)</span>
+
+<span class="nc" id="L106">    server.setThreadPool(threadPool)</span>
+
+<span class="nc" id="L108">    val connector = server.getConnectors.head.asInstanceOf[SelectChannelConnector]</span>
+    //connector.setAcceptors(Math.max(1, (Runtime.getRuntime.availableProcessors + 3) / 4))
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">    if (webServerConfig.acceptor == 0)</span>
+<span class="nc" id="L112">      connector.setAcceptors(Math.min(4, Runtime.getRuntime.availableProcessors + 3) / 4)</span>
+    else
+<span class="nc" id="L114">      connector.setAcceptors(webServerConfig.acceptor)</span>
+<span class="nc" id="L115">    connector.setAcceptQueueSize(webServerConfig.backlog)</span>
+<span class="nc" id="L116">    connector.setMaxIdleTime(webServerConfig.idleTimeSecs * 1000)</span>
+<span class="nc" id="L117">    connector.setRequestBufferSize(webServerConfig.requestBufferSizeKB * 1024)</span>
+<span class="nc" id="L118">    connector.setResponseBufferSize(webServerConfig.responseBufferSizeKB * 1024)</span>
+
+
+    //graceful shutdown
+<span class="nc" id="L122">    server.setStopAtShutdown(true)</span>
+<span class="nc" id="L123">    server.setGracefulShutdown(5000)</span>
+  }
+
+<span class="nc" id="L126">  class OverflowingSynchronousQueue[E](capacity: Int) extends LinkedBlockingQueue[E](capacity) {</span>
+<span class="nc" id="L127">    private val synchronousQueue = new SynchronousQueue[E]()</span>
+
+    // Create a new thread or wake an idled thread
+<span class="nc" id="L130">    override def offer(e: E) = synchronousQueue.offer(e)</span>
+
+    // Add to queue
+<span class="nc" id="L133">    def offerToOverflowingQueue(e: E) = super.offer(e)</span>
+
+    override def take(): E = {
+      // Return tasks from queue, if any, without blocking
+<span class="nc" id="L137">      val task = super.poll()</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">      if (task != null) task else synchronousQueue.take()</span>
+    }
+
+    override def poll(timeout: Long, unit: TimeUnit): E = {
+      // Return tasks from queue, if any, without blocking
+<span class="nc" id="L143">      val task = super.poll()</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">      if (task != null) task else synchronousQueue.poll(timeout, unit)</span>
+    }
+  }
+
+<span class="nc" id="L148">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

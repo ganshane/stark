@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActiveRecord.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">ActiveRecord.scala</span></div><h1>ActiveRecord.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
+
+import javax.persistence.{EntityManager, Id, Transient}
+
+import org.springframework.beans.factory.BeanFactory
+import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
+import stark.activerecord.services.DSL.DSLSelectionQuery
+
+import scala.collection.immutable.Stream
+import scala.language.experimental.macros
+import scala.language.{dynamics, postfixOps, reflectiveCalls}
+import scala.reflect.{ClassTag, classTag}
+
+/**
+ * active record
+  *
+  * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-01-03
+ */
+<span class="fc" id="L20">object ActiveRecord {</span>
+
+  //logger
+//  private val logger = LoggerFactory getLogger getClass
+  @volatile
+<span class="fc" id="L25">  private[activerecord] var objectLocator:BeanFactory = _</span>
+
+<span class="fc" id="L27">  private[activerecord] def entityManager:EntityManager =  getService[EntityManager]</span>
+<span class="fc" id="L28">  private[activerecord] def entityService:EntityService = getService[EntityService]</span>
+
+  /**
+   * Saves the model.
+   * If the model is new a record gets created in the database,otherwise
+   * the existing record gets updated.
+   */
+  def save[T](record:T):T={
+<span class="fc" id="L36">    entityService.save(record)</span>
+  }
+  def refresh[T](record:T)={
+<span class="nc" id="L39">    entityService.refresh(record)</span>
+  }
+
+  /**
+   * Deletes the record in the database
+   * The row is simply removed with an SQL +DELETE+ statement on the
+   * record's primary key.
+   */
+  def delete[T](record:T): Unit ={
+<span class="fc" id="L48">    entityService.delete(record)</span>
+  }
+  def updateRelation[T](relation: DynamicUpdateSupport[T]):Int={
+<span class="fc" id="L51">    entityService.updateRelation(relation)</span>
+  }
+  def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int={
+<span class="fc" id="L54">    entityService.deleteRelation(relation)</span>
+  }
+  def find[T:ClassTag](key:Any):T={
+<span class="fc" id="L57">    entityManager.find(classTag[T].runtimeClass,key).asInstanceOf[T]</span>
+  }
+
+  /**
+   * find some records by Relation
+    *
+    * @param relation relation object
+   * @tparam T type parameter
+   * @return record stream
+   */
+  private[services] def find[T](relation:Relation[T]):Stream[T]={
+<span class="fc" id="L68">    entityService.find(relation)</span>
+  }
+  private[services] def count[T](relation:Relation[T]):Long={
+<span class="fc" id="L71">    entityService.count(relation)</span>
+  }
+  def executeInTransaction(function: (EntityManager) =&gt; Int): Int ={
+<span class="fc" id="L74">    entityService.execute(function)</span>
+  }
+
+  /**
+   * find some service using ObjectLocator
+   */
+  private def getService[T:ClassTag]:T={
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if(objectLocator == null)</span>
+<span class="nc" id="L82">      throw new IllegalStateException(&quot;object locator is null&quot;)</span>
+<span class="fc" id="L83">    objectLocator.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])</span>
+  }
+  /**
+   * find_by and where function
+    *
+    * @param ql query
+   * @param params parameter values
+   * @return Relation object
+   */
+  def internalWhere[A](clazz:Class[A],primaryKey:String,ql:String)(params:Any*): QlRelation[A]={
+<span class="fc" id="L93">    new QlRelation[A](clazz,primaryKey,ql,params.toSeq)</span>
+  }
+
+  /**
+    * delete data by ql
+ *
+    * @param ql query clause
+    * @param parameters parameters
+    * @return result
+    */
+  def deleteByQL(ql:String,parameters:Any*): Int={
+<span class="nc" id="L104">    val query = entityManager.createQuery(ql)</span>
+<span class="nc" id="L105">    var i = 1</span>
+<span class="nc" id="L106">    parameters.foreach{value=&gt;</span>
+<span class="nc" id="L107">      query.setParameter(i,value)</span>
+<span class="nc" id="L108">      i += 1</span>
+    }
+<span class="nc" id="L110">    query.executeUpdate()</span>
+  }
+  def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLSelectionQuery[A,A]={
+<span class="fc" id="L113">    val where = DSL.select[A].where</span>
+<span class="fc" id="L114">    params.foreach(p=&gt;where.apply(p))</span>
+
+<span class="fc" id="L116">    where</span>
+  }
+}
+
+/**
+ * ActiveRecord trait
+ */
+<span class="fc" id="L123">trait ActiveRecord {</span>
+  @Transient
+  def save():this.type = {
+<span class="fc" id="L126">    ActiveRecord.save(this)</span>
+  }
+  @Transient
+  def delete(): Unit ={
+<span class="fc" id="L130">    ActiveRecord.delete(this)</span>
+  }
+  @Transient
+  def refresh(): Unit ={
+<span class="nc" id="L134">    ActiveRecord.refresh(this)</span>
+  }
+}
+
+<span class="fc" id="L138">abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extends Dynamic{</span>
+  /**
+   * get model class and primary key
+   */
+
+<span class="fc" id="L143">  val clazz = clazzTag.runtimeClass.asInstanceOf[Class[A]]</span>
+<span class="fc" id="L144">  protected val field = clazz.getDeclaredFields.find(_.isAnnotationPresent(classOf[Id]))</span>
+<span class="pc" id="L145">  val primaryKey = field.getOrElse(throw new IllegalStateException(&quot;primary key is null&quot;)).getName</span>
+
+  /**
+   * where method
+   * sucha as:
+   *
+   * find_by(name=&quot;jcai&quot;,code=&quot;1232&quot;)
+    *
+    * @param name method name
+   * @param params method parameter
+   * @return relation query object
+   */
+  def applyDynamicNamed(name:String)(params:(String,Any)*):DSLSelectionQuery[A,A]=macro ActiveRecordMacroDefinition.findByNamedParameterImpl[A,DSLSelectionQuery[A,A]]
+  //Don't use generic type.use Any type.
+  def selectDynamic(fieldName:String):Field[Any] = macro ActiveRecordMacroDefinition.findField[A,Field[Any]]
+  /*{
+    field match{
+      case &quot;find_by&quot;=&gt;
+        ActiveRecord.createCriteriaRelation(clazz,primaryKey)
+      case other=&gt;
+        throw new IllegalAccessException(&quot;unsupported!&quot;)
+    }
+  }
+  */
+  def count ={
+<span class="fc" id="L170">    DSL.select[A](Field.countField)</span>
+  }
+  def update:UpdateStep[A]={
+<span class="fc" id="L173">    DSL.update[A]</span>
+  }
+  def delete:DeleteStep[A]={
+<span class="fc" id="L176">    DSL.delete[A]</span>
+  }
+
+  /**
+   * find_by_xx_and_yy method
+   * such as:
+   *
+   * ModelA.find_by_name_and_code(&quot;jcai&quot;,&quot;1232&quot;)
+   *
+   * @param name method name
+   * @param params parameter list
+   * @return Relation query instance
+   */
+  def applyDynamic(name:String)(params:Any*):DSLSelectionQuery[A,A]= macro ActiveRecordMacroDefinition.findByMethodImpl[A,DSLSelectionQuery[A,A]]
+
+
+  /**
+    * select some fields
+    *
+    * @param fields fields
+    * @return Select step
+    */
+  def select(fields:SelectionField*):SelectStep[A,Array[Any]]={
+<span class="nc" id="L199">    DSL.select(fields:_*)</span>
+  }
+
+  /**
+    * where by DSL
+    *
+    * @return select step
+    */
+  def where:DSLSelectionQuery[A,A] ={
+<span class="fc" id="L208">    DSL.select[A].where</span>
+  }
+  /**
+   * whereByJPQL(ql,parameters)
+   * ModelA.where(&quot;name=?1 and code=?2&quot;,&quot;jcai&quot;,&quot;1232&quot;)
+    *
+    * @param ql query language
+   * @param parameters parameters
+   * @return Realtion Object
+   */
+  def whereByJPQL(ql:String, parameters:Any*): QlRelation[A]={
+<span class="fc" id="L219">    ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+  }
+  def countByJPQL(ql:String,parameters:Any*): Long ={
+<span class="fc" id="L222">    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+<span class="fc" id="L223">    qlRelation.count</span>
+  }
+
+
+  /**
+   * retrieving single object，must exist
+    *
+    * @param key primary key
+   * @return entity object
+   */
+  def find(key:Any):A={
+<span class="fc" id="L234">    ActiveRecord.find[A](key)</span>
+  }
+
+  /**
+   * retrieving single object，may not exist
+    *
+    * @param key primary key
+   * @return entity object
+   */
+  def findOption(key:Any):Option[A]={
+<span class="nc" id="L244">    internalFind(key).headOption</span>
+  }
+
+  /**
+   * find some records by primary key
+    *
+    * @param keys key array
+   * @return query object
+   */
+  def find(keys:Array[Any]):QlRelation[A]={
+<span class="nc" id="L254">    internalFind(keys)</span>
+  }
+  private def internalFind(key:Any):QlRelation[A]={
+<span class="pc" id="L257">    key match{</span>
+<span class="pc bpc" id="L258" title="4 of 8 branches missed.">      case _:Int|_:String|_:Long=&gt;</span>
+<span class="nc" id="L259">        new QlRelation[A](clazz,primaryKey,&quot;%s=?1&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">      case keys:Array[_] =&gt;</span>
+<span class="nc" id="L261">        new QlRelation[A](clazz,primaryKey,&quot;%s IN (?1)&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">      case None =&gt;</span>
+<span class="fc" id="L263">        new QlRelation[A](clazz,primaryKey,null,Seq())</span>
+    }
+  }
+  //retrieving single object
+<span class="fc" id="L267">  def take:A= take(1).head</span>
+  def take(n:Int):QlRelation[A]={
+<span class="fc" id="L269">    internalFind(None).limit(n)</span>
+  }
+<span class="nc" id="L271">  def first:A= first(1).head</span>
+<span class="nc" id="L272">  def first(n:Int=1):QlRelation[A]= {</span>
+<span class="nc" id="L273">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
+  }
+<span class="nc" id="L275">  def last:A= last(1).head</span>
+  def last(n:Int):QlRelation[A]= {
+<span class="nc" id="L277">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
+  }
+  def all:QlRelation[A]= {
+<span class="fc" id="L280">    internalFind(None)</span>
+  }
+  def asc(fields:String*):QlRelation[A]={
+<span class="nc" id="L283">    internalFind(None).asc(fields:_*)</span>
+  }
+  def desc(fields:String*):QlRelation[A]={
+<span class="nc" id="L286">    internalFind(None).desc(fields:_*)</span>
+  }
+
+  /*
+  def find_each(start:Int=0,batchSize:Int = 100)(f:A=&gt;Unit): Unit ={
+
+  }
+  */
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

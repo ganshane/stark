@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ThreadPoolCreator.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ThreadPoolCreator.scala</span></div><h1>ThreadPoolCreator.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent._
+import java.util.concurrent.atomic.AtomicInteger
+
+/**
+ * thread pool creator.
+ * 因为jdk的ThreadPoolExecutor在队列未满的时候，不会扩充pool的大小
+ */
+<span class="nc" id="L12">object ThreadPoolCreator {</span>
+
+  def newSaturatingThreadPool(corePoolSize: Int,
+                              maxPoolSize: Int,
+                              maxQueueSize: Int,
+                              keepAliveTime: Long,
+                              timeUnit: TimeUnit,
+                              threadNamePrefix: String,
+                              rejectedExecutionHandler: RejectedExecutionHandler) = {
+<span class="nc" id="L21">    val queue = new OverflowingSynchronousQueue[Runnable](maxQueueSize)</span>
+<span class="nc" id="L22">    val rejectionPolicyAdapter = new OverflowingRejectionPolicyAdapter(queue, rejectedExecutionHandler)</span>
+<span class="nc" id="L23">    val executor: ThreadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, timeUnit, queue, new NamedThreadFactory(threadNamePrefix), rejectionPolicyAdapter)</span>
+<span class="nc" id="L24">    executor</span>
+  }
+
+<span class="nc" id="L27">  class NamedThreadFactory(prefix: String) extends ThreadFactory {</span>
+<span class="nc" id="L28">    private val seq = new AtomicInteger()</span>
+
+    def newThread(p1: Runnable) = {
+<span class="nc" id="L31">      val thread = new Thread(p1)</span>
+<span class="nc" id="L32">      thread.setName(&quot;%s-%d&quot;.format(prefix, seq.incrementAndGet()))</span>
+      //设置优先级，让抽取和索引线程滞后处理
+<span class="nc" id="L34">      thread.setPriority((Thread.NORM_PRIORITY - Thread.MIN_PRIORITY) / 2)</span>
+<span class="nc" id="L35">      thread.setDaemon(true)</span>
+<span class="nc" id="L36">      thread</span>
+    }
+  }
+
+<span class="nc" id="L40">  class OverflowingRejectionPolicyAdapter(queue: OverflowingSynchronousQueue[Runnable],</span>
+<span class="nc" id="L41">                                          adaptedRejectedExecutionHandler: RejectedExecutionHandler)</span>
+<span class="nc" id="L42">    extends RejectedExecutionHandler {</span>
+    def rejectedExecution(r: Runnable, executor: ThreadPoolExecutor) {
+<span class="nc bnc" id="L44" title="All 2 branches missed.">      if (!queue.offerToOverflowingQueue(r)) {</span>
+<span class="nc" id="L45">        adaptedRejectedExecutionHandler.rejectedExecution(r, executor)</span>
+      }
+    }
+  }
+
+<span class="nc" id="L50">  class OverflowingSynchronousQueue[E](capacity: Int) extends LinkedBlockingQueue[E](capacity) {</span>
+<span class="nc" id="L51">    private val synchronousQueue = new SynchronousQueue[E]()</span>
+
+    // Create a new thread or wake an idled thread
+<span class="nc" id="L54">    override def offer(e: E) = synchronousQueue.offer(e)</span>
+
+    // Add to queue
+<span class="nc" id="L57">    def offerToOverflowingQueue(e: E) = super.offer(e)</span>
+
+    override def take(): E = {
+      // Return tasks from queue, if any, without blocking
+<span class="nc" id="L61">      val task = super.poll()</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">      if (task != null) task else synchronousQueue.take()</span>
+    }
+
+    override def poll(timeout: Long, unit: TimeUnit): E = {
+      // Return tasks from queue, if any, without blocking
+<span class="nc" id="L67">      val task = super.poll()</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">      if (task != null) task else synchronousQueue.poll(timeout, unit)</span>
+    }
+  }
+
+<span class="nc" id="L72">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

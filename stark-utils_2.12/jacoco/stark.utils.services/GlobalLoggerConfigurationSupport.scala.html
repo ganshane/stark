@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalLoggerConfigurationSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">GlobalLoggerConfigurationSupport.scala</span></div><h1>GlobalLoggerConfigurationSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.Properties
+import java.util.logging.LogManager
+
+import org.apache.log4j.PropertyConfigurator
+
+/**
+ * global log4j configuration
+ */
+<span class="nc" id="L13">trait GlobalLoggerConfigurationSupport {</span>
+  protected def configLogger(logFile: String, prefix: String, loggerPrefix: String*) {
+    //convert jcl to slf4j
+<span class="nc" id="L16">    val rootLogger = LogManager.getLogManager.getLogger(&quot;&quot;)</span>
+<span class="nc" id="L17">    val handlers = rootLogger.getHandlers</span>
+<span class="nc" id="L18">    for (handler &lt;- handlers) {</span>
+<span class="nc" id="L19">      rootLogger.removeHandler(handler)</span>
+    }
+    //SLF4JBridgeHandler.install()
+
+    //spymemcached logger
+<span class="nc" id="L24">    System.setProperty(&quot;net.spy.log.LoggerImpl&quot;, &quot;net.spy.memcached.compat.log.SLF4JLogger&quot;)</span>
+
+    //debug mode or enable log
+<span class="nc bnc" id="L27" title="All 6 branches missed.">    if (System.getProperty(&quot;enable-log&quot;) != &quot;true&quot;) {</span>
+<span class="nc" id="L28">      System.setProperty(&quot;log4j.defaultInitOverride&quot;, &quot;false&quot;)</span>
+<span class="nc" id="L29">      val properties = new Properties()</span>
+<span class="nc" id="L30">      properties.put(&quot;log4j.rootCategory&quot;, &quot;error,R&quot;)</span>
+<span class="nc" id="L31">      properties.put(&quot;log4j.appender.R&quot;, &quot;org.apache.log4j.RollingFileAppender&quot;)</span>
+<span class="nc" id="L32">      properties.put(&quot;log4j.appender.R.layout&quot;, &quot;org.apache.log4j.PatternLayout&quot;)</span>
+<span class="nc" id="L33">      properties.put(&quot;log4j.appender.R.layout.ConversionPattern&quot;, &quot;[&quot; + prefix + &quot;] %d{MM-dd HH:mm:ss} [%p] %m%n&quot;)</span>
+<span class="nc" id="L34">      properties.put(&quot;log4j.appender.R.File&quot;, logFile)</span>
+<span class="nc" id="L35">      properties.put(&quot;log4j.appender.R.MaxFileSize&quot;, &quot;10000KB&quot;)</span>
+<span class="nc" id="L36">      properties.put(&quot;log4j.appender.R.MaxBackupIndex&quot;, &quot;10&quot;)</span>
+<span class="nc" id="L37">      loggerPrefix foreach { p =&gt; properties.put(&quot;log4j.category.&quot; + p, &quot;info&quot;)}</span>
+<span class="nc" id="L38">      properties.put(&quot;log4j.category.org.apache.zookeeper&quot;, &quot;warn&quot;)</span>
+<span class="nc" id="L39">      properties.put(&quot;log4j.category.com.netflix&quot;, &quot;warn&quot;)</span>
+//      properties.put(&quot;log4j.category.org.hibernate.SQL&quot;, &quot;DEBUG&quot;)
+
+<span class="nc" id="L42">      PropertyConfigurator.configure(properties)</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TableDefinition.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">TableDefinition.scala</span></div><h1>TableDefinition.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ * Copyright (c) 2009 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
+/**
+ * A builder to define a table.  Its methods add the specified type of
+ * column to the table's definition.
+ */
+<span class="fc" id="L45">class TableDefinition(adapter: DatabaseAdapter,</span>
+<span class="fc" id="L46">                      tableName: String,options:TableOption*) {</span>
+<span class="fc" id="L47">  private val columnDefinitions = new mutable.ListBuffer[ColumnDefinition]</span>
+
+  /**
+   * Generate a SQL string representation of the columns in the table.
+   *
+   * @return the SQL text that defines the columns in the table
+   */
+  final def toSql: String = {
+<span class="fc" id="L55">    val sb = new java.lang.StringBuilder(512)</span>
+<span class="fc" id="L56">    var firstColumn = true</span>
+<span class="fc" id="L57">    for (columnDefinition &lt;- columnDefinitions) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (firstColumn) {</span>
+<span class="fc" id="L59">        firstColumn = false</span>
+      }
+      else {
+<span class="fc" id="L62">        sb.append(&quot;, &quot;)</span>
+      }
+<span class="fc" id="L64">      sb.append(columnDefinition.getColumnName)</span>
+<span class="fc" id="L65">        .append(' ')</span>
+<span class="fc" id="L66">        .append(columnDefinition.toSql)</span>
+    }
+<span class="fc" id="L68">    sb.toString</span>
+  }
+  final def toCommentSql:Array[String]={
+    //table comment
+<span class="fc" id="L72">    val list = new ListBuffer[String]()</span>
+<span class="pc bpc" id="L73" title="2 of 4 branches missed.">    for (option @ Comment(comment) &lt;- options) {</span>
+<span class="fc" id="L74">      list.append(adapter.commentTableSql(tableName,comment))</span>
+    }
+<span class="fc" id="L76">    list.appendAll(columnDefinitions.flatMap(_.toCommentSql))</span>
+
+<span class="fc" id="L78">    list.toArray</span>
+  }
+
+  /**
+   * Add any known column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param columnType the type of column being added
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def column(name: String,
+                   columnType: SqlType,
+                   options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L95">    val columnDefinition = adapter.newColumnDefinition(tableName,</span>
+<span class="fc" id="L96">      name,</span>
+<span class="fc" id="L97">      columnType,</span>
+<span class="fc" id="L98">      options: _*)</span>
+<span class="fc" id="L99">    columnDefinitions += columnDefinition</span>
+<span class="fc" id="L100">    this</span>
+  }
+
+  /**
+   * Add a BIGINT column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def bigint(name: String,
+                   options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L115">    column(name, BigintType, options: _*)</span>
+  }
+
+  /**
+   * Add a BLOB column type to the table.  The actual SQL text used to
+   * create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def blob(name: String,
+                 options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L130">    column(name, BlobType, options: _*)</span>
+  }
+  /**
+   * Add a CLOB column type to the table.  The actual SQL text used to
+   * create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def clob(name: String,
+                 options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L144">    column(name, ClobType, options: _*)</span>
+  }
+
+  /**
+   * Add a BOOLEAN column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def boolean(name: String,
+                    options: ColumnOption*): TableDefinition = {
+<span class="nc" id="L159">    column(name, BooleanType, options: _*)</span>
+  }
+
+  /**
+   * Add a CHAR column type to the table.  The actual SQL text used to
+   * create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def char(name: String,
+                 options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L174">    column(name, CharType, options: _*)</span>
+  }
+
+  /**
+   * Add a DECIMAL column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def decimal(name: String,
+                    options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L189">    column(name, DecimalType, options: _*)</span>
+  }
+
+  /**
+   * Add a INTEGER column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def integer(name: String,
+                    options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L204">    column(name, IntegerType, options: _*)</span>
+  }
+
+  /**
+   * Add a SMALLINT column type to the table.  The actual SQL text
+   * used to create the column is chosen by the database adapter and
+   * may be different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def smallint(name: String,
+                     options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L219">    column(name, SmallintType, options: _*)</span>
+  }
+
+  /**
+   * Add a TIMESTAMP column type to the table.  The actual SQL text
+   * used to create the column is chosen by the database adapter and
+   * may be different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def timestamp(name: String,
+                      options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L234">    column(name, TimestampType, options: _*)</span>
+  }
+
+  /**
+   * Add a VARBINARY column type to the table.  The actual SQL text
+   * used to create the column is chosen by the database adapter and
+   * may be different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def varbinary(name: String,
+                      options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L249">    column(name, VarbinaryType, options: _*)</span>
+  }
+
+  /**
+   * Add a VARCHAR column type to the table.  The actual SQL text used
+   * to create the column is chosen by the database adapter and may be
+   * different than the name of the columnType argument.
+   *
+   * @param name the column's name
+   * @param options a possibly empty array of column options to customize the
+   *        column
+   * @return the same instance
+   */
+  final def varchar(name: String,
+                    options: ColumnOption*): TableDefinition = {
+<span class="fc" id="L264">    column(name, VarcharType, options: _*)</span>
+  }
+<span class="fc" id="L266">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

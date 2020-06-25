@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Migrator.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">Migrator.scala</span></div><h1>Migrator.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2010 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+import java.net.{URL, URLDecoder}
+import java.sql.Connection
+import java.util.jar.JarFile
+import javax.sql.DataSource
+
+import net.sf.log4jdbc.ConnectionSpy
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.collection.{immutable, mutable}
+
+/**
+ * A migration to create the schema_migrations table that records
+ * which migrations have been applied to a database.
+ */
+private class CreateSchemaMigrationsTableMigration
+<span class="fc" id="L52">    extends Migration {</span>
+  override def up() {
+<span class="fc" id="L54">    createTable(Migrator.schemaMigrationsTableName) { t =&gt;</span>
+<span class="fc" id="L55">      t.varchar(&quot;version&quot;, Limit(32), NotNull)</span>
+    }
+
+<span class="fc" id="L58">    addIndex(Migrator.schemaMigrationsTableName,</span>
+<span class="fc" id="L59">      Array(&quot;version&quot;),</span>
+<span class="fc" id="L60">      Unique,</span>
+<span class="fc" id="L61">      Name(&quot;unique_schema_migrations&quot;))</span>
+  }
+
+  override def down() {
+<span class="nc" id="L65">    throw new IrreversibleMigrationException</span>
+  }
+}
+
+<span class="fc" id="L69">object Migrator {</span>
+  /**
+   * The name of the table that stores all the installed migration
+   * version numbers.
+   */
+<span class="fc" id="L74">  val schemaMigrationsTableName = &quot;schema_migrations&quot;</span>
+
+  /**
+   * Given a path to a JAR file, return a set of all the names of all
+   * the classes the JAR file contains.
+   *
+   * @param path path to the JAR file
+   * @param packageName the package name that the classes should be in
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return a set of the class names the JAR file contains
+   */
+  private def classNamesInJar(path: String,
+                              packageName: String,
+                              searchSubPackages: Boolean): mutable.HashSet[String] = {
+    // Search for the package in the JAR file by mapping the package
+    // name to the expected name in the JAR file, then append a '/' to
+    // the package name to ensure that no matches are done on
+    // different packages that share a common substring.
+<span class="nc" id="L93">    val pn = packageName.replace('.', '/') + '/'</span>
+
+<span class="nc" id="L95">    val classNames = new mutable.HashSet[String]</span>
+<span class="nc" id="L96">    With.jarFile(new JarFile(path, false)) { jar =&gt;</span>
+<span class="nc" id="L97">      val entries = jar.entries</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">      while (entries.hasMoreElements) {</span>
+<span class="nc" id="L99">        val name = entries.nextElement.getName</span>
+<span class="nc bnc" id="L100" title="All 4 branches missed.">        if (name.startsWith(pn) &amp;&amp; name.endsWith(&quot;.class&quot;)) {</span>
+<span class="nc" id="L101">          val className = name.substring(0, name.length - &quot;.class&quot;.length)</span>
+<span class="nc" id="L102">            .replace('/', '.')</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">          if (searchSubPackages) {</span>
+<span class="nc" id="L104">            classNames += className</span>
+          }
+<span class="nc bnc" id="L106" title="All 2 branches missed.">          else if (!className.substring(pn.length).contains('.')) {</span>
+<span class="nc" id="L107">            classNames += className</span>
+          }
+        }
+      }
+<span class="nc" id="L111">      classNames</span>
+    }
+  }
+
+  /**
+   * Given a java.io.File for a directory containing compiled Java and
+   * Scala classes, return a set of all names of the classes the
+   * directory contains.
+   *
+   * @param file the java.io.File corresponding to the directory
+   * @param packageName the package name that the classes should be
+   *        in
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return a set of the class names the directory contains
+   */
+  private def classNamesInDir(file: java.io.File,
+                              packageName: String,
+                              searchSubPackages: Boolean): mutable.HashSet[String] = {
+<span class="fc" id="L130">    val classNames = new mutable.HashSet[String]</span>
+
+    def scan(f: java.io.File,
+             pn: String) {
+<span class="fc" id="L134">      val childFiles = f.listFiles</span>
+
+<span class="fc" id="L136">      for (childFile &lt;- childFiles) {</span>
+<span class="pc bpc" id="L137" title="1 of 4 branches missed.">        if (searchSubPackages &amp;&amp; childFile.isDirectory) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">          val childPackageName = if (pn.length &gt; 0)</span>
+<span class="nc" id="L139">            pn + '.' + childFile.getName</span>
+          else
+<span class="nc" id="L141">            childFile.getName</span>
+<span class="nc" id="L142">          scan(childFile, childPackageName)</span>
+        }
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        else if (childFile.isFile) {</span>
+<span class="fc" id="L145">          val name = childFile.getName</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">          if (name.endsWith(&quot;.class&quot;)) {</span>
+<span class="fc" id="L147">            val className = pn +</span>
+<span class="fc" id="L148">              '.' +</span>
+<span class="fc" id="L149">              name.substring(0, name.length - &quot;.class&quot;.length)</span>
+<span class="fc" id="L150">            classNames += className</span>
+          }
+        }
+      }
+    }
+
+<span class="fc" id="L156">    scan(file, packageName)</span>
+
+<span class="fc" id="L158">    classNames</span>
+  }
+
+  /**
+   * Given a resource's URL, return the names of all the classes in
+   * the resource.
+   *
+   * @param url the resource's URL
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return a set of class names in the resource
+   */
+  private def classNamesInResource(
+    url: URL,
+    packageName: String,
+    searchSubPackages: Boolean): mutable.HashSet[String] = {
+<span class="fc" id="L176">    val u = URLDecoder.decode(url.toString, &quot;UTF-8&quot;)</span>
+
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">    if (u.startsWith(&quot;jar:file:&quot;)) {</span>
+      // This URL ends with a ! character followed by the name of the
+      // resource in the jar file, so just get the jar file path.
+<span class="nc" id="L181">      val index = u.lastIndexOf('!')</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">      val path = if (index == -1)</span>
+<span class="nc" id="L183">        u.substring(&quot;jar:file:&quot;.length)</span>
+      else
+<span class="nc" id="L185">        u.substring(&quot;jar:file:&quot;.length, index)</span>
+<span class="nc" id="L186">      classNamesInJar(path, packageName, searchSubPackages)</span>
+    }
+<span class="pc bpc" id="L188" title="1 of 2 branches missed.">    else if (u.startsWith(&quot;file:&quot;)) {</span>
+<span class="fc" id="L189">      val dir = u.substring(&quot;file:&quot;.length)</span>
+<span class="fc" id="L190">      val file = new java.io.File(dir)</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">      if (!file.isDirectory) {</span>
+<span class="nc" id="L192">        val message = &quot;The resource URL '&quot; +</span>
+<span class="nc" id="L193">          u +</span>
+<span class="nc" id="L194">          &quot;' should be a directory but is not.&quot;</span>
+<span class="nc" id="L195">        throw new RuntimeException(message)</span>
+      }
+<span class="fc" id="L197">      classNamesInDir(file, packageName, searchSubPackages)</span>
+    }
+    else {
+<span class="nc" id="L200">      val message = &quot;Do not know how to get a list of classes in the &quot; +</span>
+        &quot;resource at '&quot; +
+<span class="nc" id="L202">        u +</span>
+<span class="nc" id="L203">        &quot;' corresponding to the package '&quot; +</span>
+<span class="nc" id="L204">        packageName +</span>
+<span class="nc" id="L205">        &quot;'.&quot;</span>
+<span class="pc" id="L206">      throw new RuntimeException(message)</span>
+    }
+  }
+
+  /**
+   * Given a Java package name, return a set of concrete classes with
+   * a no argument constructor that implement Migration.
+   *
+   * Limitations:
+   * 1) This function assumes that only a single directory or jar file
+   *    provides classes in the Java package.
+   * 2) It will descend into non-child directories of the package
+   *    directory or other jars to find other migrations.
+   * 3) It does not support remotely loaded classes and jar files.
+   *
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return a sorted map with version number keys and the concrete
+   *         Migration subclasses as the value
+   */
+  private def findMigrations(
+    packageName: String,
+    searchSubPackages: Boolean,
+    logger: Logger): immutable.SortedMap[Long, Class[_ &lt;: Migration]] = {
+    // Ask the current class loader for the resources corresponding to
+    // the package, which can refer to directories, jar files
+    // accessible via the local filesystem or remotely accessible jar
+    // files.  Only the first two are handled.
+<span class="fc" id="L236">    val pn = packageName.replace('.', '/')</span>
+
+<span class="fc" id="L238">    val urls = this.getClass.getClassLoader.getResources(pn)</span>
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">    if (!urls.hasMoreElements) {</span>
+<span class="nc" id="L240">      throw new RuntimeException(&quot;Cannot find a resource for package '&quot; +</span>
+<span class="nc" id="L241">        packageName +</span>
+<span class="nc" id="L242">        &quot;'.&quot;)</span>
+    }
+
+<span class="fc" id="L245">    val classNames = new mutable.HashSet[String]</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">    while (urls.hasMoreElements) {</span>
+<span class="fc" id="L247">      val url = urls.nextElement</span>
+<span class="fc" id="L248">      logger.debug(&quot;For package '{}' found resource at '{}'.&quot;,</span>
+<span class="fc" id="L249">        Array[AnyRef](packageName, url))</span>
+
+<span class="fc" id="L251">      classNames ++= classNamesInResource(url,</span>
+<span class="fc" id="L252">        packageName,</span>
+<span class="fc" id="L253">        searchSubPackages)</span>
+    }
+
+    // Search through the class names for ones that are concrete
+    // subclasses of Migration that have a no argument constructor.
+    // Use a sorted map mapping the version to the class name so the
+    // final results will be sorted in numerically increasing order.
+<span class="fc" id="L260">    var seenVersions = new immutable.TreeMap[Long, String]</span>
+<span class="fc" id="L261">    val seenDescriptions = new mutable.HashMap[String, String]</span>
+
+    // Search for classes that have the proper format.
+<span class="fc" id="L264">    val reStr = &quot;&quot;&quot;Migrate_(\d+)_([_a-zA-Z0-9]*)&quot;&quot;&quot;</span>
+<span class="fc" id="L265">    val re = java.util.regex.Pattern.compile(reStr)</span>
+
+    // Classes to be skipped.  classNames cannot have items removed from it
+    // inside the for loop below or not all elements in classNames may be
+    // visited (iterator corruption).
+<span class="fc" id="L270">    val skipNames = new mutable.HashSet[String]</span>
+
+<span class="fc" id="L272">    for (className &lt;- classNames) {</span>
+<span class="fc" id="L273">      val index = className.lastIndexOf('.')</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">      val baseName = if (index == -1)</span>
+<span class="nc" id="L275">        className</span>
+      else
+<span class="fc" id="L277">        className.substring(index + 1)</span>
+<span class="fc" id="L278">      val matcher = re.matcher(baseName)</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">      if (matcher.matches) {</span>
+<span class="fc" id="L280">        val versionStr = matcher.group(1)</span>
+        val versionOpt =
+          try {
+<span class="pc" id="L283">            Some(java.lang.Long.parseLong(versionStr))</span>
+          }
+          catch {
+            case e: NumberFormatException =&gt; {
+<span class="nc" id="L287">              skipNames += className</span>
+<span class="nc" id="L288">              logger.debug(</span>
+<span class="nc" id="L289">                &quot;Skipping '{}' because the version string '{}' could not &quot; +</span>
+                  &quot;be parsed as a long integer.&quot;,
+<span class="nc" id="L291">                Array[AnyRef](className, versionStr))</span>
+<span class="pc" id="L292">              None</span>
+            }
+          }
+
+<span class="pc" id="L296">        versionOpt match {</span>
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">          case Some(version) =&gt; {</span>
+<span class="pc" id="L298">            seenVersions.get(version) match {</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">              case Some(cn) =&gt; {</span>
+<span class="fc" id="L300">                val message = &quot;The '&quot; +</span>
+<span class="fc" id="L301">                  className +</span>
+<span class="fc" id="L302">                  &quot;' migration defines a duplicate version number &quot; +</span>
+<span class="fc" id="L303">                  &quot;with '&quot; +</span>
+<span class="fc" id="L304">                  cn +</span>
+<span class="fc" id="L305">                  &quot;'.&quot;</span>
+<span class="fc" id="L306">                throw new DuplicateMigrationVersionException(message)</span>
+              }
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">              case None =&gt; {</span>
+<span class="fc" id="L309">                seenVersions = seenVersions.insert(version, className)</span>
+              }
+            }
+
+<span class="fc" id="L313">            val description = matcher.group(2)</span>
+<span class="pc" id="L314">            seenDescriptions.get(description) match {</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">              case Some(cn) =&gt; {</span>
+<span class="fc" id="L316">                val message = &quot;The '&quot; +</span>
+<span class="fc" id="L317">                  className +</span>
+<span class="fc" id="L318">                  &quot;' defines a duplicate description with '&quot; +</span>
+<span class="fc" id="L319">                  cn +</span>
+<span class="fc" id="L320">                  &quot;'.&quot;</span>
+<span class="fc" id="L321">                throw new DuplicateMigrationDescriptionException(message)</span>
+              }
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">              case None =&gt; {</span>
+<span class="fc" id="L324">                seenDescriptions.put(description, className)</span>
+              }
+            }
+          }
+<span class="nc bnc" id="L328" title="All 2 branches missed.">          case None =&gt;</span>
+        }
+      }
+      else {
+<span class="fc" id="L332">        skipNames += className</span>
+<span class="fc" id="L333">        logger.debug(&quot;Skipping '{}' because it does not match '{}'.&quot;,</span>
+<span class="fc" id="L334">          Array[AnyRef](className, reStr))</span>
+      }
+    }
+
+    // Remove all the skipped class names from classNames.
+<span class="fc" id="L339">    classNames --= skipNames</span>
+
+<span class="fc" id="L341">    var results = new immutable.TreeMap[Long, Class[_ &lt;: Migration]]</span>
+
+<span class="pc bpc" id="L343" title="2 of 4 branches missed.">    for ((version, className) &lt;- seenVersions) {</span>
+<span class="fc" id="L344">      var c: Class[_] = null</span>
+      try {
+<span class="fc" id="L346">        c = Class.forName(className)</span>
+<span class="pc bpc" id="L347" title="1 of 2 branches missed.">        if (classOf[Migration].isAssignableFrom(c) &amp;&amp;</span>
+<span class="pc bpc" id="L348" title="1 of 2 branches missed.">          !c.isInterface &amp;&amp;</span>
+<span class="pc bpc" id="L349" title="1 of 2 branches missed.">          !java.lang.reflect.Modifier.isAbstract(c.getModifiers)) {</span>
+          try {
+            // Ensure that there is a no-argument constructor.
+<span class="fc" id="L352">            c.getConstructor()</span>
+<span class="fc" id="L353">            val castedClass = c.asSubclass(classOf[Migration])</span>
+<span class="pc" id="L354">            results = results.insert(version, castedClass)</span>
+          }
+          catch {
+            case e: NoSuchMethodException =&gt; {
+<span class="pc" id="L358">              logger.debug(&quot;Unable to find a no-argument constructor for '&quot; +</span>
+<span class="nc" id="L359">                className +</span>
+<span class="nc" id="L360">                &quot;'&quot;,</span>
+<span class="nc" id="L361">                e)</span>
+            }
+          }
+        }
+      }
+      catch {
+        case e: Exception =&gt; {
+<span class="pc" id="L368">          logger.debug(&quot;Unable to load class '&quot; +</span>
+<span class="nc" id="L369">            className +</span>
+<span class="nc" id="L370">            &quot;'.&quot;,</span>
+<span class="nc" id="L371">            e)</span>
+        }
+      }
+    }
+
+<span class="fc" id="L376">    results</span>
+  }
+}
+
+<span class="fc" id="L380">private class RawAndLoggingConnections(val raw: Connection,</span>
+<span class="fc" id="L381">                                       val logging: Connection)</span>
+
+/**
+ * This class migrates the database into the desired state.
+ */
+<span class="pc bnc" id="L386" title="All 8 branches missed.">class Migrator(connectionBuilder: ConnectionBuilder,</span>
+<span class="fc" id="L387">               val adapter: DatabaseAdapter) extends SchemaDumperSupport{</span>
+  import Migrator._
+  import RichConnection._
+
+<span class="fc" id="L391">  private final val logger = LoggerFactory.getLogger(this.getClass)</span>
+
+  // Since log4jdbc is not in any public Maven repository [1][2], to
+  // make it easier for developers that want to use Scala Migrations
+  // and are using a build tool which has automatic dependency
+  // resolution, so they do not need to manually download log4jdbc
+  // themselves, make log4jdbc optional by dynamically checking if it
+  // is available and use it if it is.
+  // [1] http://code.google.com/p/log4jdbc/wiki/FAQ
+  // [2] http://code.google.com/p/log4jdbc/issues/detail?id=19
+<span class="fc" id="L401">  private final val log4jdbcAvailable = try {</span>
+<span class="fc" id="L402">    Class.forName(&quot;net.sf.log4jdbc.ConnectionSpy&quot;)</span>
+<span class="pc" id="L403">    true</span>
+  }
+  catch {
+<span class="pc" id="L406">    case _: Exception =&gt; false</span>
+  }
+
+  /**
+   * Construct a migrator to a database that does not need a username
+   * and password.
+   *
+   * @param jdbcUrl the JDBC URL to connect to the database
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcUrl: String,
+<span class="nc" id="L418">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L419">    this(new ConnectionBuilder(jdbcUrl), adapter)</span>
+  }
+
+  /**
+   * Construct a migrator to a database that needs a username and password.
+   *
+   * @param jdbcUrl the JDBC URL to connect to the database
+   * @param jdbcUsername the username to log into the database
+   * @param jdbcPassword the password associated with the database
+   *        username
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcUrl: String,
+           jdbcUsername: String,
+           jdbcPassword: String,
+<span class="nc" id="L435">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L436">    this(new ConnectionBuilder(jdbcUrl, jdbcUsername, jdbcPassword), adapter)</span>
+  }
+
+  /**
+   * Construct a migrator to a database with an existing DataSource.
+   *
+   * @param jdbcDatasource the JDBC DataSource to connect to the database
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcDatasource: DataSource,
+<span class="nc" id="L447">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L448">    this(new ConnectionBuilder(jdbcDatasource), adapter)</span>
+  }
+
+  /**
+   * Construct a migrator to a database with an existing DataSource but
+   * override default username and password.
+   *
+   * @param jdbcDatasource the JDBC DataSource to connect to the database
+   * @param jdbcUsername the username to log into the database
+   * @param jdbcPassword the password associated with the database
+   *        username
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcDatasource: DataSource,
+           jdbcUsername: String,
+           jdbcPassword: String,
+<span class="nc" id="L465">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L466">    this(new ConnectionBuilder(jdbcDatasource, jdbcUsername, jdbcPassword),</span>
+<span class="nc" id="L467">      adapter)</span>
+  }
+
+  /**
+   * Get a database connection that logs all calls to it and pass it
+   * to a closure for the closure to use.  After the closure returns,
+   * normally or by throwing an exception, close the connection.
+   *
+   * @param commitBehavior specify the auto-commit mode on the
+   *        connection and whether to commit() or rollback() the
+   *        transaction if the auto-commit mode is disabled on the
+   *        connection
+   * @param f a Function1[Connection,T] that is passed a new
+   *        connection
+   * @return what f returns
+   */
+  private[migration] def withLoggingConnection[T](commitBehavior: CommitBehavior)(f: Connection =&gt; T): T = {
+<span class="fc" id="L484">    connectionBuilder.withConnection(commitBehavior) { rawConnection =&gt;</span>
+<span class="pc bpc" id="L485" title="1 of 2 branches missed.">      val c = if (log4jdbcAvailable)</span>
+<span class="fc" id="L486">        new ConnectionSpy(rawConnection)</span>
+      else
+<span class="pc" id="L488">        rawConnection</span>
+<span class="fc" id="L489">      f(c)</span>
+    }
+  }
+
+  /**
+   * Get a tuple of database connections, a raw one and one that logs
+   * all calls to it and pass both to a closure for the closure to
+   * use.  After the closure returns, normally or by throwing an
+   * exception, close the raw connection.
+   *
+   * @param commitBehavior specify the auto-commit mode on the
+   *        connection and whether to commit() or rollback() the
+   *        transaction if the auto-commit mode is disabled on the
+   *        connection
+   * @param f a Function1[RawAndLoggingConnections,T] that is passed a
+   *        pair of related connections
+   * @return what f returns
+   */
+  private[migration] def withConnections[T](commitBehavior: CommitBehavior)(f: RawAndLoggingConnections =&gt; T): T = {
+<span class="fc" id="L508">    connectionBuilder.withConnection(commitBehavior) { rawConnection =&gt;</span>
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">      val c = if (log4jdbcAvailable)</span>
+<span class="fc" id="L510">        new ConnectionSpy(rawConnection)</span>
+      else
+<span class="pc" id="L512">        rawConnection</span>
+<span class="fc" id="L513">      f(new RawAndLoggingConnections(rawConnection, c))</span>
+    }
+  }
+
+  /**
+   * Get a list of table names.  If the database adapter was given a
+   * schema name then only the tables in that schema are returned.
+   *
+   * @return a set of table names; no modifications of the case of
+   *         table names is done
+   */
+  def getTableNames: mutable.Set[String] = {
+<span class="fc" id="L525">    withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="pc" id="L526">      val schemaPattern = adapter.schemaNameOpt match {</span>
+<span class="pc bpc" id="L527" title="1 of 2 branches missed.">        case Some(n) =&gt; adapter.unquotedNameConverter(n)</span>
+<span class="pc bpc" id="L528" title="1 of 2 branches missed.">        case None =&gt; null</span>
+      }
+<span class="fc" id="L530">      val metadata = connection.getMetaData</span>
+<span class="fc" id="L531">      With.autoClosingResultSet(metadata.getTables(null,</span>
+<span class="fc" id="L532">        schemaPattern,</span>
+<span class="fc" id="L533">        null,</span>
+<span class="fc" id="L534">        Array(&quot;TABLE&quot;))) { rs =&gt;</span>
+<span class="fc" id="L535">        val names = new mutable.HashSet[String]</span>
+<span class="fc bfc" id="L536" title="All 2 branches covered.">        while (rs.next()) {</span>
+<span class="fc" id="L537">          names += rs.getString(3)</span>
+        }
+<span class="fc" id="L539">        names</span>
+      }
+    }
+  }
+
+  /**
+   * Execute a migration in the given direction.
+   *
+   * @param migrationClass the class of migration to execute
+   * @param direction the direction the migration should be run
+   * @param versionUpdateOpt if provided, the schema_migrations table
+   *        is updated using the given connection and migration
+   *        version number; this allows this method to
+   */
+  private def runMigration(migrationClass: Class[_ &lt;: Migration],
+                           direction: MigrationDirection,
+                           versionUpdateOpt: Option[(Connection, Long)]) {
+<span class="fc" id="L556">    logger.info(&quot;Migrating {} with '{}'.&quot;,</span>
+<span class="fc" id="L557">      Array[AnyRef](direction.str, migrationClass.getName))</span>
+
+<span class="fc" id="L559">    val migration = migrationClass.getConstructor().newInstance()</span>
+<span class="fc" id="L560">    withConnections(AutoCommit) { connections =&gt;</span>
+<span class="fc" id="L561">      migration.adapterOpt = Some(adapter)</span>
+<span class="fc" id="L562">      migration.rawConnectionOpt = Some(connections.raw)</span>
+<span class="fc" id="L563">      migration.connectionOpt = Some(connections.logging)</span>
+
+<span class="pc" id="L565">      direction match {</span>
+<span class="fc bfc" id="L566" title="All 2 branches covered.">        case Up =&gt; migration.up()</span>
+<span class="pc bpc" id="L567" title="1 of 2 branches missed.">        case Down =&gt; migration.down()</span>
+      }
+    }
+
+<span class="pc" id="L571">    versionUpdateOpt match {</span>
+<span class="pc bpc" id="L572" title="1 of 4 branches missed.">      case Some((schemaConnection, version)) =&gt; {</span>
+<span class="fc" id="L573">        val tableName = adapter.quoteTableName(schemaMigrationsTableName)</span>
+        val sql =
+<span class="pc" id="L575">          direction match {</span>
+<span class="fc bfc" id="L576" title="All 2 branches covered.">            case Up =&gt; &quot;INSERT INTO &quot; +</span>
+<span class="fc" id="L577">              tableName +</span>
+<span class="fc" id="L578">              &quot; (version) VALUES (?)&quot;</span>
+<span class="pc bpc" id="L579" title="1 of 2 branches missed.">            case Down =&gt; &quot;DELETE FROM &quot; +</span>
+<span class="fc" id="L580">              tableName +</span>
+<span class="fc" id="L581">              &quot; WHERE version = ?&quot;</span>
+          }
+
+<span class="fc" id="L584">        schemaConnection.withPreparedStatement(sql) { statement =&gt;</span>
+<span class="fc" id="L585">          statement.setString(1, version.toString)</span>
+<span class="fc" id="L586">          statement.execute()</span>
+        }
+      }
+<span class="pc bpc" id="L589" title="1 of 2 branches missed.">      case None =&gt;</span>
+    }
+  }
+
+  /**
+   * Determine if the &quot;schema_migrations&quot; table exists.
+   *
+   * @return true if the &quot;schema_migration&quot; table exists
+   */
+  private def doesSchemaMigrationsTableExist: Boolean = {
+<span class="fc" id="L599">    val smtn = Migrator.schemaMigrationsTableName.toLowerCase</span>
+<span class="pc bpc" id="L600" title="3 of 6 branches missed.">    getTableNames.find(_.toLowerCase == smtn) match {</span>
+<span class="fc bfc" id="L601" title="All 2 branches covered.">      case Some(_) =&gt; true</span>
+<span class="pc bpc" id="L602" title="1 of 2 branches missed.">      case None =&gt; false</span>
+    }
+  }
+
+  /**
+   * Creates the schema migrations table if it does not exist.
+   */
+  private def initializeSchemaMigrationsTable() {
+<span class="fc bfc" id="L610" title="All 2 branches covered.">    if (!doesSchemaMigrationsTableExist) {</span>
+<span class="fc" id="L611">      runMigration(classOf[CreateSchemaMigrationsTableMigration], Up, None)</span>
+    }
+  }
+
+  /**
+   * Get a sorted list of all the installed migrations using a query
+   * on the given connection.
+   *
+   * @param connection the connection to perform the query on
+   * @return a sorted set of version numbers of the installed
+   *         migrations
+   */
+  private def getInstalledVersions(connection: Connection): scala.collection.SortedSet[Long] = {
+<span class="fc" id="L624">    val sql = &quot;SELECT version FROM &quot; +</span>
+<span class="fc" id="L625">      adapter.quoteTableName(schemaMigrationsTableName)</span>
+<span class="fc" id="L626">    connection.withPreparedStatement(sql) { statement =&gt;</span>
+<span class="fc" id="L627">      With.autoClosingResultSet(statement.executeQuery()) { rs =&gt;</span>
+<span class="fc" id="L628">        var versions = new immutable.TreeSet[Long]</span>
+<span class="fc bfc" id="L629" title="All 2 branches covered.">        while (rs.next()) {</span>
+<span class="fc" id="L630">          val versionStr = rs.getString(1)</span>
+          try {
+<span class="fc" id="L632">            val version = java.lang.Long.parseLong(versionStr)</span>
+<span class="pc" id="L633">            versions = versions.insert(version)</span>
+          }
+          catch {
+            case e: NumberFormatException =&gt; {
+<span class="nc" id="L637">              logger.warn(&quot;Ignoring installed migration with unparsable &quot; +</span>
+                &quot;version number '&quot; +
+<span class="nc" id="L639">                versionStr +</span>
+<span class="nc" id="L640">                &quot;'.&quot;,</span>
+<span class="nc" id="L641">                e)</span>
+            }
+          }
+        }
+
+<span class="fc" id="L646">        versions</span>
+      }
+    }
+  }
+
+  /**
+   * Get a sorted list of all the installed migrations.
+   *
+   * @return a sorted set of version numbers of the installed
+   *         migrations
+   */
+  def getInstalledVersions: scala.collection.SortedSet[Long] = {
+<span class="fc" id="L658">    withLoggingConnection(AutoCommit) { connection =&gt;</span>
+<span class="fc" id="L659">      getInstalledVersions(connection)</span>
+    }
+  }
+
+  /**
+   * Migrate the database.
+   *
+   * Running this method, even if no concrete Migration subclasses are
+   * found in the given package name, will result in the creation of
+   * the schema_migrations table in the database, if it does not
+   * currently exist.
+   *
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @param operation the migration operation that should be performed
+   */
+  def migrate(operation: MigratorOperation,
+              packageName: String,
+              searchSubPackages: Boolean) {
+<span class="fc" id="L680">    initializeSchemaMigrationsTable()</span>
+
+    // Get a new connection that locks the schema_migrations table.
+    // This will prevent concurrent migrations from running.  Commit
+    // any modifications to schema_migrations regardless if an
+    // exception is thrown or not, this ensures that any migrations
+    // that were successfully run are recorded.
+<span class="fc" id="L687">    withLoggingConnection(CommitUponReturnOrException) { schemaConnection =&gt;</span>
+<span class="fc" id="L688">      logger.debug(&quot;Getting an exclusive lock on the '{}' table.&quot;,</span>
+<span class="fc" id="L689">        schemaMigrationsTableName)</span>
+<span class="fc" id="L690">      val sql = adapter.lockTableSql(schemaMigrationsTableName)</span>
+<span class="fc" id="L691">      schemaConnection.withPreparedStatement(sql) { statement =&gt;</span>
+<span class="fc" id="L692">        statement.execute()</span>
+      }
+
+      // Get a list of all available and installed migrations.  Check
+      // that all installed migrations have a migration class
+      // available to migrate out of that migration.  This can happen
+      // if the migration is applied by one copy of an application but
+      // another copy does not have that migration, say the migration
+      // was not checked into a source control system.  Having a
+      // missing migration for an installed migration is not fatal
+      // unless the migration needs to be rolled back.
+<span class="fc" id="L703">      val installedVersions = getInstalledVersions(schemaConnection).toArray</span>
+<span class="fc" id="L704">      val availableMigrations = findMigrations(packageName,</span>
+<span class="fc" id="L705">        searchSubPackages,</span>
+<span class="fc" id="L706">        logger)</span>
+<span class="fc" id="L707">      val availableVersions = availableMigrations.keySet.toArray</span>
+
+<span class="fc" id="L709">      for (installedVersion &lt;- installedVersions) {</span>
+<span class="pc bpc" id="L710" title="1 of 2 branches missed.">        if (!availableVersions.contains(installedVersion)) {</span>
+<span class="nc" id="L711">          logger.warn(&quot;The migration version '{}' is installed but &quot; +</span>
+<span class="nc" id="L712">            &quot;there is no migration class available to back &quot; +</span>
+            &quot;it out.&quot;,
+<span class="nc" id="L714">            installedVersion)</span>
+        }
+      }
+
+<span class="pc bpc" id="L718" title="1 of 2 branches missed.">      if (availableMigrations.isEmpty) {</span>
+<span class="nc" id="L719">        logger.info(&quot;No migrations found, nothing to do.&quot;)</span>
+      }
+
+<span class="pc bpc" id="L722" title="24 of 25 branches missed.">      case class InstallAndRemove(installVersions: Array[Long],</span>
+<span class="pc" id="L723">                                  removeVersions: Array[Long])</span>
+
+      // From the operation, determine the migrations to install and
+      // the ones to uninstall.
+      val installRemove =
+<span class="pc" id="L728">        operation match {</span>
+<span class="fc bfc" id="L729" title="All 2 branches covered.">          case InstallAllMigrations =&gt; {</span>
+<span class="fc" id="L730">            new InstallAndRemove(availableVersions, new Array[Long](0))</span>
+          }
+<span class="fc bfc" id="L732" title="All 2 branches covered.">          case RemoveAllMigrations =&gt; {</span>
+<span class="fc" id="L733">            new InstallAndRemove(new Array[Long](0), installedVersions.reverse)</span>
+          }
+<span class="fc bfc" id="L735" title="All 2 branches covered.">          case MigrateToVersion(version) =&gt; {</span>
+<span class="fc bfc" id="L736" title="All 2 branches covered.">            val index = availableVersions.indexWhere(_ == version)</span>
+<span class="pc bpc" id="L737" title="1 of 2 branches missed.">            if (index == -1) {</span>
+<span class="nc" id="L738">              val message = &quot;The target version &quot; +</span>
+<span class="nc" id="L739">                version +</span>
+<span class="nc" id="L740">                &quot; does not exist as a migration.&quot;</span>
+<span class="nc" id="L741">              throw new RuntimeException(message)</span>
+            }
+<span class="fc" id="L743">            new InstallAndRemove(availableVersions.take(index + 1).toArray,</span>
+<span class="pc bpc" id="L744" title="1 of 2 branches missed.">              installedVersions.filter(_ &gt; version).reverse)</span>
+          }
+<span class="pc bpc" id="L746" title="1 of 2 branches missed.">          case RollbackMigration(count) =&gt; {</span>
+<span class="pc bpc" id="L747" title="1 of 2 branches missed.">            if (count &gt; installedVersions.length) {</span>
+<span class="nc" id="L748">              val message = &quot;Attempting to rollback &quot; +</span>
+<span class="nc" id="L749">                count +</span>
+<span class="nc" id="L750">                &quot; migrations but the database only has &quot; +</span>
+<span class="nc" id="L751">                installedVersions.length +</span>
+<span class="nc" id="L752">                &quot; installed in it.&quot;</span>
+<span class="nc" id="L753">              throw new RuntimeException(message)</span>
+            }
+<span class="fc" id="L755">            new InstallAndRemove(new Array[Long](0),</span>
+<span class="fc" id="L756">              installedVersions.reverse.take(count))</span>
+          }
+        }
+
+      // Always remove migrations before installing new ones.
+<span class="fc" id="L761">      for (removeVersion &lt;- installRemove.removeVersions) {</span>
+        // At the beginning of the method it wasn't a fatal error to
+        // have a missing migration class for an installed migration,
+        // but when it cannot be removed, it is.
+<span class="pc" id="L765">        availableMigrations.get(removeVersion) match {</span>
+<span class="pc bpc" id="L766" title="1 of 2 branches missed.">          case Some(clazz) =&gt; {</span>
+<span class="fc" id="L767">            runMigration(clazz,</span>
+<span class="fc" id="L768">              Down,</span>
+<span class="fc" id="L769">              Some((schemaConnection, removeVersion)))</span>
+          }
+<span class="nc bnc" id="L771" title="All 2 branches missed.">          case None =&gt; {</span>
+<span class="nc" id="L772">            val message = &quot;The database has migration version '&quot; +</span>
+<span class="nc" id="L773">              removeVersion +</span>
+<span class="nc" id="L774">              &quot;' installed but there is no migration class &quot; +</span>
+<span class="nc" id="L775">              &quot;available with that version.&quot;</span>
+<span class="nc" id="L776">            logger.error(message)</span>
+<span class="nc" id="L777">            throw new MissingMigrationClass(message)</span>
+          }
+        }
+      }
+
+<span class="fc" id="L782">      for (installVersion &lt;- installRemove.installVersions) {</span>
+<span class="fc bfc" id="L783" title="All 2 branches covered.">        if (!installedVersions.contains(installVersion)) {</span>
+<span class="pc" id="L784">          availableMigrations.get(installVersion) match {</span>
+<span class="pc bpc" id="L785" title="1 of 2 branches missed.">            case Some(clazz) =&gt; {</span>
+<span class="fc" id="L786">              runMigration(clazz,</span>
+<span class="fc" id="L787">                Up,</span>
+<span class="fc" id="L788">                Some((schemaConnection, installVersion)))</span>
+            }
+<span class="nc bnc" id="L790" title="All 2 branches missed.">            case None =&gt; {</span>
+<span class="nc" id="L791">              val message = &quot;Illegal state: trying to install a migration &quot; +</span>
+                &quot;with version '&quot; +
+<span class="nc" id="L793">                installVersion +</span>
+<span class="nc" id="L794">                &quot;' that should exist.&quot;</span>
+<span class="nc" id="L795">              throw new MissingMigrationClass(message)</span>
+            }
+          }
+        }
+      }
+
+
+      //explicitly unlock schemaMigration table,because commit will not release the lock.
+<span class="pc" id="L803">      adapter.unlockTableSql(schemaMigrationsTableName).foreach{sql=&gt;</span>
+<span class="nc" id="L804">        schemaConnection.withPreparedStatement(sql) { statement =&gt;</span>
+<span class="nc" id="L805">          statement.execute()</span>
+        }
+      }
+    }
+  }
+
+  /**
+   * Get the status of all the installed and available migrations.  A
+   * tuple-like class is returned that contains three groups of
+   * migrations: installed migrations with an associated Migration
+   * subclass, installed migration without an associated Migration
+   * subclass and Migration subclasses that are not installed.
+   *
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   */
+  def getMigrationStatuses(packageName: String,
+                           searchSubPackages: Boolean): MigrationStatuses = {
+<span class="fc" id="L825">    val availableMigrations = findMigrations(packageName,</span>
+<span class="fc" id="L826">      searchSubPackages,</span>
+<span class="fc" id="L827">      logger)</span>
+<span class="fc bfc" id="L828" title="All 2 branches covered.">    val installedVersions = if (doesSchemaMigrationsTableExist)</span>
+<span class="fc" id="L829">      getInstalledVersions</span>
+    else
+<span class="fc" id="L831">      new immutable.TreeSet[Long]</span>
+
+<span class="fc" id="L833">    var notInstalled = availableMigrations</span>
+    var installedWithAvailableImplementation =
+<span class="fc" id="L835">      new immutable.TreeMap[Long, Class[_ &lt;: Migration]]</span>
+    var installedWithoutAvailableImplementation =
+<span class="fc" id="L837">      new immutable.TreeSet[Long]</span>
+
+<span class="fc" id="L839">    for (installedVersion &lt;- installedVersions) {</span>
+<span class="fc" id="L840">      notInstalled -= installedVersion</span>
+<span class="pc" id="L841">      availableMigrations.get(installedVersion) match {</span>
+<span class="fc bfc" id="L842" title="All 2 branches covered.">        case Some(clazz) =&gt; {</span>
+<span class="fc" id="L843">          installedWithAvailableImplementation =</span>
+<span class="fc" id="L844">            installedWithAvailableImplementation.insert(installedVersion,</span>
+<span class="fc" id="L845">              clazz)</span>
+        }
+<span class="pc bpc" id="L847" title="1 of 2 branches missed.">        case None =&gt; {</span>
+<span class="fc" id="L848">          installedWithoutAvailableImplementation += installedVersion</span>
+        }
+      }
+    }
+
+<span class="fc" id="L853">    new MigrationStatuses(notInstalled,</span>
+<span class="fc" id="L854">      installedWithAvailableImplementation,</span>
+<span class="fc" id="L855">      installedWithoutAvailableImplementation)</span>
+  }
+
+  /**
+   * Determine if the database has all available migrations installed
+   * in it and no migrations installed that do not have a
+   * corresponding concrete Migration subclass; that is, the database
+   * must have only those migrations installed that are found by
+   * searching the package name for concrete Migration subclasses.
+   *
+   * Running this method does not modify the database in any way.  The
+   * schema migrations table is not created.
+   *
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return None if all available migrations are installed and all
+   *         installed migrations have a corresponding Migration
+   *         subclass; Some(message) with a message suitable for
+   *         logging with the not-installed migrations and the
+   *         installed migrations that do not have a matching
+   *         Migration subclass
+   */
+  def whyNotMigrated(packageName: String,
+                     searchSubPackages: Boolean): Option[String] = {
+<span class="fc" id="L881">    val migrationStatuses = getMigrationStatuses(packageName,</span>
+<span class="fc" id="L882">      searchSubPackages)</span>
+
+<span class="fc" id="L884">    val notInstalled = migrationStatuses.notInstalled</span>
+    val installedWithoutAvailableImplementation =
+<span class="fc" id="L886">      migrationStatuses.installedWithoutAvailableImplementation</span>
+
+<span class="fc bfc" id="L888" title="All 2 branches covered.">    if (notInstalled.isEmpty &amp;&amp;</span>
+<span class="fc bfc" id="L889" title="All 2 branches covered.">      installedWithoutAvailableImplementation.isEmpty) {</span>
+<span class="fc" id="L890">      None</span>
+    }
+    else {
+<span class="fc" id="L893">      val sb = new java.lang.StringBuilder(256)</span>
+<span class="fc" id="L894">      sb.append(&quot;The database is not fully migrated because &quot;)</span>
+
+<span class="fc bfc" id="L896" title="All 2 branches covered.">      if (!notInstalled.isEmpty) {</span>
+<span class="fc" id="L897">        sb.append(&quot;the following migrations are not installed: &quot;)</span>
+<span class="fc" id="L898">        sb.append(notInstalled.valuesIterator.map(_.getName).mkString(&quot;, &quot;))</span>
+<span class="pc bpc" id="L899" title="1 of 2 branches missed.">        if (!installedWithoutAvailableImplementation.isEmpty) {</span>
+<span class="nc" id="L900">          sb.append(&quot; and &quot;)</span>
+        }
+      }
+
+<span class="fc bfc" id="L904" title="All 2 branches covered.">      if (!installedWithoutAvailableImplementation.isEmpty) {</span>
+<span class="fc" id="L905">        sb.append(&quot;the following migrations are installed without a &quot; +</span>
+          &quot;matching Migration subclass: &quot;)
+<span class="fc" id="L907">        sb.append(installedWithoutAvailableImplementation.mkString(&quot;, &quot;))</span>
+      }
+
+<span class="fc" id="L910">      sb.append('.')</span>
+
+<span class="fc" id="L912">      Some(sb.toString)</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

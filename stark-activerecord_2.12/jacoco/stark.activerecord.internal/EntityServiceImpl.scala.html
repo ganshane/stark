@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EntityServiceImpl.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.internal</a> &gt; <span class="el_source">EntityServiceImpl.scala</span></div><h1>EntityServiceImpl.scala</h1><pre class="source lang-java linenums">package stark.activerecord.internal
+
+import javax.persistence.{EntityManager, Query}
+
+import org.slf4j.LoggerFactory
+import org.springframework.transaction.annotation.Transactional
+import stark.activerecord.services._
+
+import scala.collection.JavaConversions
+import scala.collection.immutable.Stream
+import scala.reflect.{ClassTag, classTag}
+
+/**
+ * implement EntityService
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-01-03
+ */
+<span class="fc" id="L18">class EntityServiceImpl(entityManager:EntityManager) extends EntityService {</span>
+<span class="fc" id="L19">  private val logger = LoggerFactory getLogger getClass</span>
+  @Transactional
+  override def save[T](entity: T): T = {
+<span class="fc" id="L22">    entityManager.persist(entity)</span>
+<span class="fc" id="L23">    entity</span>
+  }
+  override def refresh[T](entity: T):Unit = {
+<span class="nc" id="L26">    entityManager.refresh(entity)</span>
+  }
+
+  @Transactional
+  override def deleteById[T: ClassTag](id: Any): Unit = {
+<span class="nc" id="L31">    val entity = entityManager.find(classTag[T].runtimeClass, id)</span>
+<span class="nc" id="L32">    entityManager.remove(entity)</span>
+  }
+
+  @Transactional
+  override def delete[T](entity: T): Unit = {
+<span class="fc" id="L37">    entityManager.remove(entity)</span>
+  }
+
+
+  @Transactional
+  override def execute[T](func: EntityManager=&gt;Int): Int={
+<span class="fc" id="L43">    func(entityManager)</span>
+  }
+
+  @Transactional
+  override def deleteRelation[T](updateSupport: DynamicUpdateSupport[T]): Int = {
+<span class="fc" id="L48">    updateSupport match {</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">      case relation:QlRelation[T]=&gt;</span>
+<span class="fc" id="L50">        var fullQl = &quot;delete from %s&quot;.format (relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L51">        relation.queryClause.foreach {</span>
+<span class="fc" id="L52">          fullQl += &quot; where %s&quot;.format (_)</span>
+        }
+<span class="fc" id="L54">        val query = entityManager.createQuery (fullQl)</span>
+
+<span class="fc" id="L56">        setQueryParameter (query, relation)</span>
+
+<span class="fc" id="L58">        query.executeUpdate()</span>
+      case other =&gt;
+<span class="nc" id="L60">        throw new UnsupportedOperationException</span>
+    }
+  }
+
+  @Transactional
+  override def updateRelation[T](updateObject: DynamicUpdateSupport[T]): Int = {
+<span class="fc" id="L66">    updateObject match {</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L68">        var fullQl = &quot;update %s set&quot;.format(relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L69">        relation.updateQl.foreach {</span>
+<span class="fc" id="L70">          fullQl += &quot; %s&quot;.format(_)</span>
+        }
+<span class="fc" id="L72">        relation.queryClause.foreach {</span>
+<span class="fc" id="L73">          fullQl += &quot; where %s&quot;.format(_)</span>
+        }
+
+<span class="fc" id="L76">        val query = entityManager.createQuery(fullQl)</span>
+
+<span class="fc" id="L78">        var index: Int = setQueryParameter(query, relation)</span>
+
+<span class="fc" id="L80">        relation.updateParams.foreach { value =&gt;</span>
+<span class="fc" id="L81">          query.setParameter(index, value)</span>
+<span class="fc" id="L82">          index += 1</span>
+        }
+<span class="fc" id="L84">        query.executeUpdate()</span>
+      case other =&gt;
+<span class="nc" id="L86">        throw new UnsupportedOperationException</span>
+    }
+  }
+
+  private def setQueryParameter[T](query:Query,relation: QlRelation[T]): Int = {
+<span class="fc" id="L91">    var index = 1</span>
+<span class="fc" id="L92">    relation.queryParams.foreach { value =&gt;</span>
+<span class="fc" id="L93">      query.setParameter(index, value)</span>
+<span class="fc" id="L94">      index += 1</span>
+    }
+<span class="fc" id="L96">    index</span>
+  }
+
+  /**
+   * find some records by Relation
+ *
+   * @param queryObj relation object
+   * @tparam T type parameter
+   * @return record stream
+   */
+  def find[T](queryObj:Relation[T]):Stream[T]={
+<span class="fc" id="L107">    val query = queryObj match {</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L109">        var fullQl = &quot;from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L110">        relation.queryClause.foreach {</span>
+<span class="fc" id="L111">          fullQl += &quot; where %s&quot;.format(_)</span>
+        }
+<span class="fc" id="L113">        relation.orderBy.foreach {</span>
+<span class="fc" id="L114">          fullQl += &quot; order by %s&quot;.format(_)</span>
+        }
+
+<span class="fc" id="L117">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
+<span class="fc" id="L118">        val query = entityManager.createQuery(fullQl)</span>
+
+<span class="fc" id="L120">        setQueryParameter(query, relation)</span>
+
+<span class="fc" id="L122">        query</span>
+      case other=&gt;
+<span class="nc" id="L124">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
+    }
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (queryObj.offset &gt; -1)</span>
+<span class="fc" id="L127">      query.setFirstResult(queryObj.offset)</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (queryObj.limit &gt; -1)</span>
+<span class="fc" id="L129">      query.setMaxResults(queryObj.limit)</span>
+    //convert as scala stream
+<span class="fc" id="L131">    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream</span>
+  }
+
+  override def count[T](queryObj: Relation[T]): Long = {
+<span class="fc" id="L135">    val query = queryObj match {</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L137">        var fullQl = &quot;select count(*) from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
+
+<span class="fc" id="L139">        relation.queryClause.foreach {</span>
+<span class="pc" id="L140">          fullQl += &quot; where %s&quot;.format(_)</span>
+        }
+<span class="fc" id="L142">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
+<span class="fc" id="L143">        val query = entityManager.createQuery(fullQl)</span>
+
+<span class="fc" id="L145">        setQueryParameter(query, relation)</span>
+
+<span class="fc" id="L147">        query</span>
+      case other=&gt;
+<span class="nc" id="L149">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
+    }
+<span class="fc" id="L151">    query.getResultList.get(0).asInstanceOf[Long]</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

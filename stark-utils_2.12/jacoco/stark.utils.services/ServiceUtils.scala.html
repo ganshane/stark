@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServiceUtils.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ServiceUtils.scala</span></div><h1>ServiceUtils.scala</h1><pre class="source lang-java linenums">// Copyright 2012,2013,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.LockSupport
+
+import org.slf4j.LoggerFactory
+
+import scala.util.control.NonFatal
+
+/**
+ * 服务常用类
+ * @author jcai
+ */
+<span class="nc" id="L16">object ServiceUtils {</span>
+  private final val NUM_RETRY = 3
+  private final val BETWEEN_SECONDS = 20
+<span class="nc bnc" id="L19" title="All 4 branches missed.">    private lazy val logger = LoggerFactory getLogger getClass</span>
+
+    def runInNoThrow(fun: =&gt;Unit){
+<span class="nc" id="L22">      try {</span>
+<span class="nc" id="L23">        fun</span>
+      } catch {
+<span class="nc bnc" id="L25" title="All 2 branches missed.">        case NonFatal(e) =&gt; logger.error(e.getMessage, e)</span>
+      }
+    }
+
+<span class="nc bnc" id="L29" title="All 2 branches missed.">  def waitUntilObjectLive[T](objName:String)(fun: =&gt; T):T={</span>
+<span class="nc" id="L30">        0 until NUM_RETRY foreach { i=&gt;</span>
+<span class="nc" id="L31">            val value:T = fun</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            if (value != null)</span>
+<span class="nc" id="L33">                return value</span>
+<span class="nc" id="L34">            logger.debug(&quot;waiting object live...&quot;)</span>
+
+<span class="nc" id="L36">            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(BETWEEN_SECONDS))</span>
+        }
+<span class="nc" id="L38">        throw new StarkException(&quot;经过%s s还未能获取[%s]实例&quot;.format(NUM_RETRY * BETWEEN_SECONDS,objName),StarkUtilsErrorCode.TIMEOUT_TO_GET_OBJECT)</span>
+    }
+<span class="nc" id="L40">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Relation.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">Relation.scala</span></div><h1>Relation.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
+
+import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
+
+import scala.collection.generic.CanBuildFrom
+import scala.collection.{GenTraversableOnce, mutable}
+import scala.language.experimental.macros
+import scala.language.{dynamics, postfixOps, reflectiveCalls}
+
+/**
+ * query relation interface
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2016-01-15
+ */
+<span class="fc" id="L15">trait Relation[A] {</span>
+  protected val primaryKey:String
+<span class="fc" id="L17">  private[activerecord] var limit:Int = -1</span>
+<span class="fc" id="L18">  private[activerecord] var offset:Int = -1</span>
+
+  private var underlying_result:Stream[A] = _
+  protected def executeQuery: Stream[A] = {
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">    if(underlying_result == null)</span>
+<span class="fc" id="L23">      underlying_result = ActiveRecord.find(this)</span>
+<span class="fc" id="L24">    underlying_result</span>
+  }
+
+  private[activerecord] def count:Long={
+<span class="fc" id="L28">    ActiveRecord.count(this)</span>
+  }
+
+  def order(params:(String,String)*):this.type
+  def asc(fields:String*):this.type={
+<span class="fc" id="L33">    order(fields.map((_,&quot;asc&quot;)):_*)</span>
+  }
+  def desc(fields:String*):this.type={
+<span class="nc" id="L36">    order(fields.map((_,&quot;desc&quot;)):_*)</span>
+  }
+<span class="nc" id="L38">  def exists():Boolean= limit(1).headOption.isDefined</span>
+  def limit(n:Int):this.type={
+<span class="fc" id="L40">    limit=n</span>
+<span class="fc" id="L41">    this</span>
+  }
+<span class="fc" id="L43">  def take:A= take(1).head</span>
+<span class="nc" id="L44">  def takeOption:Option[A]= take(1).headOption</span>
+  def take(n:Int):this.type={
+<span class="fc" id="L46">    limit(n)</span>
+  }
+<span class="nc" id="L48">  def first:A= first(1).head</span>
+<span class="nc" id="L49">  def firstOption:Option[A]= first(1).headOption</span>
+  def first(n:Int):this.type= {
+<span class="nc" id="L51">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
+  }
+<span class="nc" id="L53">  def last:A= last(1).head</span>
+  def last(n:Int):this.type= {
+<span class="nc" id="L55">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
+  }
+  def offset(n:Int): this.type={
+<span class="fc" id="L58">    offset = n</span>
+<span class="fc" id="L59">    this</span>
+  }
+<span class="nc" id="L61">  @inline final def toList= executeQuery.toList</span>
+<span class="fc" id="L62">  @inline final def size = executeQuery.size</span>
+<span class="nc" id="L63">  @inline final def foreach[U](f: A =&gt; U) = executeQuery.foreach(f)</span>
+<span class="nc" id="L64">  @inline final def filter(f: A =&gt; Boolean) = executeQuery.filter(f)</span>
+<span class="fc" id="L65">  @inline final def head = executeQuery.head</span>
+<span class="nc" id="L66">  @inline final def headOption = executeQuery.headOption</span>
+<span class="nc" id="L67">  @inline final def tail = executeQuery.tail</span>
+<span class="nc" id="L68">  @inline final def map[B, That](f: A =&gt; B)(implicit bf: CanBuildFrom[Stream[A], B, That]): That =  executeQuery.map(f)</span>
+<span class="nc" id="L69">  @inline final def flatMap[B, That](f: A =&gt; GenTraversableOnce[B])(implicit bf: CanBuildFrom[Stream[A], B, That]): That = executeQuery.flatMap(f)</span>
+}
+
+<span class="fc" id="L72">trait DynamicUpdateSupport[A] extends Dynamic{</span>
+  /**
+   * update method
+   */
+  def applyDynamicNamed(name:String)(params:(String,Any)*):Int=macro ActiveRecordMacroDefinition.updateMethodImpl[A,Int]
+  def internalUpdate(params:(String,Any)*): Int
+}
+
+
+
+
+/**
+ * query case class
+ * @param entityClazz entity class
+ * @param primaryKey primary key
+ * @tparam A type parameter
+ */
+<span class="pc" id="L89">class QlRelation[A](val entityClazz:Class[A],val primaryKey:String) extends Relation[A] with DynamicUpdateSupport[A]{</span>
+
+<span class="fc" id="L91">  def this(entityClazz:Class[A],primaryKey:String,query:String,queryParams:Seq[Any]){</span>
+<span class="fc" id="L92">    this(entityClazz,primaryKey)</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">    if(query != null)</span>
+<span class="fc" id="L94">      this.queryClause = Some(query)</span>
+
+<span class="fc" id="L96">    this.queryParams = queryParams</span>
+  }
+<span class="fc" id="L98">  private[activerecord] var orderBy:Option[String]=None</span>
+
+<span class="fc" id="L100">  private[activerecord] var queryClause:Option[String] = None</span>
+<span class="fc" id="L101">  private[activerecord] var queryParams:Seq[Any] = Nil</span>
+
+<span class="fc" id="L103">  private[activerecord] var updateQl:Option[String] = None</span>
+<span class="fc" id="L104">  private[activerecord] var updateParams:Seq[Any] = Nil</span>
+
+
+  def order(params:(String,String)*):this.type= {
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">    params.foreach{case (key,value)=&gt;</span>
+<span class="pc" id="L109">      orderBy match{</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">        case Some(o) =&gt;</span>
+<span class="nc" id="L111">          orderBy = Some(o+&quot;,%s %s&quot;.format(key,value))</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        case None=&gt;</span>
+<span class="fc" id="L113">          orderBy = Some(&quot;%s %s&quot;.format(key,value))</span>
+      }
+    }
+<span class="fc" id="L116">    this</span>
+  }
+  def internalUpdate(params:(String,Any)*): Int={
+<span class="fc" id="L119">    var ql = &quot;&quot;</span>
+<span class="fc" id="L120">    var index = queryParams.size + 1</span>
+<span class="fc" id="L121">    val updateParams = mutable.Buffer[Any]()</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">    params.foreach{</span>
+<span class="fc" id="L123">      case (key,value)=&gt;</span>
+<span class="fc" id="L124">        ql += &quot;%s=?%s,&quot;.format(key,index)</span>
+<span class="fc" id="L125">        index += 1</span>
+<span class="fc" id="L126">        updateParams += value</span>
+    }
+
+<span class="fc" id="L129">    this.updateParams = updateParams.toSeq</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">    if(ql.length&gt;0){</span>
+<span class="fc" id="L131">      this.updateQl = Some(ql.dropRight(1))</span>
+    }
+
+<span class="fc" id="L134">    ActiveRecord.updateRelation(this)</span>
+  }
+  def delete:Int = {
+<span class="fc" id="L137">    ActiveRecord.deleteRelation(this)</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

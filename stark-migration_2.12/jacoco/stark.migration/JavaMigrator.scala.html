@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavaMigrator.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Database Migration</a> &gt; <a href="index.source.html" class="el_package">stark.migration</a> &gt; <span class="el_source">JavaMigrator.scala</span></div><h1>JavaMigrator.scala</h1><pre class="source lang-java linenums">// Copyright 2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+/*
+ * Copyright (c) 2015 Jun Tsai &lt;jcai@ganshane.com&gt;
+ * Copyright (c) 2009 Sony Pictures Imageworks Inc.
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the
+ * distribution.  Neither the name of Sony Pictures Imageworks nor the
+ * names of its contributors may be used to endorse or promote
+ * products derived from this software without specific prior written
+ * permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+package stark.migration
+
+/**
+ * The Scala Migrator class uses Scala case classes in its public
+ * constructors and public methods which makes it difficult to use
+ * from a pure Java environment.  This class exposes a Java-style
+ * interface and delegates to the Scala Migrator class.
+ */
+<span class="fc" id="L44">class JavaMigrator private (migrator: Migrator) {</span>
+  /**
+   * JavaMigrator constructor.
+   *
+   * @param connectionBuilder a builder of connections to the
+   *        database
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(connectionBuilder: ConnectionBuilder,
+<span class="fc" id="L54">           adapter: DatabaseAdapter) {</span>
+<span class="fc" id="L55">    this(new Migrator(connectionBuilder, adapter))</span>
+  }
+
+  /**
+   * JavaMigrator constructor.
+   *
+   * @param jdbcUrl the JDBC URL to connect to the database
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcUrl: String,
+<span class="nc" id="L66">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L67">    this(new ConnectionBuilder(jdbcUrl), adapter)</span>
+  }
+
+  /**
+   * JavaMigrator constructor.
+   *
+   * @param jdbcUrl the JDBC URL to connect to the database
+   * @param jdbcUsername the username to log into the database
+   * @param jdbcPassword the password associated with the database
+   *        username
+   * @param adapter a concrete DatabaseAdapter that the migrator uses
+   *        to handle database specific features
+   */
+  def this(jdbcUrl: String,
+           jdbcUsername: String,
+           jdbcPassword: String,
+<span class="nc" id="L83">           adapter: DatabaseAdapter) {</span>
+<span class="nc" id="L84">    this(new ConnectionBuilder(jdbcUrl, jdbcUsername, jdbcPassword),</span>
+<span class="nc" id="L85">      adapter)</span>
+  }
+
+  /**
+   * Get a list of table names.  If the database adapter was given a
+   * schema name then only the tables in that schema are returned.
+   *
+   * @return a set of table names; no modifications of the case of
+   *         table names is done
+   */
+  def getTableNames: java.util.Set[String] = {
+<span class="fc" id="L96">    val tableNames = migrator.getTableNames</span>
+
+<span class="fc" id="L98">    val set = new java.util.HashSet[String](tableNames.size)</span>
+
+<span class="fc" id="L100">    for (tableName &lt;- tableNames)</span>
+<span class="fc" id="L101">      set.add(tableName)</span>
+
+<span class="fc" id="L103">    set</span>
+  }
+
+  /**
+   * Install all available migrations into the database.
+   *
+   * @param packageName the package name that the Migration subclasses
+   *        should be searched for
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   */
+  def installAllMigrations(packageName: String,
+                           searchSubPackages: Boolean) {
+<span class="fc" id="L116">    migrator.migrate(InstallAllMigrations, packageName, searchSubPackages)</span>
+  }
+
+  /**
+   * Remove all installed migrations from the database.
+   *
+   * @param packageName the package name that the Migration subclasses
+   *        should be searched for
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   */
+  def removeAllMigrations(packageName: String,
+                          searchSubPackages: Boolean) {
+<span class="fc" id="L129">    migrator.migrate(RemoveAllMigrations, packageName, searchSubPackages)</span>
+  }
+
+  /**
+   * Migrate the database to the given version.
+   *
+   * @param version the version number the database should be migrated
+   *        to
+   * @param packageName the package name that the Migration subclasses
+   *        should be searched for
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   */
+  def migrateTo(version: Long,
+                packageName: String,
+                searchSubPackages: Boolean) {
+<span class="nc" id="L145">    migrator.migrate(MigrateToVersion(version), packageName, searchSubPackages)</span>
+  }
+
+  /**
+   * Rollback a given number of migrations in the database.
+   *
+   * @param count the number of migrations to rollback
+   *        to
+   * @param packageName the package name that the Migration subclasses
+   *        should be searched for
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   */
+  def rollback(count: Int,
+               packageName: String,
+               searchSubPackages: Boolean) {
+<span class="nc" id="L161">    migrator.migrate(RollbackMigration(count),</span>
+<span class="nc" id="L162">      packageName,</span>
+<span class="nc" id="L163">      searchSubPackages)</span>
+  }
+
+  /**
+   * Determine if the database has all available migrations installed
+   * in it and no migrations installed that do not have a
+   * corresponding concrete Migration subclass; that is, the database
+   * must have only those migrations installed that are found by
+   * searching the package name for concrete Migration subclasses.
+   *
+   * Running this method does not modify the database in any way.  The
+   * schema migrations table is not created.
+   *
+   * @param packageName the Java package name to search for Migration
+   *        subclasses
+   * @param searchSubPackages true if sub-packages of packageName
+   *        should be searched
+   * @return null if all available migrations are installed and all
+   *         installed migrations have a corresponding Migration
+   *         subclass; a non-null message suitable for logging with
+   *         the not-installed migrations and the installed migrations
+   *         that do not have a matching Migration subclass
+   */
+  def whyNotMigrated(packageName: String,
+                     searchSubPackages: Boolean): String = {
+<span class="pc" id="L188">    migrator.whyNotMigrated(packageName, searchSubPackages) match {</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">      case Some(message) =&gt; message</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">      case None =&gt; null</span>
+    }
+  }
+<span class="fc" id="L193">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

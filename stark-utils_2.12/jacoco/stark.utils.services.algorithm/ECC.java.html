@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ECC.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services.algorithm</a> &gt; <span class="el_source">ECC.java</span></div><h1>ECC.java</h1><pre class="source lang-java linenums">// Copyright 2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services.algorithm;
+
+import java.math.BigInteger;
+import java.util.Random;
+
+/**
+ * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
+ * @since 2015-02-02
+ */
+
+public class ECC {
+    static E e;//椭圆曲线
+    Pare pare;//椭圆上的已知点
+    long privatekey;//7位速度变慢            私钥--随机
+    Pare publickey;//公钥
+
+    public ECC() {
+<span class="nc" id="L20">        super();</span>
+<span class="nc" id="L21">        Random rand = new Random();</span>
+<span class="nc" id="L22">        this.e = new E(BigInteger.probablePrime(30, rand).intValue(), rand.nextInt(1024), rand.nextInt(1024));</span>
+<span class="nc" id="L23">        this.privatekey = rand.nextLong();//(343354356L);//7位速度变慢            私钥--随机</span>
+<span class="nc" id="L24">        this.pare = new Pare(rand.nextInt(10000000), rand.nextInt(10000000));</span>
+<span class="nc" id="L25">        this.publickey = this.pare.multiply(privatekey);//new Pare();</span>
+<span class="nc" id="L26">    }</span>
+
+    class E {// 表示椭圆曲线方程
+        Long p;//模p的椭圆群
+        Long a;
+        Long b;
+
+<span class="nc" id="L33">        public E(long p, long a, long b) {</span>
+<span class="nc" id="L34">            super();</span>
+<span class="nc" id="L35">            this.p = p;</span>
+<span class="nc" id="L36">            this.a = a;</span>
+<span class="nc" id="L37">            this.b = b;</span>
+<span class="nc" id="L38">        }</span>
+
+    }
+
+    class Message {//传送消息的最小单元
+        Pare pa;
+        Pare pb;
+
+<span class="nc" id="L46">        public Message(Pare pa, Pare pb) {</span>
+<span class="nc" id="L47">            super();</span>
+<span class="nc" id="L48">            this.pa = pa;</span>
+<span class="nc" id="L49">            this.pb = pb;</span>
+<span class="nc" id="L50">        }</span>
+
+        public String toString() {
+<span class="nc" id="L53">            return this.pa.toString() + &quot; &quot; + this.pb.toString();</span>
+        }
+    }
+
+    class Pare {//椭圆曲线上的点(x,y)
+        long x;
+        long y;
+
+<span class="nc" id="L61">        public Pare() {</span>
+<span class="nc" id="L62">            super();</span>
+<span class="nc" id="L63">        }</span>
+
+<span class="nc" id="L65">        public Pare(long x, long y) {</span>
+<span class="nc" id="L66">            super();</span>
+
+<span class="nc" id="L68">            this.x = x;</span>
+<span class="nc" id="L69">            this.y = y;</span>
+<span class="nc" id="L70">        }</span>
+
+        //加法
+        public Pare add(Pare pare) {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (this.x == Integer.MAX_VALUE) {//为无穷大时O+P=P</span>
+<span class="nc" id="L75">                return pare;</span>
+            }
+<span class="nc" id="L77">            Pare res = new Pare();</span>
+<span class="nc bnc" id="L78" title="All 4 branches missed.">            if (this.y == pare.y &amp;&amp; this.x == pare.x) {//相等时</span>
+<span class="nc" id="L79">                long d = moddivision(3 * this.x * this.x + ECC.e.a, ECC.e.p, 2 * this.y);</span>
+
+<span class="nc" id="L81">                res.x = d * d - 2 * this.x;</span>
+<span class="nc" id="L82">                res.x = mod(res.x, ECC.e.p);</span>
+
+<span class="nc" id="L84">                res.y = d * (this.x - res.x) - this.y;</span>
+<span class="nc" id="L85">                res.y = mod(res.y, ECC.e.p);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">            } else if (pare.x - this.x != 0) {</span>
+<span class="nc" id="L87">                long d = moddivision(pare.y - this.y, ECC.e.p, pare.x - this.x);</span>
+<span class="nc" id="L88">                res.x = d * d - this.x - pare.x;</span>
+<span class="nc" id="L89">                res.x = mod(res.x, ECC.e.p);</span>
+
+<span class="nc" id="L91">                res.y = d * (this.x - res.x) - this.y;</span>
+<span class="nc" id="L92">                res.y = mod(res.y, ECC.e.p);</span>
+<span class="nc" id="L93">            } else {//P Q互逆,返回无穷大</span>
+<span class="nc" id="L94">                res.x = Integer.MAX_VALUE;</span>
+<span class="nc" id="L95">                res.y = Integer.MAX_VALUE;</span>
+            }
+
+<span class="nc" id="L98">            return res;</span>
+        }
+
+        //减法
+        public Pare less(Pare p) {
+<span class="nc" id="L103">            p.y *= -1;</span>
+<span class="nc" id="L104">            return add(p);</span>
+        }
+
+        //乘法
+        public Pare multiply(long num) {
+<span class="nc" id="L109">            Pare p = new Pare(this.x, this.y);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            for (long i = 1; i &lt; num; i++) {</span>
+<span class="nc" id="L111">                p = p.add(this);</span>
+            }
+<span class="nc" id="L113">            return p;</span>
+        }
+
+        //求余,解决负号问题
+        public long mod(long a, long b) {
+<span class="nc" id="L118">            a = a % b;</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            while (a &lt; 0) {</span>
+<span class="nc" id="L120">                a += b;</span>
+            }
+<span class="nc" id="L122">            return a;</span>
+        }
+
+        //求余取商(a mod b)/c
+        /*public long moddivision(long a, long b, long c) {
+			a = mod(a,b);
+			while(a%c != 0) {
+				a += b;
+			}
+			a = a/c;
+			return a;
+		}*/
+        public long moddivision(long a, long b, long c) {
+<span class="nc" id="L135">            a = mod(a, b);</span>
+<span class="nc" id="L136">            c = mod(c, b);</span>
+<span class="nc" id="L137">            a = a * MyMath.exgcd(c, b);</span>
+<span class="nc" id="L138">            return mod(a, b);</span>
+        }
+
+        public String toString() {
+<span class="nc" id="L142">            return Tools.obox(Tools.long2hexStr(this.x), 4) + &quot; &quot; + Tools.obox(Tools.long2hexStr(this.y), 4);</span>
+        }
+    }
+
+    //加密
+    public Message encryption(Pare g, Pare pbk, Pare word) {
+<span class="nc" id="L148">        pbk = g.multiply(privatekey);//公钥</span>
+<span class="nc" id="L149">        int d = new Random().nextInt(1024);//随机数</span>
+<span class="nc" id="L150">        Pare dg = g.multiply(d);</span>
+<span class="nc" id="L151">        Pare dp = pbk.multiply(d);</span>
+<span class="nc" id="L152">        Pare send = word.add(dp);</span>
+<span class="nc" id="L153">        return new Message(dg, send);</span>
+    }
+
+    public String encryption(Pare g, Pare pbk, String word) {
+<span class="nc" id="L157">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L158">        Pare[] words = Str2Pares(word);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        for (int i = 0; i &lt; words.length; i++) {</span>
+<span class="nc" id="L160">            sb.append(encryption(g, pbk, words[i]).toString());</span>
+<span class="nc" id="L161">            sb.append(&quot; &quot;);</span>
+        }
+<span class="nc" id="L163">        return sb.toString();</span>
+    }
+
+    public String encryption(String word) {
+<span class="nc" id="L167">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L168">        Pare[] words = Str2Pares(word);</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        for (int i = 0; i &lt; words.length; i++) {</span>
+<span class="nc" id="L170">            sb.append(encryption(this.pare, this.publickey, words[i]).toString());</span>
+<span class="nc" id="L171">            sb.append(&quot; &quot;);</span>
+        }
+<span class="nc" id="L173">        return sb.toString();</span>
+    }
+
+    //解密
+    public Pare decryption(Message m) {
+<span class="nc" id="L178">        Pare pab = m.pa.multiply(this.privatekey);</span>
+<span class="nc" id="L179">        Pare result = m.pb.less(pab);</span>
+<span class="nc" id="L180">        return result;</span>
+    }
+
+    public String decryption(String s) {
+<span class="nc" id="L184">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc" id="L185">        Message[] mes = hexStr2Messages(s);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        for (int i = 0; i &lt; mes.length; i++) {</span>
+<span class="nc" id="L187">            sb.append(decryption(mes[i]).toString());</span>
+        }
+<span class="nc" id="L189">        return Tools.hexStr2Str(sb.toString().replace(&quot; &quot;, &quot;&quot;));</span>
+    }
+
+    public static void print(Object o) {
+<span class="nc" id="L193">        System.out.println(o);</span>
+<span class="nc" id="L194">    }</span>
+
+    //将字符串转换为   值对
+    public Pare[] Str2Pares(String string) {
+
+        Pare[] pares;
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (string.length() % 2 != 0)</span>
+<span class="nc" id="L201">            pares = new Pare[string.length() / 2 + 1];</span>
+        else
+<span class="nc" id="L203">            pares = new Pare[string.length() / 2];</span>
+<span class="nc" id="L204">        char[] chars = string.toCharArray();</span>
+<span class="nc" id="L205">        int i = 0;</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        for (i = 0; i &lt; string.length() / 2; i++) {</span>
+<span class="nc" id="L207">            pares[i] = new Pare(chars[i * 2], chars[i * 2 + 1]);</span>
+        }
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (string.length() % 2 != 0)</span>
+<span class="nc" id="L210">            pares[i] = new Pare(chars[i * 2], 0);</span>
+<span class="nc" id="L211">        return pares;</span>
+    }
+
+    //将值对转换成16进制字符串
+    public String Pares2hexStr(Pare[] pares) {
+<span class="nc" id="L216">        StringBuffer s = new StringBuffer();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (int i = 0; i &lt; pares.length; i++) {</span>
+<span class="nc" id="L218">            s.append(pares[i].toString());</span>
+        }
+<span class="nc" id="L220">        return s.toString();</span>
+    }
+
+    //将16进制字符串转为     消息串
+    public Message[] hexStr2Messages(String s) {
+<span class="nc" id="L225">        String[] ss = s.split(&quot; &quot;);</span>
+<span class="nc" id="L226">        Message[] mes = new Message[ss.length / 4];</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        for (int i = 0; i &lt; mes.length; i++) {</span>
+<span class="nc" id="L228">            long pax = Tools.hexStr2long(ss[i * 4]);</span>
+<span class="nc" id="L229">            long pay = Tools.hexStr2long(ss[i * 4 + 1]);</span>
+<span class="nc" id="L230">            long pbx = Tools.hexStr2long(ss[i * 4 + 2]);</span>
+<span class="nc" id="L231">            long pby = Tools.hexStr2long(ss[i * 4 + 3]);</span>
+<span class="nc" id="L232">            mes[i] = new Message(new Pare(pax, pay), new Pare(pbx, pby));</span>
+        }
+<span class="nc" id="L234">        return mes;</span>
+    }
+
+    //将消息串转为16进制字符串
+    public String Messages2hexStr(Message[] mes) {
+<span class="nc" id="L239">        StringBuffer sb = new StringBuffer();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        for (int i = 0; i &lt; mes.length; i++) {</span>
+<span class="nc" id="L241">            sb.append(mes[i].toString());</span>
+<span class="nc" id="L242">            sb.append(&quot; &quot;);</span>
+        }
+<span class="nc" id="L244">        return sb.toString();</span>
+    }
+
+    public static void main(String[] args) {
+<span class="nc" id="L248">        ECC ecc = new ECC();</span>
+<span class="nc" id="L249">        print(&quot;私钥:&quot; + ecc.privatekey);</span>
+<span class="nc" id="L250">        print(&quot;公钥:&quot; + ecc.publickey);</span>
+<span class="nc" id="L251">        print(&quot;基点:&quot; + ecc.pare);</span>
+<span class="nc" id="L252">        print(&quot;&quot;);</span>
+<span class="nc" id="L253">        String s = &quot;大家好啊abc123aaaaa sadfasdfe asf&quot;;</span>
+
+<span class="nc" id="L255">        String jm = ecc.encryption(s);</span>
+        //System.out.print(&quot;密文:  &quot; +jm);
+<span class="nc" id="L257">        print(&quot;密文:   &quot; + jm);</span>
+<span class="nc" id="L258">        String mw = ecc.decryption(jm);</span>
+<span class="nc" id="L259">        System.out.print(&quot;明文:  &quot;);</span>
+<span class="nc" id="L260">        print(&quot;明文:   &quot; + mw);</span>
+
+<span class="nc" id="L262">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

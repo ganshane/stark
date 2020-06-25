@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ZkChildrenSupport.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">ZkChildrenSupport.scala</span></div><h1>ZkChildrenSupport.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.util.concurrent.{ConcurrentHashMap, CopyOnWriteArraySet}
+
+import org.apache.curator.framework.api.CuratorWatcher
+import org.apache.zookeeper.KeeperException.NoNodeException
+import org.apache.zookeeper.WatchedEvent
+import org.apache.zookeeper.Watcher.Event.EventType
+
+import scala.collection.JavaConversions._
+import scala.util.control.NonFatal
+
+/**
+ * zk children support
+ */
+<span class="fc" id="L18">trait ZkChildrenSupport {</span>
+  this: ZkClientSupport
+    with ZkPathCreatorSupport
+    with ZkDeletePathSupport
+    with ZkNodeDataSupport
+    with RunInNoExceptionThrown
+    with LoggerSupport =&gt;
+
+  /**
+   * 子节点观察的监听者,当父节点本身被删除，然后被创建，那么此watcher仍然有效
+   */
+<span class="fc" id="L29">  private final val childrenWatcher = new ConcurrentHashMap[String, ChildrenWatcherList]()</span>
+<span class="fc" id="L30">  private final val failedChildrenWatcher = new CopyOnWriteArraySet[String]()</span>
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">  private val childrenCuratorWatcher = new CuratorWatcher {</span>
+    def process(event: WatchedEvent) {
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">      if (event.getPath == null) return</span>
+<span class="fc" id="L34">      val selfWatchers = childrenWatcher.get(event.getPath)</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">      if (selfWatchers == null) return</span>
+<span class="fc" id="L36">      event.getType match {</span>
+<span class="fc bfc" id="L37" title="All 6 branches covered.">        case EventType.NodeChildrenChanged | EventType.NodeCreated =&gt;</span>
+<span class="fc" id="L38">          val data = internalWatchChildren(event.getPath, this)</span>
+<span class="fc" id="L39">          selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="fc" id="L40">            x.handleDataChanged(data)</span>
+          })
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        case EventType.NodeDeleted =&gt;</span>
+<span class="fc" id="L43">          zkClient.checkExists().usingWatcher(this).forPath(event.getPath)</span>
+        case other =&gt;
+<span class="nc" id="L45">          debug(&quot;other event:{}&quot;, other)</span>
+      }
+    }
+  }
+
+  def deleteRecursive(path: String) {
+<span class="fc" id="L51">    val children = getChildren(path)</span>
+<span class="fc" id="L52">    for (node &lt;- children) {</span>
+<span class="fc" id="L53">      deleteRecursive(path + '/' + node)</span>
+    }
+<span class="fc" id="L55">    delete(path)</span>
+  }
+
+  def watchChildren(path: String, watcher: ChildrenDataWatcher) {
+<span class="fc" id="L59">    var isHandleData = false</span>
+<span class="fc" id="L60">    var watchers = childrenWatcher.get(path)</span>
+<span class="nc" id="L61">    try {</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">      if (watchers == null) {</span>
+<span class="fc" id="L63">        val arrayList = ChildrenWatcherList(childrenCuratorWatcher, new CopyOnWriteArraySet[ChildrenDataWatcher]())</span>
+<span class="fc" id="L64">        watchers = childrenWatcher.putIfAbsent(path, arrayList)</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (watchers == null) {</span>
+          //说明首次添加，需要进行watcher
+<span class="fc" id="L67">          watchers = arrayList</span>
+          //如果不存在此节点
+<span class="fc" id="L69">          val nodeStat = stat(path)</span>
+<span class="fc" id="L70">          isHandleData = true</span>
+<span class="pc" id="L71">          nodeStat match {</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">            case Some(s) =&gt; //存在此节点</span>
+              //val seq = zkClient.getChildren.usingWatcher(arrayList.internalWatcher).forPath(path).toSeq
+<span class="nc" id="L74">              val seq = internalWatchChildren(path, childrenCuratorWatcher)</span>
+<span class="nc" id="L75">              runInNotExceptionThrown {</span>
+<span class="nc" id="L76">                watcher.handleDataChanged(seq)</span>
+              }
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            case None =&gt;</span>
+              //check exists
+<span class="fc" id="L80">              zkClient.checkExists().usingWatcher(arrayList.internalWatcher).forPath(path)</span>
+<span class="fc" id="L81">              runInNotExceptionThrown {</span>
+<span class="fc" id="L82">                watcher.handleDataChanged(Seq[String]())</span>
+              }
+          }
+        }
+      }
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">      if (!isHandleData)</span>
+<span class="nc" id="L88">        runInNotExceptionThrown {</span>
+<span class="nc" id="L89">          watcher.handleDataChanged(getChildren(path))</span>
+        }
+    } catch {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L93">        failedChildrenWatcher.add(path)</span>
+<span class="nc" id="L94">        error(&quot;fail to watch childre,will retry &quot; + e.getMessage)</span>
+    }
+    finally {
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">      if (watchers != null)</span>
+<span class="fc" id="L98">        watchers.watchers.add(watcher)</span>
+    }
+  }
+
+  def getChildren(path: String): Seq[String] = {
+    try {
+<span class="pc" id="L104">      zkClient.getChildren.forPath(path).toSeq</span>
+    } catch {
+      case ex: NoNodeException =&gt;
+<span class="pc" id="L107">        Seq[String]()</span>
+    }
+  }
+
+  private def internalWatchChildren(path: String, curatorWatcher: CuratorWatcher): Seq[String] = {
+<span class="pc" id="L112">    try {</span>
+<span class="fc" id="L113">      failedChildrenWatcher.remove(path)</span>
+<span class="fc" id="L114">      val data = zkClient.getChildren.usingWatcher(curatorWatcher).forPath(path)</span>
+<span class="pc" id="L115">      data.toSeq</span>
+    } catch {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L118">        warn(&quot;fail to watch node data,will retry,msg:{}&quot;, e.getMessage)</span>
+<span class="nc" id="L119">        failedChildrenWatcher.add(path)</span>
+<span class="nc" id="L120">        null</span>
+    }
+  }
+
+  protected def retryFailedChildrenWatcher() {
+<span class="fc" id="L125">    debug(&quot;retry to watch children&quot;)</span>
+<span class="fc" id="L126">    val it = failedChildrenWatcher.iterator()</span>
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">    while (it.hasNext) {</span>
+<span class="nc" id="L128">      val path = it.next()</span>
+<span class="nc" id="L129">      val watcherList = childrenWatcher.get(path)</span>
+<span class="nc" id="L130">      val data = internalWatchChildren(path, watcherList.internalWatcher)</span>
+      //针对每个watcher调用数据，进行执行
+<span class="nc bnc" id="L132" title="All 2 branches missed.">      if (data != null)</span>
+<span class="nc" id="L133">        watcherList.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="nc" id="L134">          x.handleDataChanged(data)</span>
+        })
+    }
+  }
+
+  protected def rewatchChildren() {
+    //对子节点监测
+<span class="pc bnc" id="L141" title="All 2 branches missed.">    childrenWatcher.foreach {</span>
+<span class="nc" id="L142">      case (k, v) =&gt;</span>
+<span class="nc" id="L143">        val data = internalWatchChildren(k, v.internalWatcher)</span>
+        //针对每个watcher调用数据，进行执行
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (data != null)</span>
+<span class="nc" id="L146">          v.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="nc" id="L147">            x.handleDataChanged(data)</span>
+          })
+
+    }
+  }
+
+  //过滤掉针对children的重复监听
+<span class="pc bpc" id="L154" title="32 of 33 branches missed.">  private case class ChildrenWatcherList(internalWatcher: CuratorWatcher, watchers: CopyOnWriteArraySet[ChildrenDataWatcher])</span>
+
+}
+
+/**
+ * 针对子节点数据的查看器
+ */
+trait ChildrenDataWatcher {
+  /**
+   * 针对数据发变化的处理
+   * @param data 子节点数据
+   */
+  def handleDataChanged(data: Seq[String])
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

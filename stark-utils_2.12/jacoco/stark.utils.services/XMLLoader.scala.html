@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLLoader.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">XMLLoader.scala</span></div><h1>XMLLoader.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.io._
+import javax.xml.XMLConstants
+import javax.xml.bind.util.ValidationEventCollector
+import javax.xml.bind.{JAXBContext, Marshaller}
+import javax.xml.transform.stream.StreamSource
+import javax.xml.validation.SchemaFactory
+
+import com.sun.org.apache.xerces.internal.dom.DOMInputImpl
+import org.w3c.dom.ls.{LSInput, LSResourceResolver}
+import stark.utils.StarkUtilsConstants
+
+import scala.io.Source
+import scala.util.control.NonFatal
+
+/**
+ * 使用Jaxb方式解析XML配置文件
+ *
+ * @author jcai
+ * @version 0.1
+ */
+<span class="nc" id="L25">object XmlLoader {</span>
+  def loadConfig[T &lt;: Object](clazz: Class[T], filePath: String): T = {
+<span class="nc" id="L27">    loadConfig[T](filePath)(Manifest.classType(clazz))</span>
+  }
+
+  /** 加载某一个配置 **/
+  def loadConfig[T &lt;: Object](filePath: String,
+<span class="nc" id="L32">                              symbols: Map[String, String] = Map[String, String](),</span>
+<span class="nc" id="L33">                              encoding: String = StarkUtilsConstants.UTF8_ENCODING)(implicit m: Manifest[T]): T = {</span>
+<span class="nc" id="L34">    val content = Source.fromFile(filePath, encoding).mkString</span>
+<span class="nc" id="L35">    parseXML(content, symbols, encoding)</span>
+  }
+
+  def parseXML[T &lt;: Object](content: String,
+<span class="nc" id="L39">                            symbols: Map[String, String] = Map[String, String](),</span>
+<span class="nc" id="L40">                            encoding: String = StarkUtilsConstants.UTF8_ENCODING,</span>
+<span class="nc" id="L41">                            xsd: Option[InputStream] = None)(implicit m: Manifest[T]): T = {</span>
+<span class="nc" id="L42">    parseXML(new ByteArrayInputStream(SymbolExpander.expand(content, symbols).getBytes(encoding)), xsd)</span>
+  }
+
+  def parseXML[T &lt;: Object](is: InputStream, xsd: Option[InputStream])(implicit m: Manifest[T]): T = {
+<span class="nc" id="L46">    val vec = new ValidationEventCollector()</span>
+<span class="nc" id="L47">    try {</span>
+      //obtain type parameter
+<span class="nc" id="L49">      val clazz = m.runtimeClass.asInstanceOf[Class[T]]</span>
+      //create io reader
+<span class="nc" id="L51">      val reader = new InputStreamReader(is, StarkUtilsConstants.UTF8_ENCODING)</span>
+<span class="nc" id="L52">      val context = JAXBContext.newInstance(clazz)</span>
+      //unmarshal xml
+<span class="nc" id="L54">      val unmarshaller = context.createUnmarshaller()</span>
+      //.unmarshal(reader).asInstanceOf[T]
+<span class="nc bnc" id="L56" title="All 2 branches missed.">      if (xsd.isDefined) {</span>
+<span class="nc" id="L57">        val sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)</span>
+<span class="nc" id="L58">        sf.setResourceResolver(new LSResourceResolver {</span>
+          override def resolveResource(`type`: String, namespaceURI: String, publicId: String, systemId: String, baseURI: String): LSInput = {
+<span class="nc" id="L60">            val input = new DOMInputImpl()</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">            if (systemId.endsWith(&quot;monad.xsd&quot;)) {</span>
+              //仅仅处理系统的文件 TODO 调整为能够自动识别文件路径
+<span class="nc" id="L63">              input.setByteStream(getClass.getResourceAsStream(&quot;/monad.xsd&quot;))</span>
+            }
+<span class="nc" id="L65">            input</span>
+          }
+        })
+<span class="nc" id="L68">        val schemaSource = new StreamSource(xsd.get, &quot;xml&quot;)</span>
+<span class="nc" id="L69">        val schema = sf.newSchema(schemaSource)</span>
+<span class="nc" id="L70">        unmarshaller.setSchema(schema)</span>
+<span class="nc" id="L71">        unmarshaller.setEventHandler(vec)</span>
+      }
+<span class="nc" id="L73">      unmarshaller.unmarshal(reader).asInstanceOf[T]</span>
+    } catch {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L76">        throw StarkException.wrap(e, StarkUtilsErrorCode.FAIL_PARSE_XML)</span>
+    } finally {
+<span class="nc" id="L78">      close(is)</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">      if (xsd.isDefined)</span>
+<span class="nc" id="L80">        close(xsd.get)</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">      if (vec.hasEvents) {</span>
+<span class="nc" id="L82">        val veOption = vec.getEvents.headOption</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (veOption.isDefined) {</span>
+<span class="nc" id="L84">          val ve = veOption.get</span>
+<span class="nc" id="L85">          val vel = ve.getLocator</span>
+<span class="nc" id="L86">          throw new StarkException(</span>
+<span class="nc" id="L87">            &quot;line %s column %s :%s&quot;.format(vel.getLineNumber, vel.getColumnNumber, ve.getMessage),</span>
+<span class="nc" id="L88">            StarkUtilsErrorCode.FAIL_PARSE_XML)</span>
+        }
+      }
+    }
+  }
+
+  private def close(io: Closeable) {
+<span class="nc" id="L95">    try {</span>
+<span class="nc" id="L96">      io.close()</span>
+    } catch {
+<span class="nc bnc" id="L98" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+    }
+  }
+
+  /**
+   * 把对象转化为XML文件
+   */
+<span class="nc" id="L105">  def toXml[T](obj: T, encoding: String = StarkUtilsConstants.UTF8_ENCODING): String = {</span>
+<span class="nc" id="L106">    val context = JAXBContext.newInstance(obj.getClass)</span>
+<span class="nc" id="L107">    val marshaller = context.createMarshaller()</span>
+<span class="nc" id="L108">    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true)</span>
+<span class="nc" id="L109">    val out = new ByteArrayOutputStream</span>
+<span class="nc" id="L110">    marshaller.marshal(obj, out)</span>
+<span class="nc" id="L111">    new String(out.toByteArray, encoding)</span>
+  }
+<span class="nc" id="L113">}</span>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

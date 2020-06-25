@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StarkUtils.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Utils Support</a> &gt; <a href="index.source.html" class="el_package">stark.utils.services</a> &gt; <span class="el_source">StarkUtils.scala</span></div><h1>StarkUtils.scala</h1><pre class="source lang-java linenums">// Copyright 2014,2015,2016 the original author or authors. All rights reserved.
+// site: http://www.ganshane.com
+package stark.utils.services
+
+import java.io._
+import java.util.UUID
+import java.util.concurrent.{ExecutorService, TimeUnit}
+
+import org.apache.commons.io.input.ClassLoaderObjectInputStream
+
+/**
+ * Stark Utils
+ */
+<span class="nc bnc" id="L14" title="All 8 branches missed.">object StarkUtils</span>
+<span class="nc" id="L15">  extends LoggerSupport</span>
+  with NetworkUtilsSupport {
+  /**
+   * 解析host:port形式的网络地址
+   * @param bind 网络地址
+   * @return host和port
+   */
+  def parseBind(bind: String): (String, Int) = {
+<span class="nc" id="L23">    val arr = bind.split(&quot;:&quot;)</span>
+<span class="nc" id="L24">    (arr(0), arr(1).toInt)</span>
+  }
+
+  /**
+   * 比较两个byte数组
+   * @param a 数组1
+   * @param b 数组2
+   * @return a是否小于b
+   */
+<span class="nc bnc" id="L33" title="All 2 branches missed.">  def isLessThan(a: Array[Byte], b: Array[Byte]): Boolean = {</span>
+<span class="nc" id="L34">    val len = math.min(a.length, b.length)</span>
+<span class="nc" id="L35">    0 until len foreach {</span>
+      case i =&gt;
+<span class="nc bnc" id="L37" title="All 2 branches missed.">        if (a.apply(i) &lt; b.apply(i))</span>
+<span class="nc" id="L38">          return true</span>
+    }
+<span class="nc" id="L40">    false</span>
+  }
+
+  /**
+   * 得到随机的64位的long数据
+   * @return long数据
+   */
+  def secureRandomLong: Long = {
+<span class="nc" id="L48">    UUID.randomUUID.getLeastSignificantBits</span>
+  }
+
+  def currentTimeInSecs: Int = {
+<span class="nc" id="L52">    (System.currentTimeMillis() / 1000).toInt</span>
+  }
+
+  /**
+   * 对象序列化
+   * @param obj 对象
+   * @return 对象序列化后的字节数组
+   */
+  def serialize(obj: AnyRef): Array[Byte] = {
+    try {
+<span class="nc" id="L62">      val bos: ByteArrayOutputStream = new ByteArrayOutputStream</span>
+<span class="nc" id="L63">      val oos: ObjectOutputStream = new ObjectOutputStream(bos)</span>
+<span class="nc" id="L64">      oos.writeObject(obj)</span>
+<span class="nc" id="L65">      oos.close()</span>
+<span class="nc" id="L66">      bos.toByteArray</span>
+    }
+    catch {
+      case ioe: IOException =&gt;
+<span class="nc" id="L70">        throw new RuntimeException(ioe)</span>
+    }
+  }
+
+  /**
+   * 反序列化
+   * @param serialized 序列化的数据
+   * @return  对象
+   */
+  def deserialize(serialized: Array[Byte]): AnyRef = {
+<span class="nc" id="L80">    deserialize(serialized, Thread.currentThread().getContextClassLoader)</span>
+  }
+
+  /**
+   * 通过给定的class loader来进行反序列化
+   * @param serialized 序列化数据
+   * @param loader class loader
+   * @return 对象
+   */
+  def deserialize(serialized: Array[Byte], loader: ClassLoader): AnyRef = {
+    try {
+<span class="nc" id="L91">      val bis: ByteArrayInputStream = new ByteArrayInputStream(serialized)</span>
+<span class="nc" id="L92">      var ret: AnyRef = null</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">      if (loader != null) {</span>
+<span class="nc" id="L94">        val cis: ClassLoaderObjectInputStream = new ClassLoaderObjectInputStream(loader, bis)</span>
+<span class="nc" id="L95">        ret = cis.readObject</span>
+<span class="nc" id="L96">        cis.close()</span>
+      }
+      else {
+<span class="nc" id="L99">        val ois: ObjectInputStream = new ObjectInputStream(bis)</span>
+<span class="nc" id="L100">        ret = ois.readObject</span>
+<span class="nc" id="L101">        ois.close()</span>
+      }
+<span class="nc" id="L103">      ret</span>
+    }
+    catch {
+      case ioe: IOException =&gt;
+<span class="nc" id="L107">        throw new RuntimeException(ioe)</span>
+      case e: ClassNotFoundException =&gt;
+<span class="nc" id="L109">        throw new RuntimeException(e)</span>
+    }
+  }
+
+  /**
+   * 关闭某个executor
+   * Uses the shutdown pattern from http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ExecutorService.html
+   * @param executor Executor service
+   * @param executorName executor name
+   */
+  def shutdownExecutor(executor: ExecutorService, executorName: String) {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">    if (executor == null)</span>
+<span class="nc" id="L121">      return</span>
+    //停止新任务提交
+<span class="nc" id="L123">    executor.shutdown()</span>
+    try {
+      //等待已经执行的任务关闭
+<span class="nc bnc" id="L126" title="All 2 branches missed.">      if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {</span>
+        //取消所有正在执行的任务
+<span class="nc" id="L128">        executor.shutdownNow</span>
+        //再次等待任务关闭
+<span class="nc bnc" id="L130" title="All 2 branches missed.">        if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {</span>
+<span class="nc" id="L131">          warn(&quot;executor {} not terminated&quot;, executorName)</span>
+        }
+      }
+    }
+    catch {
+      case ie: InterruptedException =&gt;
+<span class="nc" id="L137">        executor.shutdownNow</span>
+<span class="nc" id="L138">        Thread.currentThread.interrupt()</span>
+    }
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
