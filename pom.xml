@@ -9,7 +9,7 @@
   <groupId>com.ganshane.stark</groupId>
   <artifactId>stark-project_2.12</artifactId>
   <packaging>pom</packaging>
-  <version>2.0.4-SNAPSHOT</version>
+  <version>2.0.4</version>
   <name>Stark Project</name>
   <description>Application Framework</description>
   <modules>
