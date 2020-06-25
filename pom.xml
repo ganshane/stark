@@ -16,11 +16,8 @@
     <module>stark-activerecord</module>
     <module>stark-activerecord-macro</module>
     <module>stark-activerecord-generator</module>
-    <!-- <module>stark-rpc</module> -->
     <module>stark-migration</module>
     <module>stark-utils</module>
-    <!--<module>stark-webservice</module>-->
-    <!-- <module>reward</module> -->
   </modules>
   <scm>
     <url>https://github.com/ganshane/stark</url>
@@ -53,11 +50,6 @@
       <dependency>
         <groupId>${project.groupId}</groupId>
         <artifactId>stark-utils_${scala-binary-version}</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>${project.groupId}</groupId>
-        <artifactId>stark-webservice${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
