@@ -22,6 +22,12 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     entityManager.persist(entity)
     entity
   }
+
+  @Transactional
+  override def merge[T](entity: T): T = {
+    entityManager.merge(entity)
+  }
+
   override def refresh[T](entity: T):Unit = {
     entityManager.refresh(entity)
   }

@@ -38,6 +38,9 @@ object ActiveRecord {
   def refresh[T](record:T)={
     entityService.refresh(record)
   }
+  def merge[T](record:T)={
+    entityService.merge(record)
+  }
 
   /**
    * Deletes the record in the database
@@ -132,6 +135,10 @@ trait ActiveRecord {
   @Transient
   def refresh(): Unit ={
     ActiveRecord.refresh(this)
+  }
+  @Transient
+  def merge(): Unit ={
+    ActiveRecord.merge(this)
   }
 }
 

@@ -17,6 +17,8 @@ trait EntityService {
 
   @Transactional
   def save[T](entity:T):T
+  @Transactional
+  def merge[T](entity:T):T
   def refresh[T](entity:T):Unit
   @Transactional
   def deleteById[T:ClassTag](id:Any)
