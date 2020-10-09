@@ -22,78 +22,84 @@ import scala.reflect.{ClassTag, classTag}
 <span class="fc" id="L22">    entityManager.persist(entity)</span>
 <span class="fc" id="L23">    entity</span>
   }
+
+  @Transactional
+  override def merge[T](entity: T): T = {
+<span class="nc" id="L28">    entityManager.merge(entity)</span>
+  }
+
   override def refresh[T](entity: T):Unit = {
-<span class="nc" id="L26">    entityManager.refresh(entity)</span>
+<span class="nc" id="L32">    entityManager.refresh(entity)</span>
   }
 
   @Transactional
   override def deleteById[T: ClassTag](id: Any): Unit = {
-<span class="nc" id="L31">    val entity = entityManager.find(classTag[T].runtimeClass, id)</span>
-<span class="nc" id="L32">    entityManager.remove(entity)</span>
+<span class="nc" id="L37">    val entity = entityManager.find(classTag[T].runtimeClass, id)</span>
+<span class="nc" id="L38">    entityManager.remove(entity)</span>
   }
 
   @Transactional
   override def delete[T](entity: T): Unit = {
-<span class="fc" id="L37">    entityManager.remove(entity)</span>
+<span class="fc" id="L43">    entityManager.remove(entity)</span>
   }
 
 
   @Transactional
   override def execute[T](func: EntityManager=&gt;Int): Int={
-<span class="fc" id="L43">    func(entityManager)</span>
+<span class="fc" id="L49">    func(entityManager)</span>
   }
 
   @Transactional
   override def deleteRelation[T](updateSupport: DynamicUpdateSupport[T]): Int = {
-<span class="fc" id="L48">    updateSupport match {</span>
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">      case relation:QlRelation[T]=&gt;</span>
-<span class="fc" id="L50">        var fullQl = &quot;delete from %s&quot;.format (relation.entityClazz.getSimpleName)</span>
-<span class="fc" id="L51">        relation.queryClause.foreach {</span>
-<span class="fc" id="L52">          fullQl += &quot; where %s&quot;.format (_)</span>
+<span class="fc" id="L54">    updateSupport match {</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">      case relation:QlRelation[T]=&gt;</span>
+<span class="fc" id="L56">        var fullQl = &quot;delete from %s&quot;.format (relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L57">        relation.queryClause.foreach {</span>
+<span class="fc" id="L58">          fullQl += &quot; where %s&quot;.format (_)</span>
         }
-<span class="fc" id="L54">        val query = entityManager.createQuery (fullQl)</span>
+<span class="fc" id="L60">        val query = entityManager.createQuery (fullQl)</span>
 
-<span class="fc" id="L56">        setQueryParameter (query, relation)</span>
+<span class="fc" id="L62">        setQueryParameter (query, relation)</span>
 
-<span class="fc" id="L58">        query.executeUpdate()</span>
+<span class="fc" id="L64">        query.executeUpdate()</span>
       case other =&gt;
-<span class="nc" id="L60">        throw new UnsupportedOperationException</span>
+<span class="nc" id="L66">        throw new UnsupportedOperationException</span>
     }
   }
 
   @Transactional
   override def updateRelation[T](updateObject: DynamicUpdateSupport[T]): Int = {
-<span class="fc" id="L66">    updateObject match {</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
-<span class="fc" id="L68">        var fullQl = &quot;update %s set&quot;.format(relation.entityClazz.getSimpleName)</span>
-<span class="fc" id="L69">        relation.updateQl.foreach {</span>
-<span class="fc" id="L70">          fullQl += &quot; %s&quot;.format(_)</span>
+<span class="fc" id="L72">    updateObject match {</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L74">        var fullQl = &quot;update %s set&quot;.format(relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L75">        relation.updateQl.foreach {</span>
+<span class="fc" id="L76">          fullQl += &quot; %s&quot;.format(_)</span>
         }
-<span class="fc" id="L72">        relation.queryClause.foreach {</span>
-<span class="fc" id="L73">          fullQl += &quot; where %s&quot;.format(_)</span>
+<span class="fc" id="L78">        relation.queryClause.foreach {</span>
+<span class="fc" id="L79">          fullQl += &quot; where %s&quot;.format(_)</span>
         }
 
-<span class="fc" id="L76">        val query = entityManager.createQuery(fullQl)</span>
+<span class="fc" id="L82">        val query = entityManager.createQuery(fullQl)</span>
 
-<span class="fc" id="L78">        var index: Int = setQueryParameter(query, relation)</span>
+<span class="fc" id="L84">        var index: Int = setQueryParameter(query, relation)</span>
 
-<span class="fc" id="L80">        relation.updateParams.foreach { value =&gt;</span>
-<span class="fc" id="L81">          query.setParameter(index, value)</span>
-<span class="fc" id="L82">          index += 1</span>
+<span class="fc" id="L86">        relation.updateParams.foreach { value =&gt;</span>
+<span class="fc" id="L87">          query.setParameter(index, value)</span>
+<span class="fc" id="L88">          index += 1</span>
         }
-<span class="fc" id="L84">        query.executeUpdate()</span>
+<span class="fc" id="L90">        query.executeUpdate()</span>
       case other =&gt;
-<span class="nc" id="L86">        throw new UnsupportedOperationException</span>
+<span class="nc" id="L92">        throw new UnsupportedOperationException</span>
     }
   }
 
   private def setQueryParameter[T](query:Query,relation: QlRelation[T]): Int = {
-<span class="fc" id="L91">    var index = 1</span>
-<span class="fc" id="L92">    relation.queryParams.foreach { value =&gt;</span>
-<span class="fc" id="L93">      query.setParameter(index, value)</span>
-<span class="fc" id="L94">      index += 1</span>
+<span class="fc" id="L97">    var index = 1</span>
+<span class="fc" id="L98">    relation.queryParams.foreach { value =&gt;</span>
+<span class="fc" id="L99">      query.setParameter(index, value)</span>
+<span class="fc" id="L100">      index += 1</span>
     }
-<span class="fc" id="L96">    index</span>
+<span class="fc" id="L102">    index</span>
   }
 
   /**
@@ -104,51 +110,51 @@ import scala.reflect.{ClassTag, classTag}
    * @return record stream
    */
   def find[T](queryObj:Relation[T]):Stream[T]={
-<span class="fc" id="L107">    val query = queryObj match {</span>
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
-<span class="fc" id="L109">        var fullQl = &quot;from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
-<span class="fc" id="L110">        relation.queryClause.foreach {</span>
-<span class="fc" id="L111">          fullQl += &quot; where %s&quot;.format(_)</span>
+<span class="fc" id="L113">    val query = queryObj match {</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L115">        var fullQl = &quot;from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L116">        relation.queryClause.foreach {</span>
+<span class="fc" id="L117">          fullQl += &quot; where %s&quot;.format(_)</span>
         }
-<span class="fc" id="L113">        relation.orderBy.foreach {</span>
-<span class="fc" id="L114">          fullQl += &quot; order by %s&quot;.format(_)</span>
+<span class="fc" id="L119">        relation.orderBy.foreach {</span>
+<span class="fc" id="L120">          fullQl += &quot; order by %s&quot;.format(_)</span>
         }
 
-<span class="fc" id="L117">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
-<span class="fc" id="L118">        val query = entityManager.createQuery(fullQl)</span>
+<span class="fc" id="L123">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
+<span class="fc" id="L124">        val query = entityManager.createQuery(fullQl)</span>
 
-<span class="fc" id="L120">        setQueryParameter(query, relation)</span>
+<span class="fc" id="L126">        setQueryParameter(query, relation)</span>
 
-<span class="fc" id="L122">        query</span>
+<span class="fc" id="L128">        query</span>
       case other=&gt;
-<span class="nc" id="L124">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
+<span class="nc" id="L130">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
     }
-<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (queryObj.offset &gt; -1)</span>
-<span class="fc" id="L127">      query.setFirstResult(queryObj.offset)</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (queryObj.limit &gt; -1)</span>
-<span class="fc" id="L129">      query.setMaxResults(queryObj.limit)</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">    if (queryObj.offset &gt; -1)</span>
+<span class="fc" id="L133">      query.setFirstResult(queryObj.offset)</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (queryObj.limit &gt; -1)</span>
+<span class="fc" id="L135">      query.setMaxResults(queryObj.limit)</span>
     //convert as scala stream
-<span class="fc" id="L131">    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream</span>
+<span class="fc" id="L137">    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream</span>
   }
 
   override def count[T](queryObj: Relation[T]): Long = {
-<span class="fc" id="L135">    val query = queryObj match {</span>
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
-<span class="fc" id="L137">        var fullQl = &quot;select count(*) from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
+<span class="fc" id="L141">    val query = queryObj match {</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">      case relation: QlRelation[T] =&gt;</span>
+<span class="fc" id="L143">        var fullQl = &quot;select count(*) from %s&quot;.format(relation.entityClazz.getSimpleName)</span>
 
-<span class="fc" id="L139">        relation.queryClause.foreach {</span>
-<span class="pc" id="L140">          fullQl += &quot; where %s&quot;.format(_)</span>
+<span class="fc" id="L145">        relation.queryClause.foreach {</span>
+<span class="pc" id="L146">          fullQl += &quot; where %s&quot;.format(_)</span>
         }
-<span class="fc" id="L142">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
-<span class="fc" id="L143">        val query = entityManager.createQuery(fullQl)</span>
+<span class="fc" id="L148">        logger.debug(&quot;ql:{}&quot;, fullQl)</span>
+<span class="fc" id="L149">        val query = entityManager.createQuery(fullQl)</span>
 
-<span class="fc" id="L145">        setQueryParameter(query, relation)</span>
+<span class="fc" id="L151">        setQueryParameter(query, relation)</span>
 
-<span class="fc" id="L147">        query</span>
+<span class="fc" id="L153">        query</span>
       case other=&gt;
-<span class="nc" id="L149">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
+<span class="nc" id="L155">        throw new UnsupportedOperationException(&quot;%s unspported&quot;.format(other))</span>
     }
-<span class="fc" id="L151">    query.getResultList.get(0).asInstanceOf[Long]</span>
+<span class="fc" id="L157">    query.getResultList.get(0).asInstanceOf[Long]</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

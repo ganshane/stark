@@ -38,6 +38,9 @@ import scala.reflect.{ClassTag, classTag}
   def refresh[T](record:T)={
 <span class="nc" id="L39">    entityService.refresh(record)</span>
   }
+  def merge[T](record:T)={
+<span class="nc" id="L42">    entityService.merge(record)</span>
+  }
 
   /**
    * Deletes the record in the database
@@ -45,16 +48,16 @@ import scala.reflect.{ClassTag, classTag}
    * record's primary key.
    */
   def delete[T](record:T): Unit ={
-<span class="fc" id="L48">    entityService.delete(record)</span>
+<span class="fc" id="L51">    entityService.delete(record)</span>
   }
   def updateRelation[T](relation: DynamicUpdateSupport[T]):Int={
-<span class="fc" id="L51">    entityService.updateRelation(relation)</span>
+<span class="fc" id="L54">    entityService.updateRelation(relation)</span>
   }
   def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int={
-<span class="fc" id="L54">    entityService.deleteRelation(relation)</span>
+<span class="fc" id="L57">    entityService.deleteRelation(relation)</span>
   }
   def find[T:ClassTag](key:Any):T={
-<span class="fc" id="L57">    entityManager.find(classTag[T].runtimeClass,key).asInstanceOf[T]</span>
+<span class="fc" id="L60">    entityManager.find(classTag[T].runtimeClass,key).asInstanceOf[T]</span>
   }
 
   /**
@@ -65,22 +68,22 @@ import scala.reflect.{ClassTag, classTag}
    * @return record stream
    */
   private[services] def find[T](relation:Relation[T]):Stream[T]={
-<span class="fc" id="L68">    entityService.find(relation)</span>
+<span class="fc" id="L71">    entityService.find(relation)</span>
   }
   private[services] def count[T](relation:Relation[T]):Long={
-<span class="fc" id="L71">    entityService.count(relation)</span>
+<span class="fc" id="L74">    entityService.count(relation)</span>
   }
   def executeInTransaction(function: (EntityManager) =&gt; Int): Int ={
-<span class="fc" id="L74">    entityService.execute(function)</span>
+<span class="fc" id="L77">    entityService.execute(function)</span>
   }
 
   /**
    * find some service using ObjectLocator
    */
   private def getService[T:ClassTag]:T={
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    if(objectLocator == null)</span>
-<span class="nc" id="L82">      throw new IllegalStateException(&quot;object locator is null&quot;)</span>
-<span class="fc" id="L83">    objectLocator.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">    if(objectLocator == null)</span>
+<span class="nc" id="L85">      throw new IllegalStateException(&quot;object locator is null&quot;)</span>
+<span class="fc" id="L86">    objectLocator.getBean(classTag[T].runtimeClass.asInstanceOf[Class[T]])</span>
   }
   /**
    * find_by and where function
@@ -90,7 +93,7 @@ import scala.reflect.{ClassTag, classTag}
    * @return Relation object
    */
   def internalWhere[A](clazz:Class[A],primaryKey:String,ql:String)(params:Any*): QlRelation[A]={
-<span class="fc" id="L93">    new QlRelation[A](clazz,primaryKey,ql,params.toSeq)</span>
+<span class="fc" id="L96">    new QlRelation[A](clazz,primaryKey,ql,params.toSeq)</span>
   }
 
   /**
@@ -101,48 +104,52 @@ import scala.reflect.{ClassTag, classTag}
     * @return result
     */
   def deleteByQL(ql:String,parameters:Any*): Int={
-<span class="nc" id="L104">    val query = entityManager.createQuery(ql)</span>
-<span class="nc" id="L105">    var i = 1</span>
-<span class="nc" id="L106">    parameters.foreach{value=&gt;</span>
-<span class="nc" id="L107">      query.setParameter(i,value)</span>
-<span class="nc" id="L108">      i += 1</span>
+<span class="nc" id="L107">    val query = entityManager.createQuery(ql)</span>
+<span class="nc" id="L108">    var i = 1</span>
+<span class="nc" id="L109">    parameters.foreach{value=&gt;</span>
+<span class="nc" id="L110">      query.setParameter(i,value)</span>
+<span class="nc" id="L111">      i += 1</span>
     }
-<span class="nc" id="L110">    query.executeUpdate()</span>
+<span class="nc" id="L113">    query.executeUpdate()</span>
   }
   def createCriteriaRelation[A:ClassTag](clazz:Class[A],primaryKey:String,params:Condition*):DSLSelectionQuery[A,A]={
-<span class="fc" id="L113">    val where = DSL.select[A].where</span>
-<span class="fc" id="L114">    params.foreach(p=&gt;where.apply(p))</span>
+<span class="fc" id="L116">    val where = DSL.select[A].where</span>
+<span class="fc" id="L117">    params.foreach(p=&gt;where.apply(p))</span>
 
-<span class="fc" id="L116">    where</span>
+<span class="fc" id="L119">    where</span>
   }
 }
 
 /**
  * ActiveRecord trait
  */
-<span class="fc" id="L123">trait ActiveRecord {</span>
+<span class="fc" id="L126">trait ActiveRecord {</span>
   @Transient
   def save():this.type = {
-<span class="fc" id="L126">    ActiveRecord.save(this)</span>
+<span class="fc" id="L129">    ActiveRecord.save(this)</span>
   }
   @Transient
   def delete(): Unit ={
-<span class="fc" id="L130">    ActiveRecord.delete(this)</span>
+<span class="fc" id="L133">    ActiveRecord.delete(this)</span>
   }
   @Transient
   def refresh(): Unit ={
-<span class="nc" id="L134">    ActiveRecord.refresh(this)</span>
+<span class="nc" id="L137">    ActiveRecord.refresh(this)</span>
+  }
+  @Transient
+  def merge(): Unit ={
+<span class="nc" id="L141">    ActiveRecord.merge(this)</span>
   }
 }
 
-<span class="fc" id="L138">abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extends Dynamic{</span>
+<span class="fc" id="L145">abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extends Dynamic{</span>
   /**
    * get model class and primary key
    */
 
-<span class="fc" id="L143">  val clazz = clazzTag.runtimeClass.asInstanceOf[Class[A]]</span>
-<span class="fc" id="L144">  protected val field = clazz.getDeclaredFields.find(_.isAnnotationPresent(classOf[Id]))</span>
-<span class="pc" id="L145">  val primaryKey = field.getOrElse(throw new IllegalStateException(&quot;primary key is null&quot;)).getName</span>
+<span class="fc" id="L150">  val clazz = clazzTag.runtimeClass.asInstanceOf[Class[A]]</span>
+<span class="fc" id="L151">  protected val field = clazz.getDeclaredFields.find(_.isAnnotationPresent(classOf[Id]))</span>
+<span class="pc" id="L152">  val primaryKey = field.getOrElse(throw new IllegalStateException(&quot;primary key is null&quot;)).getName</span>
 
   /**
    * where method
@@ -167,13 +174,13 @@ import scala.reflect.{ClassTag, classTag}
   }
   */
   def count ={
-<span class="fc" id="L170">    DSL.select[A](Field.countField)</span>
+<span class="fc" id="L177">    DSL.select[A](Field.countField)</span>
   }
   def update:UpdateStep[A]={
-<span class="fc" id="L173">    DSL.update[A]</span>
+<span class="fc" id="L180">    DSL.update[A]</span>
   }
   def delete:DeleteStep[A]={
-<span class="fc" id="L176">    DSL.delete[A]</span>
+<span class="fc" id="L183">    DSL.delete[A]</span>
   }
 
   /**
@@ -196,7 +203,7 @@ import scala.reflect.{ClassTag, classTag}
     * @return Select step
     */
   def select(fields:SelectionField*):SelectStep[A,Array[Any]]={
-<span class="nc" id="L199">    DSL.select(fields:_*)</span>
+<span class="nc" id="L206">    DSL.select(fields:_*)</span>
   }
 
   /**
@@ -205,7 +212,7 @@ import scala.reflect.{ClassTag, classTag}
     * @return select step
     */
   def where:DSLSelectionQuery[A,A] ={
-<span class="fc" id="L208">    DSL.select[A].where</span>
+<span class="fc" id="L215">    DSL.select[A].where</span>
   }
   /**
    * whereByJPQL(ql,parameters)
@@ -216,11 +223,11 @@ import scala.reflect.{ClassTag, classTag}
    * @return Realtion Object
    */
   def whereByJPQL(ql:String, parameters:Any*): QlRelation[A]={
-<span class="fc" id="L219">    ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+<span class="fc" id="L226">    ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
   }
   def countByJPQL(ql:String,parameters:Any*): Long ={
-<span class="fc" id="L222">    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
-<span class="fc" id="L223">    qlRelation.count</span>
+<span class="fc" id="L229">    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+<span class="fc" id="L230">    qlRelation.count</span>
   }
 
 
@@ -231,7 +238,7 @@ import scala.reflect.{ClassTag, classTag}
    * @return entity object
    */
   def find(key:Any):A={
-<span class="fc" id="L234">    ActiveRecord.find[A](key)</span>
+<span class="fc" id="L241">    ActiveRecord.find[A](key)</span>
   }
 
   /**
@@ -241,7 +248,7 @@ import scala.reflect.{ClassTag, classTag}
    * @return entity object
    */
   def findOption(key:Any):Option[A]={
-<span class="nc" id="L244">    internalFind(key).headOption</span>
+<span class="nc" id="L251">    internalFind(key).headOption</span>
   }
 
   /**
@@ -251,39 +258,39 @@ import scala.reflect.{ClassTag, classTag}
    * @return query object
    */
   def find(keys:Array[Any]):QlRelation[A]={
-<span class="nc" id="L254">    internalFind(keys)</span>
+<span class="nc" id="L261">    internalFind(keys)</span>
   }
   private def internalFind(key:Any):QlRelation[A]={
-<span class="pc" id="L257">    key match{</span>
-<span class="pc bpc" id="L258" title="4 of 8 branches missed.">      case _:Int|_:String|_:Long=&gt;</span>
-<span class="nc" id="L259">        new QlRelation[A](clazz,primaryKey,&quot;%s=?1&quot;.format(primaryKey),Seq(key))</span>
-<span class="pc bpc" id="L260" title="1 of 2 branches missed.">      case keys:Array[_] =&gt;</span>
-<span class="nc" id="L261">        new QlRelation[A](clazz,primaryKey,&quot;%s IN (?1)&quot;.format(primaryKey),Seq(key))</span>
-<span class="pc bpc" id="L262" title="1 of 2 branches missed.">      case None =&gt;</span>
-<span class="fc" id="L263">        new QlRelation[A](clazz,primaryKey,null,Seq())</span>
+<span class="pc" id="L264">    key match{</span>
+<span class="pc bpc" id="L265" title="4 of 8 branches missed.">      case _:Int|_:String|_:Long=&gt;</span>
+<span class="nc" id="L266">        new QlRelation[A](clazz,primaryKey,&quot;%s=?1&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">      case keys:Array[_] =&gt;</span>
+<span class="nc" id="L268">        new QlRelation[A](clazz,primaryKey,&quot;%s IN (?1)&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">      case None =&gt;</span>
+<span class="fc" id="L270">        new QlRelation[A](clazz,primaryKey,null,Seq())</span>
     }
   }
   //retrieving single object
-<span class="fc" id="L267">  def take:A= take(1).head</span>
+<span class="fc" id="L274">  def take:A= take(1).head</span>
   def take(n:Int):QlRelation[A]={
-<span class="fc" id="L269">    internalFind(None).limit(n)</span>
+<span class="fc" id="L276">    internalFind(None).limit(n)</span>
   }
-<span class="nc" id="L271">  def first:A= first(1).head</span>
-<span class="nc" id="L272">  def first(n:Int=1):QlRelation[A]= {</span>
-<span class="nc" id="L273">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
+<span class="nc" id="L278">  def first:A= first(1).head</span>
+<span class="nc" id="L279">  def first(n:Int=1):QlRelation[A]= {</span>
+<span class="nc" id="L280">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
   }
-<span class="nc" id="L275">  def last:A= last(1).head</span>
+<span class="nc" id="L282">  def last:A= last(1).head</span>
   def last(n:Int):QlRelation[A]= {
-<span class="nc" id="L277">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
+<span class="nc" id="L284">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
   }
   def all:QlRelation[A]= {
-<span class="fc" id="L280">    internalFind(None)</span>
+<span class="fc" id="L287">    internalFind(None)</span>
   }
   def asc(fields:String*):QlRelation[A]={
-<span class="nc" id="L283">    internalFind(None).asc(fields:_*)</span>
+<span class="nc" id="L290">    internalFind(None).asc(fields:_*)</span>
   }
   def desc(fields:String*):QlRelation[A]={
-<span class="nc" id="L286">    internalFind(None).desc(fields:_*)</span>
+<span class="nc" id="L293">    internalFind(None).desc(fields:_*)</span>
   }
 
   /*

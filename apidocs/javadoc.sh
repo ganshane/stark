@@ -1,1 +1,0 @@
-/usr/lib/jvm/java-7-oracle/jre/../bin/javadoc -J-Xmx512m -J-Xms128m @options @packages
