@@ -73,7 +73,7 @@ abstract trait ExpiredCallback[K, V] {
   }
 
   def rotate: Option[java.util.Map[K, V]] = {
-<span class="pc bpc" id="L76" title="1 of 2 branches missed.">    if (flag.compareAndSet(false, true)) {</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">    if (flag.compareAndSet(false, true)) {</span>
       try {
 <span class="fc" id="L78">        val dead: java.util.Map[K, V] = _buckets.removeLast()</span>
 <span class="fc" id="L79">        _buckets.addFirst(new ConcurrentHashMap[K, V])</span>
@@ -89,7 +89,7 @@ abstract trait ExpiredCallback[K, V] {
 <span class="fc" id="L89">        flag.set(false)</span>
       }
     }
-<span class="nc" id="L92">    None</span>
+<span class="fc" id="L92">    None</span>
   }
 
   def containsKey(key: K): Boolean = {

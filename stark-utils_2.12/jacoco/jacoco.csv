@@ -88,7 +88,7 @@ Stark Utils Support,stark.utils.services,StarkUtils,68,0,0,0,0,0,18,0,18,0
 Stark Utils Support,stark.utils.services,ZkClientSupport.PermanentWatch.,30,0,0,0,1,0,8,0,8,0
 Stark Utils Support,stark.utils.services,XmlLoader.,272,0,12,0,48,0,20,0,14,0
 Stark Utils Support,stark.utils.services,JettyServerCreator.OverflowingSynchronousQueue,45,0,4,0,8,0,8,0,6,0
-Stark Utils Support,stark.utils.services,RotatingMap,122,152,18,8,29,31,17,14,6,12
+Stark Utils Support,stark.utils.services,RotatingMap,120,154,17,9,28,32,16,15,6,12
 Stark Utils Support,stark.utils.services.algorithm,ECC,469,0,18,0,75,0,21,0,12,0
 Stark Utils Support,stark.utils.services.algorithm,Tools,370,0,26,0,70,0,28,0,15,0
 Stark Utils Support,stark.utils.services.algorithm,RSA,368,0,20,0,66,0,17,0,7,0
