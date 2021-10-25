@@ -35,35 +35,29 @@ object Condition{
   }
   def eq[T](field:Field[T],value:T): Condition ={
     new PredicateCondition(
-      DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)
+      value match{
+        case v:Field[_] =>
+          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName), findFieldPath(v.fieldName))
+        case _ =>
+          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)
+      }
     )
   }
-  def eq[T](field:Field[T],value:Field[T]): Condition ={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName), findFieldPath(value.fieldName))
-    )
-  }
-  def notEq[T](field:Field[T],value:Field[T]):Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.notEqual(
-        findFieldPath(field.fieldName),
-        findFieldPath(value.fieldName)
-      )
-    )
-  }
-  def notEq[T](field:Field[T],value:T):Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)
-    )
-  }
-  def gt[T](field:Field[T],value:Field[T]): Condition={
-    new PredicateCondition(
-          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),findFieldPath(value.fieldName))
-    )
-  }
-  def gt[T](field:Field[T],value:T): Condition={
+  def notEq[T](field:Field[T],value:Any):Condition={
     new PredicateCondition(
       value match{
+        case v:Field[_]=>
+          DSL.dslContext.value.builder.notEqual( findFieldPath(field.fieldName), findFieldPath(v.fieldName))
+        case _ =>
+          DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)
+      }
+    )
+  }
+  def gt[T](field:Field[T],value:Any): Condition={
+    new PredicateCondition(
+      value match{
+        case v:Field[_] =>
+          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
         case v:Number =>
           DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)
         case other:Comparable[Any] =>
@@ -71,14 +65,11 @@ object Condition{
       }
     )
   }
-  def ge[T](field:Field[T],value:Field[T]): Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),findFieldPath(value.fieldName))
-    )
-  }
-  def ge[T](field:Field[T],value:T): Condition={
+  def ge[T](field:Field[T],value:Any): Condition={
     new PredicateCondition(
       value match{
+        case v:Field[_] =>
+          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
         case v:Number =>
           DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)
         case other:Comparable[Any] =>
@@ -87,14 +78,11 @@ object Condition{
       }
     )
   }
-  def lt[T](field:Field[T],value:Field[T]): Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),findFieldPath(value.fieldName))
-    )
-  }
   def lt[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
       value match {
+        case v:Field[_]=>
+          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
         case v:Number =>
           DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)
         case other:Comparable[Any] =>
@@ -103,14 +91,10 @@ object Condition{
     )
   }
 
-  def le[T](field:Field[T],value:Field[T]): Condition={
-    new PredicateCondition(
-      DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),findFieldPath(value.fieldName))
-    )
-  }
   def le[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
       value match {
+        case v:Field[_]=> DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
         case v: Number =>
           DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)
         case other: Comparable[Any] =>
