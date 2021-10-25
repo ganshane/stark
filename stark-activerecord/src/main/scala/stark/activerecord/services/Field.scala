@@ -29,6 +29,18 @@ object Field {
 trait Field[+A] extends SelectionField{
   val fieldName:String
   def === [B >: A ](value:B): Condition
+  def === (value:Field[Any]): Condition
+
+  def < [B >: A](value:B): Condition
+  def <= [B >: A](value:B): Condition
+  def > [B >: A](value:B): Condition
+  def >= [B >: A](value:B): Condition
+
+  def < (value:Field[Any]): Condition
+  def <= (value:Field[Any]): Condition
+  def > (value:Field[Any]): Condition
+  def >= (value:Field[Any]): Condition
+
   def !==[B>:A](value : B)                                 : Condition
   def !==[B >: A](value : Field[B])                          : Condition
   def <>[B>:A](value : B)= !==(value)
@@ -55,6 +67,20 @@ private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extend
   override def ===[B >: T](value: B): Condition = {
     Condition.eq(this,value)
   }
+
+  override def ===(value: Field[Any]): Condition = {
+    Condition.eq(this,value)
+  }
+  override def <[B >: T](value: B): Condition = Condition.lt(this,value)
+  override def <=[B >: T](value: B): Condition = Condition.le(this,value)
+  override def >[B >: T](value: B): Condition = Condition.gt(this,value)
+  override def >=[B >: T](value: B): Condition = Condition.ge(this,value)
+
+  override def <(value: Field[Any]): Condition = Condition.lt(this,value)
+  override def <=(value: Field[Any]): Condition = Condition.le(this,value)
+  override def >(value: Field[Any]): Condition = Condition.gt(this,value)
+  override def >=(value: Field[Any]): Condition = Condition.ge(this,value)
+
   override def !==[B >: T](value: B): Condition = Condition.notEq(this,value)
   override def !==[B >: T](value: Field[B]): Condition = Condition.notEq(this,value)
 
@@ -104,12 +130,6 @@ private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extend
   }
 }
 class NumericField[T](field:Field[T]){
-  def >(value:T):Condition={
-    Condition.gt(field,value)
-  }
-  def >=(value: T): Condition = Condition.ge(field,value)
-  def <(value: T): Condition = Condition.lt(field,value)
-  def <=(value: T): Condition = Condition.le(field,value)
   def avg:SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
@@ -148,14 +168,17 @@ class StringField(field:Field[String]){
   def notLike(value: String): Condition = Condition.notLike(field,value)
 }
 class DateTimeField(field:Field[DateTime]){
+  /*
   def >(value:DateTime):Condition={
     Condition.gt(field,value)
   }
   def <(value:DateTime):Condition={
     Condition.lt(field,value)
   }
+   */
 }
 class EnumerationField[T<: Enumeration#Value](field:Field[T]){
+  /*
   def >(value:T):Condition={
     Condition.gt(field,value)
   }
@@ -168,4 +191,5 @@ class EnumerationField[T<: Enumeration#Value](field:Field[T]){
   def <= (value:T):Condition={
     Condition.le(field,value)
   }
+   */
 }

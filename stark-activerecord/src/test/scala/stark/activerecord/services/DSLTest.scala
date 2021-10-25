@@ -12,6 +12,11 @@ import scala.language.postfixOps
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
+  @Test //测试引用字段
+  def test_fieldRef:Unit={
+    ModelA.where(ModelA.seq === ModelA.l).toList
+    ModelA.where(ModelA.seq > ModelA.l).toList
+  }
   @Test
   def test_simpleJoin: Unit = {
 
