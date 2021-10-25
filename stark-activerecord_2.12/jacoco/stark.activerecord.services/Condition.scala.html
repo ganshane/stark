@@ -35,131 +35,115 @@ import scala.language.implicitConversions
   }
   def eq[T](field:Field[T],value:T): Condition ={
 <span class="fc" id="L37">    new PredicateCondition(</span>
-<span class="fc" id="L38">      DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)</span>
+<span class="fc" id="L38">      value match{</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        case v:Field[_] =&gt;</span>
+<span class="fc" id="L40">          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName), findFieldPath(v.fieldName))</span>
+        case _ =&gt;
+<span class="fc" id="L42">          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)</span>
+      }
     )
   }
-  def eq[T](field:Field[T],value:Field[T]): Condition ={
-<span class="fc" id="L42">    new PredicateCondition(</span>
-<span class="fc" id="L43">      DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName), findFieldPath(value.fieldName))</span>
-    )
-  }
-  def notEq[T](field:Field[T],value:Field[T]):Condition={
+  def notEq[T](field:Field[T],value:Any):Condition={
 <span class="nc" id="L47">    new PredicateCondition(</span>
-<span class="nc" id="L48">      DSL.dslContext.value.builder.notEqual(</span>
-<span class="nc" id="L49">        findFieldPath(field.fieldName),</span>
-<span class="nc" id="L50">        findFieldPath(value.fieldName)</span>
-      )
-    )
-  }
-  def notEq[T](field:Field[T],value:T):Condition={
-<span class="nc" id="L55">    new PredicateCondition(</span>
-<span class="nc" id="L56">      DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)</span>
-    )
-  }
-  def gt[T](field:Field[T],value:Field[T]): Condition={
-<span class="fc" id="L60">    new PredicateCondition(</span>
-<span class="fc" id="L61">          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),findFieldPath(value.fieldName))</span>
-    )
-  }
-  def gt[T](field:Field[T],value:T): Condition={
-<span class="fc" id="L65">    new PredicateCondition(</span>
-<span class="pc" id="L66">      value match{</span>
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
-<span class="fc" id="L68">          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
-<span class="nc" id="L70">          DSL.dslContext.value.builder.greaterThan(findFieldPath(field.fieldName),other)</span>
+<span class="nc" id="L48">      value match{</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        case v:Field[_]=&gt;</span>
+<span class="nc" id="L50">          DSL.dslContext.value.builder.notEqual( findFieldPath(field.fieldName), findFieldPath(v.fieldName))</span>
+        case _ =&gt;
+<span class="nc" id="L52">          DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)</span>
       }
     )
   }
-  def ge[T](field:Field[T],value:Field[T]): Condition={
-<span class="nc" id="L75">    new PredicateCondition(</span>
-<span class="nc" id="L76">      DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),findFieldPath(value.fieldName))</span>
-    )
-  }
-  def ge[T](field:Field[T],value:T): Condition={
-<span class="nc" id="L80">    new PredicateCondition(</span>
-<span class="nc" id="L81">      value match{</span>
-<span class="nc bnc" id="L82" title="All 2 branches missed.">        case v:Number =&gt;</span>
-<span class="nc" id="L83">          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)</span>
-<span class="nc bnc" id="L84" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
-<span class="nc" id="L85">          val expression:Path[Comparable[Any]] = findFieldPath(field.fieldName) //.as(classOf[T])</span>
-<span class="nc" id="L86">          DSL.dslContext.value.builder.greaterThanOrEqualTo(expression,other)</span>
+  def gt[T](field:Field[T],value:Any): Condition={
+<span class="fc" id="L57">    new PredicateCondition(</span>
+<span class="pc" id="L58">      value match{</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        case v:Field[_] =&gt;</span>
+<span class="fc" id="L60">          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
+<span class="fc" id="L62">          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L64">          DSL.dslContext.value.builder.greaterThan(findFieldPath(field.fieldName),other)</span>
       }
     )
   }
-  def lt[T](field:Field[T],value:Field[T]): Condition={
-<span class="nc" id="L91">    new PredicateCondition(</span>
-<span class="nc" id="L92">      DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),findFieldPath(value.fieldName))</span>
+  def ge[T](field:Field[T],value:Any): Condition={
+<span class="nc" id="L69">    new PredicateCondition(</span>
+<span class="nc" id="L70">      value match{</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        case v:Field[_] =&gt;</span>
+<span class="nc" id="L72">          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),findFieldPath(v.fieldName))</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        case v:Number =&gt;</span>
+<span class="nc" id="L74">          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L76">          val expression:Path[Comparable[Any]] = findFieldPath(field.fieldName) //.as(classOf[T])</span>
+<span class="nc" id="L77">          DSL.dslContext.value.builder.greaterThanOrEqualTo(expression,other)</span>
+      }
     )
   }
   def lt[T](field:Field[T],value:T): Condition={
-<span class="fc" id="L96">    new PredicateCondition(</span>
-<span class="pc" id="L97">      value match {</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
-<span class="fc" id="L99">          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
-<span class="nc" id="L101">          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),other)</span>
+<span class="fc" id="L82">    new PredicateCondition(</span>
+<span class="pc" id="L83">      value match {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        case v:Field[_]=&gt;</span>
+<span class="nc" id="L85">          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">        case v:Number =&gt;</span>
+<span class="fc" id="L87">          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        case other:Comparable[Any] =&gt;</span>
+<span class="nc" id="L89">          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),other)</span>
       }
     )
   }
 
-  def le[T](field:Field[T],value:Field[T]): Condition={
-<span class="nc" id="L107">    new PredicateCondition(</span>
-<span class="nc" id="L108">      DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),findFieldPath(value.fieldName))</span>
-    )
-  }
   def le[T](field:Field[T],value:T): Condition={
-<span class="nc" id="L112">    new PredicateCondition(</span>
-<span class="nc" id="L113">      value match {</span>
-<span class="nc bnc" id="L114" title="All 2 branches missed.">        case v: Number =&gt;</span>
-<span class="nc" id="L115">          DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)</span>
-<span class="nc bnc" id="L116" title="All 2 branches missed.">        case other: Comparable[Any] =&gt;</span>
-<span class="nc" id="L117">          DSL.dslContext.value.builder.lessThanOrEqualTo(findFieldPath(field.fieldName), other)</span>
+<span class="nc" id="L95">    new PredicateCondition(</span>
+<span class="nc" id="L96">      value match {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        case v:Field[_]=&gt; DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),findFieldPath(v.fieldName))</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        case v: Number =&gt;</span>
+<span class="nc" id="L99">          DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        case other: Comparable[Any] =&gt;</span>
+<span class="nc" id="L101">          DSL.dslContext.value.builder.lessThanOrEqualTo(findFieldPath(field.fieldName), other)</span>
       }
     )
   }
   def notNull[T](field:Field[T]):Condition={
-<span class="nc" id="L122">    new PredicateCondition(</span>
-<span class="nc" id="L123">      DSL.dslContext.value.builder.isNotNull(findFieldPath(field.fieldName))</span>
+<span class="nc" id="L106">    new PredicateCondition(</span>
+<span class="nc" id="L107">      DSL.dslContext.value.builder.isNotNull(findFieldPath(field.fieldName))</span>
     )
   }
   def isNull[T](field:Field[T]):Condition={
-<span class="fc" id="L127">    new PredicateCondition(</span>
-<span class="fc" id="L128">      DSL.dslContext.value.builder.isNull(findFieldPath(field.fieldName))</span>
+<span class="fc" id="L111">    new PredicateCondition(</span>
+<span class="fc" id="L112">      DSL.dslContext.value.builder.isNull(findFieldPath(field.fieldName))</span>
     )
   }
   def between[T&lt;:Comparable[T]](field:Field[T],v1:T,v2:T):Condition={
-<span class="nc" id="L132">    new PredicateCondition(</span>
-<span class="nc" id="L133">      DSL.dslContext.value.builder.between(findFieldPath[T](field.fieldName),v1,v2)</span>
+<span class="nc" id="L116">    new PredicateCondition(</span>
+<span class="nc" id="L117">      DSL.dslContext.value.builder.between(findFieldPath[T](field.fieldName),v1,v2)</span>
     )
   }
   def like[T](field:Field[T],value:String):Condition={
-<span class="nc" id="L137">    new PredicateCondition(</span>
-<span class="nc" id="L138">      DSL.dslContext.value.builder.like(findFieldPath[String](field.fieldName),value)</span>
+<span class="nc" id="L121">    new PredicateCondition(</span>
+<span class="nc" id="L122">      DSL.dslContext.value.builder.like(findFieldPath[String](field.fieldName),value)</span>
     )
   }
   def notLike[T](field:Field[T],value:String):Condition={
-<span class="nc" id="L142">    new PredicateCondition(</span>
-<span class="nc" id="L143">      DSL.dslContext.value.builder.notLike(findFieldPath[String](field.fieldName),value)</span>
+<span class="nc" id="L126">    new PredicateCondition(</span>
+<span class="nc" id="L127">      DSL.dslContext.value.builder.notLike(findFieldPath[String](field.fieldName),value)</span>
     )
   }
 }
-<span class="fc" id="L147">trait Condition{</span>
+<span class="fc" id="L131">trait Condition{</span>
   def and(condition: Condition):Condition
   def or(condition: Condition):Condition
   def or(conditionFun: ()=&gt;Condition):Condition
   def toPredicate:Predicate
 }
-<span class="fc" id="L153">class PredicateCondition(predicateFun: =&gt; Predicate) extends Condition{</span>
-<span class="pc bpc" id="L154" title="2 of 4 branches missed.">  private lazy val expression:Predicate = predicateFun</span>
+<span class="fc" id="L137">class PredicateCondition(predicateFun: =&gt; Predicate) extends Condition{</span>
+<span class="pc bpc" id="L138" title="2 of 4 branches missed.">  private lazy val expression:Predicate = predicateFun</span>
   override def and(condition: Condition): Condition =
-<span class="nc" id="L156">    DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)</span>
+<span class="nc" id="L140">    DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)</span>
   override def or(condition: Condition): Condition =
-<span class="fc" id="L158">    DSL.dslContext.value.builder.or(Seq[Predicate](expression,condition):_*)</span>
+<span class="fc" id="L142">    DSL.dslContext.value.builder.or(Seq[Predicate](expression,condition):_*)</span>
 
 
-<span class="nc" id="L161">  override def or(conditionFun: () =&gt; Condition): Condition = ???</span>
+<span class="nc" id="L145">  override def or(conditionFun: () =&gt; Condition): Condition = ???</span>
 
-<span class="fc" id="L163">  override def toPredicate: Predicate = expression</span>
+<span class="fc" id="L147">  override def toPredicate: Predicate = expression</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

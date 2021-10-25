@@ -20,7 +20,7 @@ Stark Activerecord,stark.activerecord.services,Field.,20,17,0,0,4,4,4,4,4,4
 Stark Activerecord,stark.activerecord.services,QlRelation,117,312,5,7,1,30,21,35,16,34
 Stark Activerecord,stark.activerecord.services,DSL.JoinQueryContext,112,14,25,0,0,1,25,2,12,2
 Stark Activerecord,stark.activerecord.services,Fetch,6,151,1,9,0,28,1,14,0,10
-Stark Activerecord,stark.activerecord.services,Condition.,357,218,15,5,38,28,31,21,22,20
+Stark Activerecord,stark.activerecord.services,Condition.,362,229,22,10,35,30,27,19,14,16
 Stark Activerecord,stark.activerecord.services,OrderByClause,15,72,1,3,0,10,1,4,0,3
 Stark Activerecord,stark.activerecord.services,Field..anon.new SelectionField() {...},0,14,0,0,0,3,0,2,0,2
 Stark Activerecord,stark.activerecord.services,DSL.,32,384,8,32,0,29,8,41,0,29
@@ -49,6 +49,6 @@ Stark Activerecord,stark.activerecord.services,DynamicUpdateSupport,0,1,0,0,0,1,
 Stark Activerecord,stark.activerecord.services,DateTimeField,3,0,0,0,2,0,1,0,1,0
 Stark Activerecord,stark.activerecord.services,ConditionClause,23,204,0,0,0,21,2,18,2,18
 Stark Activerecord,stark.activerecord.services,UtilSupport,0,27,0,0,0,5,0,4,0,4
-Stark Activerecord,stark.activerecord.services,Condition,82,0,0,0,0,0,17,0,17,0
+Stark Activerecord,stark.activerecord.services,Condition,57,0,0,0,0,0,12,0,12,0
 Stark Activerecord,stark.activerecord.services,DSL.QueryContext.,36,0,2,0,1,0,7,0,6,0
 Stark Activerecord,stark.activerecord.services,LimitClause,0,17,0,0,0,7,0,3,0,3

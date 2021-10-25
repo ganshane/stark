@@ -36,19 +36,19 @@ import scala.util.control.NonFatal
 <span class="fc" id="L36">      val selfWatchers = nodeDataWatcher.get(event.getPath)</span>
 <span class="pc bpc" id="L37" title="1 of 2 branches missed.">      if (selfWatchers == null) return</span>
 <span class="fc" id="L38">      event.getType match {</span>
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        case EventType.NodeDataChanged =&gt;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        case EventType.NodeDataChanged =&gt;</span>
 <span class="fc" id="L40">          val data = internalWatchNodeData(event.getPath, this)</span>
 <span class="fc" id="L41">          selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
 <span class="fc" id="L42">            x.handleDataChanged(data)</span>
           })
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        case EventType.NodeDeleted =&gt;</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        case EventType.NodeDeleted =&gt;</span>
           try {
-<span class="nc" id="L46">            selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
-<span class="nc" id="L47">              x.handleNodeDeleted()</span>
+<span class="fc" id="L46">            selfWatchers.watchers.foreach(x =&gt; runInNotExceptionThrown {</span>
+<span class="fc" id="L47">              x.handleNodeDeleted()</span>
             })
           } finally {
             //节点已经删除，同时删除此节点相关的watcher
-<span class="nc" id="L51">            nodeDataWatcher.remove(event.getPath)</span>
+<span class="fc" id="L51">            nodeDataWatcher.remove(event.getPath)</span>
           }
         case other =&gt;
 <span class="nc" id="L54">          debug(&quot;other event:{}&quot;, other)</span>
@@ -189,10 +189,10 @@ import scala.util.control.NonFatal
 <span class="fc" id="L189">      val data = zkClient.getData.usingWatcher(curatorWatcher).forPath(path)</span>
 <span class="pc bpc" id="L190" title="2 of 4 branches missed.">      if (data == null || data.length == 0) None else Some(data)</span>
     } catch {
-<span class="pc bpc" id="L192" title="1 of 2 branches missed.">      case NonFatal(e) =&gt;</span>
-<span class="fc" id="L193">        warn(&quot;fail to watch node data,will retry,msg:{}&quot;, e.getMessage)</span>
-<span class="fc" id="L194">        failedNodeDataWatcher.add(path)</span>
-<span class="fc" id="L195">        None</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">      case NonFatal(e) =&gt;</span>
+<span class="nc" id="L193">        warn(&quot;fail to watch node data,will retry,msg:{}&quot;, e.getMessage)</span>
+<span class="nc" id="L194">        failedNodeDataWatcher.add(path)</span>
+<span class="nc" id="L195">        None</span>
     }
   }
 
