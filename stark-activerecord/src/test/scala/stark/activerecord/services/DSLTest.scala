@@ -38,9 +38,13 @@ class DSLTest extends BaseActiveRecordTestCase{
     val modelA = new ModelA
     modelA.name = "cctv"
     modelA.i = 1234
+    modelA.l = 1234L
     modelA.save
 
     Assert.assertEquals(1234L,select[ModelA](ModelA.i.sum) head)
+    val tmpL:Any = select[ModelA](ModelA.l.sum) head
+
+    Assert.assertEquals(1234L,tmpL.asInstanceOf[Long])
     Assert.assertEquals(1234,select[ModelA](ModelA.i.max) head)
     Assert.assertEquals(1234,select[ModelA](ModelA.i.min) head)
     Assert.assertEquals(1234.0,select[ModelA](ModelA.i.avg) head)

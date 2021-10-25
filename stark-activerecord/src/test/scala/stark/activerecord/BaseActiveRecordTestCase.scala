@@ -95,11 +95,11 @@ class ModelB extends ActiveRecord{
   var id:Int = _
   var name:String = _
 
-  @Column(name = "testId",nullable = true)
+  @Column(name = "test_id",nullable = true)
   var testId:Integer = _
 
   @ManyToOne(fetch = FetchType.LAZY,optional = true)
-  @JoinColumn(name = "testId",nullable=true,insertable = false,updatable = false)
+  @JoinColumn(name = "test_id",nullable=true,insertable = false,updatable = false)
   var testTableJoin:ModelA = _
 
   @ManyToOne
