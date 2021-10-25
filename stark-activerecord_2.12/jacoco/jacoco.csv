@@ -6,30 +6,30 @@ Stark Activerecord,stark.activerecord.internal,EntityServiceImpl,107,509,4,8,8,5
 Stark Activerecord,stark.activerecord.config,ActiveRecordConfigSupport,0,6,0,0,0,2,0,1,0,1
 Stark Activerecord,stark.activerecord.config,JpaProperty,0,23,0,0,0,4,0,5,0,5
 Stark Activerecord,stark.activerecord.services,SortField.,38,0,2,0,1,0,9,0,8,0
-Stark Activerecord,stark.activerecord.services,NumericField,22,28,0,0,4,6,4,5,4,5
+Stark Activerecord,stark.activerecord.services,NumericField,10,16,0,0,2,4,2,3,2,3
 Stark Activerecord,stark.activerecord.services,ActiveRecord,45,10,0,0,2,3,9,3,9,3
 Stark Activerecord,stark.activerecord.services,AbstractExecuteStep..anon.new Execute() {...},12,28,0,0,0,1,3,6,3,6
 Stark Activerecord,stark.activerecord.services,AbstractExecuteStep,8,37,0,0,0,2,2,8,2,8
 Stark Activerecord,stark.activerecord.services,PredicateCondition,38,74,2,2,2,4,4,5,2,5
 Stark Activerecord,stark.activerecord.services,ActiveRecordInstance,173,171,6,6,12,20,17,18,11,18
-Stark Activerecord,stark.activerecord.services,JPAField,22,70,0,0,3,11,5,12,5,12
 Stark Activerecord,stark.activerecord.services,DeleteStep,0,10,0,0,0,1,0,2,0,2
+Stark Activerecord,stark.activerecord.services,JPAField,47,90,0,0,8,15,10,16,10,16
 Stark Activerecord,stark.activerecord.services,Execute,18,81,3,5,2,14,3,7,0,6
 Stark Activerecord,stark.activerecord.services,ActiveRecord.,50,111,1,1,9,19,6,19,5,19
-Stark Activerecord,stark.activerecord.services,Field.,15,22,0,0,3,5,3,5,3,5
+Stark Activerecord,stark.activerecord.services,Field.,20,17,0,0,4,4,4,4,4,4
 Stark Activerecord,stark.activerecord.services,QlRelation,117,312,5,7,1,30,21,35,16,34
 Stark Activerecord,stark.activerecord.services,DSL.JoinQueryContext,112,14,25,0,0,1,25,2,12,2
 Stark Activerecord,stark.activerecord.services,Fetch,6,151,1,9,0,28,1,14,0,10
-Stark Activerecord,stark.activerecord.services,Condition.,291,174,15,5,32,24,25,17,16,16
+Stark Activerecord,stark.activerecord.services,Condition.,357,218,15,5,38,28,31,21,22,20
 Stark Activerecord,stark.activerecord.services,OrderByClause,15,72,1,3,0,10,1,4,0,3
 Stark Activerecord,stark.activerecord.services,Field..anon.new SelectionField() {...},0,14,0,0,0,3,0,2,0,2
-Stark Activerecord,stark.activerecord.services,EnumerationField,30,0,0,0,6,0,5,0,5,0
 Stark Activerecord,stark.activerecord.services,DSL.,32,384,8,32,0,29,8,41,0,29
+Stark Activerecord,stark.activerecord.services,EnumerationField,3,0,0,0,2,0,1,0,1,0
 Stark Activerecord,stark.activerecord.services,DSL.QueryContext,122,27,28,0,0,1,27,5,12,5
 Stark Activerecord,stark.activerecord.services,JPAField..anon.new DistinctSelectionField() {...},2,12,1,1,0,2,1,2,0,2
 Stark Activerecord,stark.activerecord.services,JPAField..anon.new SelectionField() {...},2,18,1,1,0,2,1,2,0,2
-Stark Activerecord,stark.activerecord.services,NumericField..anon.new SelectionField() {...},29,0,2,0,3,0,3,0,2,0
 Stark Activerecord,stark.activerecord.services,JPAField..anon.new SelectionField() {...},2,18,1,1,0,2,1,2,0,2
+Stark Activerecord,stark.activerecord.services,NumericField..anon.new SelectionField() {...},29,0,2,0,3,0,3,0,2,0
 Stark Activerecord,stark.activerecord.services,NumericField..anon.new SelectionField() {...},2,27,1,1,0,3,1,2,0,2
 Stark Activerecord,stark.activerecord.services,JPAField..anon.new SelectionField() {...},2,18,1,1,0,2,1,2,0,2
 Stark Activerecord,stark.activerecord.services,NumericField..anon.new SelectionField() {...},29,0,2,0,3,0,3,0,2,0
@@ -46,9 +46,9 @@ Stark Activerecord,stark.activerecord.services,StringField,18,0,0,0,4,0,3,0,3,0
 Stark Activerecord,stark.activerecord.services,SelectStep,454,292,6,12,1,11,116,33,110,30
 Stark Activerecord,stark.activerecord.services,Field,32,1,0,0,2,1,8,1,8,1
 Stark Activerecord,stark.activerecord.services,DynamicUpdateSupport,0,1,0,0,0,1,0,1,0,1
+Stark Activerecord,stark.activerecord.services,DateTimeField,3,0,0,0,2,0,1,0,1,0
 Stark Activerecord,stark.activerecord.services,ConditionClause,23,204,0,0,0,21,2,18,2,18
-Stark Activerecord,stark.activerecord.services,DateTimeField,18,0,0,0,4,0,3,0,3,0
 Stark Activerecord,stark.activerecord.services,UtilSupport,0,27,0,0,0,5,0,4,0,4
-Stark Activerecord,stark.activerecord.services,Condition,62,0,0,0,0,0,13,0,13,0
+Stark Activerecord,stark.activerecord.services,Condition,82,0,0,0,0,0,17,0,17,0
 Stark Activerecord,stark.activerecord.services,DSL.QueryContext.,36,0,2,0,1,0,7,0,6,0
 Stark Activerecord,stark.activerecord.services,LimitClause,0,17,0,0,0,7,0,3,0,3

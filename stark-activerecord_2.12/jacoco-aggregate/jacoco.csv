@@ -1,12 +1,12 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},38,0,0,0,1,0,2,0,2,0
-Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator2.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator2.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
-Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition.,1814,0,124,0,90,0,90,0,28,0
+Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator2.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator2.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},38,0,0,0,1,0,2,0,2,0
-Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition,27,0,0,0,0,0,4,0,4,0
-Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
+Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition.,1814,0,124,0,90,0,90,0,28,0
 Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator2.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
+Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition..typecreator1.new TypeCreator() {...},51,0,0,0,1,0,2,0,2,0
+Stark Activerecord/stark-activerecord-macro_2.12,stark.activerecord.macroinstruction,ActiveRecordMacroDefinition,27,0,0,0,0,0,4,0,4,0
