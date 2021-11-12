@@ -53,6 +53,11 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(1234,select[ModelA](ModelA.i.max) head)
     Assert.assertEquals(1234,select[ModelA](ModelA.i.min) head)
     Assert.assertEquals(1234.0,select[ModelA](ModelA.i.avg) head)
+
+    val multiSum:Array[Any] = select[ModelA](ModelA.l.sum,ModelA.i.sum).groupBy(ModelA.name).head
+
+    Assert.assertEquals(1234L,multiSum(0).asInstanceOf[Long])
+    Assert.assertEquals(1234L,multiSum(1).asInstanceOf[Long])
   }
   @Test
   def test_select: Unit = {
