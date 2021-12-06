@@ -1,11 +1,11 @@
 package stark.activerecord.services
 
-import javax.persistence.{EntityManager, Id, Transient}
-
 import org.springframework.beans.factory.BeanFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.DSLSelectionQuery
 
+import javax.persistence.criteria.Predicate
+import javax.persistence.{EntityManager, Id, Transient}
 import scala.collection.immutable.Stream
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
@@ -181,6 +181,9 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
   }
   def delete:DeleteStep[A]={
     DSL.delete[A]
+  }
+  def buildCondition(func: DSL.QueryContext => Predicate): Condition = {
+    new PredicateCondition(func(DSL.dslContext.value))
   }
 
   /**

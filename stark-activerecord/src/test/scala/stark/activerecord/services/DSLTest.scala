@@ -2,7 +2,11 @@ package stark.activerecord.services
 
 import org.junit.{Assert, Test}
 import stark.activerecord.services.DSL._
-import stark.activerecord.{ModelB, BaseActiveRecordTestCase, ModelA}
+import stark.activerecord.services.Field.wrapNumericField
+import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
+
+import javax.persistence.EntityManager
+import javax.persistence.criteria.{Expression, Predicate}
 import scala.language.postfixOps
 
 /**
@@ -58,6 +62,14 @@ class DSLTest extends BaseActiveRecordTestCase{
 
     Assert.assertEquals(1234L,multiSum(0).asInstanceOf[Long])
     Assert.assertEquals(1234L,multiSum(1).asInstanceOf[Long])
+  }
+  @Test
+  def testBuildCondition:Unit={
+    ModelA.where(ModelA.buildCondition(context=>{
+      val cb = context.builder
+      val root = context.root
+      cb.le(cb.sum(root.get[java.lang.Long]("l"),2L.asInstanceOf[java.lang.Long]),12)
+    }).and(ModelA.name === "A")).toList
   }
   @Test
   def test_select: Unit = {
