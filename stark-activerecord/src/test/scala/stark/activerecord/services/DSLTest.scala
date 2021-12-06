@@ -6,7 +6,7 @@ import stark.activerecord.services.Field.wrapNumericField
 import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
 
 import javax.persistence.EntityManager
-import javax.persistence.criteria.{Expression, Predicate}
+import javax.persistence.criteria.{Expression, Predicate, Selection}
 import scala.language.postfixOps
 
 /**
@@ -65,7 +65,15 @@ class DSLTest extends BaseActiveRecordTestCase{
   }
   @Test
   def testBuildCondition:Unit={
-    ModelA.where(ModelA.buildCondition(context=>{
+    ModelA.select(ModelA.buildSelection(context=>{
+      val cb = context.builder
+      val root = context.root
+      new SelectionField {
+        override def toSelection[X]: Selection[X] = {
+          cb.sum(root.get[java.lang.Long]("l"),2L.asInstanceOf[java.lang.Long]).asInstanceOf[Selection[X]]
+        }
+      }
+    })).where(ModelA.buildCondition(context=>{
       val cb = context.builder
       val root = context.root
       cb.le(cb.sum(root.get[java.lang.Long]("l"),2L.asInstanceOf[java.lang.Long]),12)

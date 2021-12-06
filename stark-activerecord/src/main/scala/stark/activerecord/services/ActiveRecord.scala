@@ -4,7 +4,7 @@ import org.springframework.beans.factory.BeanFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.DSLSelectionQuery
 
-import javax.persistence.criteria.Predicate
+import javax.persistence.criteria.{Predicate, Selection}
 import javax.persistence.{EntityManager, Id, Transient}
 import scala.collection.immutable.Stream
 import scala.language.experimental.macros
@@ -184,6 +184,14 @@ abstract class ActiveRecordInstance[A](implicit val clazzTag:ClassTag[A]) extend
   }
   def buildCondition(func: DSL.QueryContext => Predicate): Condition = {
     new PredicateCondition(func(DSL.dslContext.value))
+  }
+  def buildSelection(func: DSL.QueryContext => SelectionField): SelectionField= {
+    //此处代理selection，方便获取真正的context
+    new SelectionField {
+      override def toSelection[X]: Selection[X] = {
+        func(DSL.dslContext.value).toSelection
+      }
+    }
   }
 
   /**
