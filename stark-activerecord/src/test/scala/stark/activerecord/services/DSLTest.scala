@@ -47,6 +47,17 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(0,query3.size)
   }
   @Test
+  def test_select_one: Unit = {
+    val modelA = new ModelA
+    modelA.name = "cctv"
+    modelA.i = 1234
+    modelA.l = 1234L
+    modelA.save
+
+    val idOpt = ModelA.select(ModelA.id).where.headOption
+    Assert.assertEquals(1,idOpt.get)
+  }
+  @Test
   def test_sum: Unit = {
     val modelA = new ModelA
     modelA.name = "cctv"
