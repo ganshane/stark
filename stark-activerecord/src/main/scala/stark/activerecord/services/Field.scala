@@ -1,9 +1,10 @@
 package stark.activerecord.services
 
 
-import javax.persistence.criteria.Selection
 import org.joda.time.DateTime
+import stark.activerecord.services.DSL.UpdateField
 
+import javax.persistence.criteria.Selection
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe._
 
@@ -55,6 +56,10 @@ trait Field[+A] extends SelectionField{
   def sum:SelectionField
   def distinct:SelectionField
   def max:SelectionField
+
+  //用来更新操作
+  def ~|=[B >: A,OBJ](value:B):UpdateField[OBJ]
+  def ~=[B >: A,OBJ](value:B):UpdateField[OBJ]
 }
 trait SelectionField{
   def toSelection[X]:Selection[X]
@@ -126,6 +131,19 @@ private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extend
       override def toSelection[X]: Selection[X] = {
         JPAField.this.toSelection
       }
+    }
+  }
+
+  override def ~|=[B >: T, OBJ](value: B): UpdateField[OBJ] = {
+    updater =>{
+      if(value != null) updater.set(this.fieldName,value)
+      else updater
+    }
+  }
+
+  override def ~=[B >: T, OBJ](value: B): UpdateField[OBJ] = {
+    updater =>{
+      updater.set(this.fieldName,value)
     }
   }
 }

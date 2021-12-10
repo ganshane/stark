@@ -1,10 +1,9 @@
 package stark.activerecord.services
 
-import javax.persistence.criteria._
-
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
-import stark.activerecord.services.DSL.{JoinQueryContext, DSLExecuteQuery, DSLSelectionQuery, QueryContext}
+import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, JoinQueryContext, QueryContext, UpdateField}
 
+import javax.persistence.criteria._
 import scala.collection.JavaConversions
 import scala.language.dynamics
 import scala.language.experimental.macros
@@ -25,6 +24,7 @@ object DSL {
   type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause with UtilSupport
   //Selection Query
   type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport
+  type UpdateField[T] = CriteriaUpdate[T]=>CriteriaUpdate[T]
 
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])
@@ -169,6 +169,10 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
 class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T] with Dynamic{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
   def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
+  def applyDynamic(name:String)(params:UpdateField[T] *): this.type ={
+    params.foreach(x=>x(criteriaUpdate))
+    this
+  }
   def setWithType[F](field:String,value:F):this.type={
     criteriaUpdate.set(field,value)
     this
@@ -177,7 +181,7 @@ class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteS
     criteriaUpdate.set(field.fieldName,value)
     this
   }
-  def internalUpdate(params: (String, Any)*):this.type = {
+  def internalUpdate(params: (String,Any)*):this.type = {
     params.foreach{
       case (field,value) =>
         criteriaUpdate.set(field,value)
