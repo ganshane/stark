@@ -137,7 +137,7 @@ import scala.language.implicitConversions
 <span class="fc" id="L137">class PredicateCondition(predicateFun: =&gt; Predicate) extends Condition{</span>
 <span class="pc bpc" id="L138" title="2 of 4 branches missed.">  private lazy val expression:Predicate = predicateFun</span>
   override def and(condition: Condition): Condition =
-<span class="nc" id="L140">    DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)</span>
+<span class="fc" id="L140">    DSL.dslContext.value.builder.and(Seq[Predicate](expression,condition):_*)</span>
   override def or(condition: Condition): Condition =
 <span class="fc" id="L142">    DSL.dslContext.value.builder.or(Seq[Predicate](expression,condition):_*)</span>
 

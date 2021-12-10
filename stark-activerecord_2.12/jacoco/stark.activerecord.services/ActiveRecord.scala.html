@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActiveRecord.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">ActiveRecord.scala</span></div><h1>ActiveRecord.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
 
-import javax.persistence.{EntityManager, Id, Transient}
-
 import org.springframework.beans.factory.BeanFactory
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.DSLSelectionQuery
 
+import javax.persistence.criteria.{Predicate, Selection}
+import javax.persistence.{EntityManager, Id, Transient}
 import scala.collection.immutable.Stream
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
@@ -182,6 +182,17 @@ import scala.reflect.{ClassTag, classTag}
   def delete:DeleteStep[A]={
 <span class="fc" id="L183">    DSL.delete[A]</span>
   }
+  def buildCondition(func: DSL.QueryContext =&gt; Predicate): Condition = {
+<span class="fc" id="L186">    new PredicateCondition(func(DSL.dslContext.value))</span>
+  }
+<span class="fc" id="L188">  def buildSelection(func: DSL.QueryContext =&gt; SelectionField): SelectionField= {</span>
+    //此处代理selection，方便获取真正的context
+<span class="fc" id="L190">    new SelectionField {</span>
+      override def toSelection[X]: Selection[X] = {
+<span class="fc" id="L192">        func(DSL.dslContext.value).toSelection</span>
+      }
+    }
+  }
 
   /**
    * find_by_xx_and_yy method
@@ -203,7 +214,7 @@ import scala.reflect.{ClassTag, classTag}
     * @return Select step
     */
   def select(fields:SelectionField*):SelectStep[A,Array[Any]]={
-<span class="nc" id="L206">    DSL.select(fields:_*)</span>
+<span class="fc" id="L217">    DSL.select(fields:_*)</span>
   }
 
   /**
@@ -212,7 +223,7 @@ import scala.reflect.{ClassTag, classTag}
     * @return select step
     */
   def where:DSLSelectionQuery[A,A] ={
-<span class="fc" id="L215">    DSL.select[A].where</span>
+<span class="fc" id="L226">    DSL.select[A].where</span>
   }
   /**
    * whereByJPQL(ql,parameters)
@@ -223,11 +234,11 @@ import scala.reflect.{ClassTag, classTag}
    * @return Realtion Object
    */
   def whereByJPQL(ql:String, parameters:Any*): QlRelation[A]={
-<span class="fc" id="L226">    ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+<span class="fc" id="L237">    ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
   }
   def countByJPQL(ql:String,parameters:Any*): Long ={
-<span class="fc" id="L229">    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
-<span class="fc" id="L230">    qlRelation.count</span>
+<span class="fc" id="L240">    val qlRelation = ActiveRecord.internalWhere(clazz,primaryKey,ql)(parameters:_*)</span>
+<span class="fc" id="L241">    qlRelation.count</span>
   }
 
 
@@ -238,7 +249,7 @@ import scala.reflect.{ClassTag, classTag}
    * @return entity object
    */
   def find(key:Any):A={
-<span class="fc" id="L241">    ActiveRecord.find[A](key)</span>
+<span class="fc" id="L252">    ActiveRecord.find[A](key)</span>
   }
 
   /**
@@ -248,7 +259,7 @@ import scala.reflect.{ClassTag, classTag}
    * @return entity object
    */
   def findOption(key:Any):Option[A]={
-<span class="nc" id="L251">    internalFind(key).headOption</span>
+<span class="nc" id="L262">    internalFind(key).headOption</span>
   }
 
   /**
@@ -258,39 +269,39 @@ import scala.reflect.{ClassTag, classTag}
    * @return query object
    */
   def find(keys:Array[Any]):QlRelation[A]={
-<span class="nc" id="L261">    internalFind(keys)</span>
+<span class="nc" id="L272">    internalFind(keys)</span>
   }
   private def internalFind(key:Any):QlRelation[A]={
-<span class="pc" id="L264">    key match{</span>
-<span class="pc bpc" id="L265" title="4 of 8 branches missed.">      case _:Int|_:String|_:Long=&gt;</span>
-<span class="nc" id="L266">        new QlRelation[A](clazz,primaryKey,&quot;%s=?1&quot;.format(primaryKey),Seq(key))</span>
-<span class="pc bpc" id="L267" title="1 of 2 branches missed.">      case keys:Array[_] =&gt;</span>
-<span class="nc" id="L268">        new QlRelation[A](clazz,primaryKey,&quot;%s IN (?1)&quot;.format(primaryKey),Seq(key))</span>
-<span class="pc bpc" id="L269" title="1 of 2 branches missed.">      case None =&gt;</span>
-<span class="fc" id="L270">        new QlRelation[A](clazz,primaryKey,null,Seq())</span>
+<span class="pc" id="L275">    key match{</span>
+<span class="pc bpc" id="L276" title="4 of 8 branches missed.">      case _:Int|_:String|_:Long=&gt;</span>
+<span class="nc" id="L277">        new QlRelation[A](clazz,primaryKey,&quot;%s=?1&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">      case keys:Array[_] =&gt;</span>
+<span class="nc" id="L279">        new QlRelation[A](clazz,primaryKey,&quot;%s IN (?1)&quot;.format(primaryKey),Seq(key))</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">      case None =&gt;</span>
+<span class="fc" id="L281">        new QlRelation[A](clazz,primaryKey,null,Seq())</span>
     }
   }
   //retrieving single object
-<span class="fc" id="L274">  def take:A= take(1).head</span>
+<span class="fc" id="L285">  def take:A= take(1).head</span>
   def take(n:Int):QlRelation[A]={
-<span class="fc" id="L276">    internalFind(None).limit(n)</span>
+<span class="fc" id="L287">    internalFind(None).limit(n)</span>
   }
-<span class="nc" id="L278">  def first:A= first(1).head</span>
-<span class="nc" id="L279">  def first(n:Int=1):QlRelation[A]= {</span>
-<span class="nc" id="L280">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
+<span class="nc" id="L289">  def first:A= first(1).head</span>
+<span class="nc" id="L290">  def first(n:Int=1):QlRelation[A]= {</span>
+<span class="nc" id="L291">    take(n).order(primaryKey-&gt; &quot;ASC&quot;)</span>
   }
-<span class="nc" id="L282">  def last:A= last(1).head</span>
+<span class="nc" id="L293">  def last:A= last(1).head</span>
   def last(n:Int):QlRelation[A]= {
-<span class="nc" id="L284">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
+<span class="nc" id="L295">    take(n).order(primaryKey-&gt;&quot;DESC&quot;)</span>
   }
   def all:QlRelation[A]= {
-<span class="fc" id="L287">    internalFind(None)</span>
+<span class="fc" id="L298">    internalFind(None)</span>
   }
   def asc(fields:String*):QlRelation[A]={
-<span class="nc" id="L290">    internalFind(None).asc(fields:_*)</span>
+<span class="nc" id="L301">    internalFind(None).asc(fields:_*)</span>
   }
   def desc(fields:String*):QlRelation[A]={
-<span class="nc" id="L293">    internalFind(None).desc(fields:_*)</span>
+<span class="nc" id="L304">    internalFind(None).desc(fields:_*)</span>
   }
 
   /*

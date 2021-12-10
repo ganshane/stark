@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Field.scala</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Stark Activerecord</a> &gt; <a href="index.source.html" class="el_package">stark.activerecord.services</a> &gt; <span class="el_source">Field.scala</span></div><h1>Field.scala</h1><pre class="source lang-java linenums">package stark.activerecord.services
 
 
-import javax.persistence.criteria.Selection
 import org.joda.time.DateTime
+import stark.activerecord.services.DSL.UpdateField
 
+import javax.persistence.criteria.Selection
 import scala.language.implicitConversions
 import scala.reflect.runtime.universe._
 
@@ -13,20 +14,20 @@ import scala.reflect.runtime.universe._
   * @author &lt;a href=&quot;mailto:jcai@ganshane.com&quot;&gt;Jun Tsai&lt;/a&gt;
  * @since 2016-03-09
  */
-<span class="fc" id="L16">object Field {</span>
-<span class="fc" id="L17">  def countField= new SelectionField {</span>
+<span class="fc" id="L17">object Field {</span>
+<span class="fc" id="L18">  def countField= new SelectionField {</span>
     override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L19">      val context =DSL.dslContext.value</span>
-<span class="fc" id="L20">      context.builder.count(context.root).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L20">      val context =DSL.dslContext.value</span>
+<span class="fc" id="L21">      context.builder.count(context.root).asInstanceOf[Selection[X]]</span>
     }
   }
-<span class="fc" id="L23">  implicit def wrapNumericField[T&lt;:Number](field: Field[T]):NumericField[T]= new NumericField(field)</span>
-<span class="nc" id="L24">  implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)</span>
-<span class="nc" id="L25">  implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)</span>
-<span class="nc" id="L26">  implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)</span>
-<span class="nc" id="L27">  implicit def wrapEnumerationField[T &lt;: Enumeration#Value](field: Field[T]):EnumerationField[T]= new EnumerationField(field)</span>
+<span class="fc" id="L24">  implicit def wrapNumericField[T&lt;:Number](field: Field[T]):NumericField[T]= new NumericField(field)</span>
+<span class="nc" id="L25">  implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)</span>
+<span class="nc" id="L26">  implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)</span>
+<span class="nc" id="L27">  implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)</span>
+<span class="nc" id="L28">  implicit def wrapEnumerationField[T &lt;: Enumeration#Value](field: Field[T]):EnumerationField[T]= new EnumerationField(field)</span>
 }
-<span class="fc" id="L29">trait Field[+A] extends SelectionField{</span>
+<span class="fc" id="L30">trait Field[+A] extends SelectionField{</span>
   val fieldName:String
   def === [B &gt;: A ](value:B): Condition
   def === (value:Field[Any]): Condition
@@ -43,8 +44,8 @@ import scala.reflect.runtime.universe._
 
   def !==[B&gt;:A](value : B)                                 : Condition
   def !==[B &gt;: A](value : Field[B])                          : Condition
-<span class="nc" id="L46">  def &lt;&gt;[B&gt;:A](value : B)= !==(value)</span>
-<span class="nc" id="L47">  def &lt;&gt;[B&gt;:A](value : Field[B])= !==(value)</span>
+<span class="nc" id="L47">  def &lt;&gt;[B&gt;:A](value : B)= !==(value)</span>
+<span class="nc" id="L48">  def &lt;&gt;[B&gt;:A](value : Field[B])= !==(value)</span>
 
   def isNull:Condition
   def notNull:Condition
@@ -55,119 +56,136 @@ import scala.reflect.runtime.universe._
   def sum:SelectionField
   def distinct:SelectionField
   def max:SelectionField
+
+  //用来更新操作
+  def ~=?[B &gt;: A,OBJ](value:B):UpdateField[OBJ]
+  def ~=[B &gt;: A,OBJ](value:B):UpdateField[OBJ]
 }
 trait SelectionField{
   def toSelection[X]:Selection[X]
 }
 trait DistinctSelectionField extends SelectionField{
 }
-<span class="pc bnc" id="L64" title="All 25 branches missed.">case class SortField[T](field: Field[T],isAsc:Boolean=true)</span>
+<span class="pc bnc" id="L69" title="All 25 branches missed.">case class SortField[T](field: Field[T],isAsc:Boolean=true)</span>
 
-<span class="pc" id="L66">private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extends Field[T] {</span>
+<span class="pc" id="L71">private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extends Field[T] {</span>
   override def ===[B &gt;: T](value: B): Condition = {
-<span class="fc" id="L68">    Condition.eq(this,value)</span>
+<span class="fc" id="L73">    Condition.eq(this,value)</span>
   }
 
   override def ===(value: Field[Any]): Condition = {
-<span class="fc" id="L72">    Condition.eq(this,value)</span>
+<span class="fc" id="L77">    Condition.eq(this,value)</span>
   }
-<span class="fc" id="L74">  override def &lt;[B &gt;: T](value: B): Condition = Condition.lt(this,value)</span>
-<span class="nc" id="L75">  override def &lt;=[B &gt;: T](value: B): Condition = Condition.le(this,value)</span>
-<span class="fc" id="L76">  override def &gt;[B &gt;: T](value: B): Condition = Condition.gt(this,value)</span>
-<span class="nc" id="L77">  override def &gt;=[B &gt;: T](value: B): Condition = Condition.ge(this,value)</span>
+<span class="fc" id="L79">  override def &lt;[B &gt;: T](value: B): Condition = Condition.lt(this,value)</span>
+<span class="nc" id="L80">  override def &lt;=[B &gt;: T](value: B): Condition = Condition.le(this,value)</span>
+<span class="fc" id="L81">  override def &gt;[B &gt;: T](value: B): Condition = Condition.gt(this,value)</span>
+<span class="nc" id="L82">  override def &gt;=[B &gt;: T](value: B): Condition = Condition.ge(this,value)</span>
 
-<span class="nc" id="L79">  override def &lt;(value: Field[Any]): Condition = Condition.lt(this,value)</span>
-<span class="nc" id="L80">  override def &lt;=(value: Field[Any]): Condition = Condition.le(this,value)</span>
-<span class="fc" id="L81">  override def &gt;(value: Field[Any]): Condition = Condition.gt(this,value)</span>
-<span class="nc" id="L82">  override def &gt;=(value: Field[Any]): Condition = Condition.ge(this,value)</span>
+<span class="nc" id="L84">  override def &lt;(value: Field[Any]): Condition = Condition.lt(this,value)</span>
+<span class="nc" id="L85">  override def &lt;=(value: Field[Any]): Condition = Condition.le(this,value)</span>
+<span class="fc" id="L86">  override def &gt;(value: Field[Any]): Condition = Condition.gt(this,value)</span>
+<span class="nc" id="L87">  override def &gt;=(value: Field[Any]): Condition = Condition.ge(this,value)</span>
 
-<span class="nc" id="L84">  override def !==[B &gt;: T](value: B): Condition = Condition.notEq(this,value)</span>
-<span class="nc" id="L85">  override def !==[B &gt;: T](value: Field[B]): Condition = Condition.notEq(this,value)</span>
+<span class="nc" id="L89">  override def !==[B &gt;: T](value: B): Condition = Condition.notEq(this,value)</span>
+<span class="nc" id="L90">  override def !==[B &gt;: T](value: Field[B]): Condition = Condition.notEq(this,value)</span>
 
-<span class="fc" id="L87">  override def isNull: Condition = Condition.isNull(this)</span>
-<span class="nc" id="L88">  override def notNull: Condition = Condition.notNull(this)</span>
+<span class="fc" id="L92">  override def isNull: Condition = Condition.isNull(this)</span>
+<span class="nc" id="L93">  override def notNull: Condition = Condition.notNull(this)</span>
 
-<span class="fc" id="L90">  override def desc[B &gt;: T]: SortField[B] = SortField(this,false)</span>
-<span class="fc" id="L91">  override def asc[B &gt;: T]: SortField[B] = SortField(this,isAsc = true)</span>
+<span class="fc" id="L95">  override def desc[B &gt;: T]: SortField[B] = SortField(this,false)</span>
+<span class="fc" id="L96">  override def asc[B &gt;: T]: SortField[B] = SortField(this,isAsc = true)</span>
 
   override def toSelection[X]: Selection[X]= {
-<span class="fc" id="L94">    DSL.dslContext.value.root.get[X](fieldName)</span>
+<span class="fc" id="L99">    DSL.dslContext.value.root.get[X](fieldName)</span>
   }
   private def expression[X]={
-<span class="fc" id="L97">    DSL.dslContext.value.root.get[X](fieldName)</span>
+<span class="fc" id="L102">    DSL.dslContext.value.root.get[X](fieldName)</span>
   }
 
   override def count: SelectionField ={
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">    new SelectionField {</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L103">        DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L108">        DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
   override def sum: SelectionField ={
-<span class="pc bpc" id="L108" title="1 of 2 branches missed.">    new SelectionField {</span>
+<span class="pc bpc" id="L113" title="1 of 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L110">        DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L115">        DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
 
 
   override def max: SelectionField = {
-<span class="pc bpc" id="L117" title="1 of 2 branches missed.">    new SelectionField {</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L119">        DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L124">        DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
 
   override def distinct: SelectionField = {
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">    new DistinctSelectionField {</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">    new DistinctSelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L127">        JPAField.this.toSelection</span>
+<span class="fc" id="L132">        JPAField.this.toSelection</span>
       }
     }
   }
+
+  override def ~=?[B &gt;: T, OBJ](value: B): UpdateField[OBJ] = {
+<span class="fc" id="L138">    updater =&gt;{</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">      if(value != null) updater.set(this.fieldName,value)</span>
+<span class="fc" id="L140">      else updater</span>
+    }
+  }
+
+  override def ~=[B &gt;: T, OBJ](value: B): UpdateField[OBJ] = {
+<span class="nc" id="L145">    updater =&gt;{</span>
+<span class="nc" id="L146">      updater.set(this.fieldName,value)</span>
+    }
+  }
 }
-<span class="fc" id="L132">class NumericField[T](field:Field[T]){</span>
+<span class="fc" id="L150">class NumericField[T](field:Field[T]){</span>
   def avg:SelectionField = {
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">    new SelectionField {</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L136">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
-<span class="fc" id="L137">        DSL.dslContext.value.builder.avg(expression).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L154">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
+<span class="fc" id="L155">        DSL.dslContext.value.builder.avg(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
   def max:SelectionField={
-<span class="nc bnc" id="L142" title="All 2 branches missed.">    new SelectionField {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="nc" id="L144">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
-<span class="nc" id="L145">        DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]</span>
+<span class="nc" id="L162">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
+<span class="nc" id="L163">        DSL.dslContext.value.builder.max(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
   def min:SelectionField={
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">    new SelectionField {</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="fc" id="L152">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
-<span class="fc" id="L153">        DSL.dslContext.value.builder.min(expression).asInstanceOf[Selection[X]]</span>
+<span class="fc" id="L170">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
+<span class="fc" id="L171">        DSL.dslContext.value.builder.min(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
   def sum:SelectionField={
-<span class="nc bnc" id="L158" title="All 2 branches missed.">    new SelectionField {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">    new SelectionField {</span>
       override def toSelection[X]: Selection[X] = {
-<span class="nc" id="L160">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
-<span class="nc" id="L161">        DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]</span>
+<span class="nc" id="L178">        val expression = DSL.dslContext.value.root.get[Number](field.fieldName)</span>
+<span class="nc" id="L179">        DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]</span>
       }
     }
   }
 }
-<span class="pc" id="L166">class StringField(field:Field[String]){</span>
-<span class="nc" id="L167">  def like(value: String): Condition = Condition.like(field,value)</span>
-<span class="nc" id="L168">  def notLike(value: String): Condition = Condition.notLike(field,value)</span>
+<span class="pc" id="L184">class StringField(field:Field[String]){</span>
+<span class="nc" id="L185">  def like(value: String): Condition = Condition.like(field,value)</span>
+<span class="nc" id="L186">  def notLike(value: String): Condition = Condition.notLike(field,value)</span>
 }
-<span class="nc" id="L170">class DateTimeField(field:Field[DateTime]){</span>
+<span class="nc" id="L188">class DateTimeField(field:Field[DateTime]){</span>
   /*
   def &gt;(value:DateTime):Condition={
     Condition.gt(field,value)
@@ -177,7 +195,7 @@ trait DistinctSelectionField extends SelectionField{
   }
    */
 }
-<span class="nc" id="L180">class EnumerationField[T&lt;: Enumeration#Value](field:Field[T]){</span>
+<span class="nc" id="L198">class EnumerationField[T&lt;: Enumeration#Value](field:Field[T]){</span>
   /*
   def &gt;(value:T):Condition={
     Condition.gt(field,value)
@@ -192,5 +210,5 @@ trait DistinctSelectionField extends SelectionField{
     Condition.le(field,value)
   }
    */
-<span class="nc" id="L195">}</span>
+<span class="nc" id="L213">}</span>
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
