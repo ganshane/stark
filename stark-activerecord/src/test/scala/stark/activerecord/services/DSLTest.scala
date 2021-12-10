@@ -23,7 +23,7 @@ class DSLTest extends BaseActiveRecordTestCase{
   }
   @Test
   def test_update: Unit ={
-    val num = update[ModelA] set (ModelA.name ~|= null) set(seq = 1) where ModelA.name === "cctv" or ModelA.seq === 1  execute;
+    val num = update[ModelA] set (ModelA.name ~=? null) set(seq = 1) where ModelA.name === "cctv" or ModelA.seq === 1  execute;
   }
   @Test
   def test_simpleJoin: Unit = {

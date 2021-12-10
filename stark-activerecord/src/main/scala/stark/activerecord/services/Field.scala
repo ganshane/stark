@@ -58,7 +58,7 @@ trait Field[+A] extends SelectionField{
   def max:SelectionField
 
   //用来更新操作
-  def ~|=[B >: A,OBJ](value:B):UpdateField[OBJ]
+  def ~=?[B >: A,OBJ](value:B):UpdateField[OBJ]
   def ~=[B >: A,OBJ](value:B):UpdateField[OBJ]
 }
 trait SelectionField{
@@ -134,7 +134,7 @@ private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extend
     }
   }
 
-  override def ~|=[B >: T, OBJ](value: B): UpdateField[OBJ] = {
+  override def ~=?[B >: T, OBJ](value: B): UpdateField[OBJ] = {
     updater =>{
       if(value != null) updater.set(this.fieldName,value)
       else updater
