@@ -24,7 +24,7 @@ object DSL {
   type DSLExecuteQuery[T] = ConditionClause[T] with Execute[T] with LimitClause with UtilSupport
   //Selection Query
   type DSLSelectionQuery[T,R] = ConditionClause[T]  with LimitClause with Fetch[R] with OrderByClause with GroupByClause with UtilSupport
-  type UpdateField[T] = CriteriaUpdate[T]=>CriteriaUpdate[T]
+  type UpdateField = CriteriaUpdate[_]=>CriteriaUpdate[_]
 
   //Query Context
   private[activerecord] case class QueryContext(builder:CriteriaBuilder,var query:Any,root:Root[_])
@@ -169,7 +169,7 @@ class SelectStep[T,R](clazz:Class[T])(implicit val context: QueryContext) extend
 class UpdateStep[T](implicit val context: QueryContext) extends AbstractExecuteStep[T] with Dynamic{
   private lazy val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[T]]
   def applyDynamicNamed(name:String)(params:(String,Any)*):this.type=macro ActiveRecordMacroDefinition.updateMethodImpl[T,this.type]
-  def applyDynamic(name:String)(params:UpdateField[T] *): this.type ={
+  def applyDynamic(name:String)(params:UpdateField *): this.type ={
     params.foreach(x=>x(criteriaUpdate))
     this
   }
