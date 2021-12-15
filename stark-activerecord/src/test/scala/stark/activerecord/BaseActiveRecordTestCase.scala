@@ -1,13 +1,9 @@
 package stark.activerecord
 
-import java.io.File
-import javax.inject.Inject
-import javax.persistence._
-import javax.sql.DataSource
-
 import org.junit.runner.RunWith
-import org.junit.{Test, After, Before}
+import org.junit.{After, Before, Test}
 import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation
 import org.springframework.context.annotation.Bean
 import org.springframework.jdbc.datasource.DriverManagerDataSource
@@ -21,6 +17,9 @@ import org.springframework.util.FileSystemUtils
 import stark.activerecord.config.{ActiveRecordConfigSupport, JpaProperty}
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
+import java.io.File
+import javax.persistence._
+import javax.sql.DataSource
 import scala.reflect.{ClassTag, classTag}
 
 /**
@@ -32,7 +31,7 @@ import scala.reflect.{ClassTag, classTag}
 @DirtiesContext(classMode=ClassMode.AFTER_EACH_TEST_METHOD)
 @ContextConfiguration(classes = Array(classOf[TestDataModule],classOf[StarkActiveRecordModule]))
 class BaseActiveRecordTestCase {
-  @Inject
+  @Autowired
   private var beanFactory:BeanFactory = _
 
   protected def getService[T:ClassTag]:T={

@@ -2,7 +2,7 @@
 // site: http://www.ganshane.com
 package stark.utils.services
 
-import javax.xml.bind.annotation.{XmlAccessType, XmlAccessorType, XmlElement, XmlType}
+import jakarta.xml.bind.annotation.{XmlAccessType, XmlAccessorType, XmlElement, XmlType}
 
 /**
  * web server configuration support
