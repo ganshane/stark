@@ -4,8 +4,8 @@ package stark.utils.services
 
 import java.io._
 import javax.xml.XMLConstants
-import jakarta.xml.bind.util.ValidationEventCollector
-import jakarta.xml.bind.{JAXBContext, Marshaller}
+import javax.xml.bind.util.ValidationEventCollector
+import javax.xml.bind.{JAXBContext, Marshaller}
 import javax.xml.transform.stream.StreamSource
 import javax.xml.validation.SchemaFactory
 

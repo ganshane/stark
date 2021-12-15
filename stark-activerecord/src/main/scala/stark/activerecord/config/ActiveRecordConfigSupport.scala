@@ -1,7 +1,8 @@
 package stark.activerecord.config
 
+import javax.xml.bind.annotation.{XmlAttribute, XmlElement, XmlElementWrapper, XmlRootElement}
+
 import java.util
-import javax.xml.bind.annotation.{XmlRootElement, XmlAttribute, XmlElement, XmlElementWrapper}
 
 /**
  * config orm

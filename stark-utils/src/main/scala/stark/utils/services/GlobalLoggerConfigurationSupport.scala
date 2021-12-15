@@ -5,7 +5,7 @@ package stark.utils.services
 import java.util.Properties
 import java.util.logging.LogManager
 
-import org.apache.log4j.PropertyConfigurator
+//import org.apache.log4j.PropertyConfigurator
 
 /**
  * global log4j configuration
@@ -39,7 +39,7 @@ trait GlobalLoggerConfigurationSupport {
       properties.put("log4j.category.com.netflix", "warn")
 //      properties.put("log4j.category.org.hibernate.SQL", "DEBUG")
 
-      PropertyConfigurator.configure(properties)
+//      PropertyConfigurator.configure(properties)
     }
   }
 }
