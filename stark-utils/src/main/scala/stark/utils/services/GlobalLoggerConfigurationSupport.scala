@@ -11,7 +11,7 @@ import org.apache.log4j.PropertyConfigurator
  * global log4j configuration
  */
 trait GlobalLoggerConfigurationSupport {
-  protected def configLogger(logFile: String, prefix: String, loggerPrefix: String*) {
+  protected def configLogger(logFile: String, prefix: String, loggerPrefix: String*) :Unit={
     //convert jcl to slf4j
     val rootLogger = LogManager.getLogManager.getLogger("")
     val handlers = rootLogger.getHandlers

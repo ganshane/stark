@@ -33,11 +33,11 @@ trait JettyServerSupport {
     }
   }
 
-  protected def join() {
+  protected def join() :Unit={
     serverOpt.foreach(_.join())
   }
 
-  protected def shutdownServer() {
+  protected def shutdownServer() :Unit={
     serverOpt.foreach(_.stop())
   }
 
@@ -103,7 +103,7 @@ object JettyServerCreator {
     server
   }
 
-  def configServer(server: Server, webServerConfig: WebServerConfig) {
+  def configServer(server: Server, webServerConfig: WebServerConfig) :Unit={
     /*
     val executorService = ThreadPoolCreator.newSaturatingThreadPool(
       webServerConfig.minConnCount,

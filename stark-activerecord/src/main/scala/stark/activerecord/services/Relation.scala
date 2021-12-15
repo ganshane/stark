@@ -2,7 +2,7 @@ package stark.activerecord.services
 
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.immutable.Stream
 import scala.collection.{GenTraversableOnce, mutable}
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
@@ -65,8 +65,8 @@ trait Relation[A] {
   @inline final def head = executeQuery.head
   @inline final def headOption = executeQuery.headOption
   @inline final def tail = executeQuery.tail
-  @inline final def map[B, That](f: A => B)(implicit bf: CanBuildFrom[Stream[A], B, That]): That =  executeQuery.map(f)
-  @inline final def flatMap[B, That](f: A => GenTraversableOnce[B])(implicit bf: CanBuildFrom[Stream[A], B, That]): That = executeQuery.flatMap(f)
+  @inline final def map[B, That](f: A => B) = executeQuery.map(f)
+  @inline final def flatMap[B, That](f: A => GenTraversableOnce[B])= executeQuery.flatMap(f)
 }
 
 trait DynamicUpdateSupport[A] extends Dynamic{

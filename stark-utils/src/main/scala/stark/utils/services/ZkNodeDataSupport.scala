@@ -2,17 +2,16 @@
 // site: http://www.ganshane.com
 package stark.utils.services
 
-import java.util.concurrent.{ConcurrentHashMap, CopyOnWriteArrayList, CopyOnWriteArraySet}
-
-import stark.utils.StarkUtilsConstants
 import org.apache.curator.framework.api.CuratorWatcher
 import org.apache.zookeeper.KeeperException.NoNodeException
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.EventType
 import org.apache.zookeeper.data.Stat
+import stark.utils.StarkUtilsConstants
 
-import scala.collection.JavaConversions._
+import java.util.concurrent.{ConcurrentHashMap, CopyOnWriteArrayList, CopyOnWriteArraySet}
 import scala.util.control.NonFatal
+import scala.collection.JavaConverters._
 
 /**
  * zookeeper node data support
@@ -38,12 +37,12 @@ trait ZkNodeDataSupport {
       event.getType match {
         case EventType.NodeDataChanged =>
           val data = internalWatchNodeData(event.getPath, this)
-          selfWatchers.watchers.foreach(x => runInNotExceptionThrown {
+          selfWatchers.watchers.forEach(x => runInNotExceptionThrown {
             x.handleDataChanged(data)
           })
         case EventType.NodeDeleted =>
           try {
-            selfWatchers.watchers.foreach(x => runInNotExceptionThrown {
+            selfWatchers.watchers.forEach(x => runInNotExceptionThrown {
               x.handleNodeDeleted()
             })
           } finally {
@@ -171,12 +170,12 @@ trait ZkNodeDataSupport {
 
   protected def rewatchNodeData() {
     //针对节点数据的观察器
-    nodeDataWatcher.foreach {
+    nodeDataWatcher.asScala.foreach {
       case (k, v) =>
         val data = internalWatchNodeData(k, v.internalWatcher)
         //针对各个watcher调用数据
         if (data.isDefined)
-          v.watchers.foreach(x => runInNotExceptionThrown {
+          v.watchers.forEach(x => runInNotExceptionThrown {
             x.handleDataChanged(data)
           })
     }
@@ -205,7 +204,7 @@ trait ZkNodeDataSupport {
       val data = internalWatchNodeData(path, watcherList.internalWatcher)
       //针对各个watcher调用数据
       if (data.isDefined)
-        watcherList.watchers.foreach(x => runInNotExceptionThrown {
+        watcherList.watchers.forEach(x => runInNotExceptionThrown {
           x.handleDataChanged(data)
         })
     }

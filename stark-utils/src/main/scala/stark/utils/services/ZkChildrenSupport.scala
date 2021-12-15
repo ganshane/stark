@@ -9,7 +9,7 @@ import org.apache.zookeeper.KeeperException.NoNodeException
 import org.apache.zookeeper.WatchedEvent
 import org.apache.zookeeper.Watcher.Event.EventType
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 /**
@@ -36,7 +36,7 @@ trait ZkChildrenSupport {
       event.getType match {
         case EventType.NodeChildrenChanged | EventType.NodeCreated =>
           val data = internalWatchChildren(event.getPath, this)
-          selfWatchers.watchers.foreach(x => runInNotExceptionThrown {
+          selfWatchers.watchers.asScala.foreach(x => runInNotExceptionThrown {
             x.handleDataChanged(data)
           })
         case EventType.NodeDeleted =>
@@ -101,7 +101,7 @@ trait ZkChildrenSupport {
 
   def getChildren(path: String): Seq[String] = {
     try {
-      zkClient.getChildren.forPath(path).toSeq
+      zkClient.getChildren.forPath(path).asScala.toSeq
     } catch {
       case ex: NoNodeException =>
         Seq[String]()
@@ -112,7 +112,7 @@ trait ZkChildrenSupport {
     try {
       failedChildrenWatcher.remove(path)
       val data = zkClient.getChildren.usingWatcher(curatorWatcher).forPath(path)
-      data.toSeq
+      data.asScala.toSeq
     } catch {
       case NonFatal(e) =>
         warn("fail to watch node data,will retry,msg:{}", e.getMessage)
@@ -130,7 +130,7 @@ trait ZkChildrenSupport {
       val data = internalWatchChildren(path, watcherList.internalWatcher)
       //针对每个watcher调用数据，进行执行
       if (data != null)
-        watcherList.watchers.foreach(x => runInNotExceptionThrown {
+        watcherList.watchers.asScala.foreach(x => runInNotExceptionThrown {
           x.handleDataChanged(data)
         })
     }
@@ -138,12 +138,12 @@ trait ZkChildrenSupport {
 
   protected def rewatchChildren() {
     //对子节点监测
-    childrenWatcher.foreach {
+    childrenWatcher.asScala.foreach {
       case (k, v) =>
         val data = internalWatchChildren(k, v.internalWatcher)
         //针对每个watcher调用数据，进行执行
         if (data != null)
-          v.watchers.foreach(x => runInNotExceptionThrown {
+          v.watchers.asScala.foreach(x => runInNotExceptionThrown {
             x.handleDataChanged(data)
           })
 

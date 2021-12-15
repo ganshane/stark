@@ -630,7 +630,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
           val versionStr = rs.getString(1)
           try {
             val version = java.lang.Long.parseLong(versionStr)
-            versions = versions.insert(version)
+            versions += version
           }
           catch {
             case e: NumberFormatException => {

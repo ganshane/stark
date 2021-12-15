@@ -18,7 +18,7 @@ object ServiceUtils {
   private final val BETWEEN_SECONDS = 20
     private lazy val logger = LoggerFactory getLogger getClass
 
-    def runInNoThrow(fun: =>Unit){
+    def runInNoThrow(fun: =>Unit):Unit={
       try {
         fun
       } catch {

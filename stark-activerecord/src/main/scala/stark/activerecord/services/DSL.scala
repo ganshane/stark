@@ -4,11 +4,11 @@ import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, JoinQueryContext, QueryContext, UpdateField}
 
 import javax.persistence.criteria._
-import scala.collection.JavaConversions
 import scala.language.dynamics
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
 import scala.reflect.{ClassTag, classTag}
+import scala.collection.JavaConverters._
 
 /**
  * ActiveRecord DSL
@@ -287,7 +287,7 @@ private[activerecord] trait Fetch[A] extends Iterable[A]{
     if(offsetNum > 0)
       query.setFirstResult(offsetNum)
 
-    JavaConversions.asScalaBuffer(query.getResultList).toStream
+    query.getResultList.asScala.toStream
   }
 
   override def iterator: Iterator[A] = executeQuery.toIterator

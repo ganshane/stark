@@ -10,7 +10,7 @@ import scala.util.control.NonFatal
  */
 trait RunInNoExceptionThrown {
   this: LoggerSupport =>
-  def runInNotExceptionThrown(fun: => Unit) {
+  def runInNotExceptionThrown(fun: => Unit) :Unit={
     try {
       fun
     } catch {

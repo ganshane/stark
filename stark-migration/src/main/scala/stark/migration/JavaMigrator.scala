@@ -51,7 +51,7 @@ class JavaMigrator private (migrator: Migrator) {
    *        to handle database specific features
    */
   def this(connectionBuilder: ConnectionBuilder,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new Migrator(connectionBuilder, adapter))
   }
 
@@ -63,7 +63,7 @@ class JavaMigrator private (migrator: Migrator) {
    *        to handle database specific features
    */
   def this(jdbcUrl: String,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcUrl), adapter)
   }
 
@@ -80,7 +80,7 @@ class JavaMigrator private (migrator: Migrator) {
   def this(jdbcUrl: String,
            jdbcUsername: String,
            jdbcPassword: String,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcUrl, jdbcUsername, jdbcPassword),
       adapter)
   }
@@ -112,7 +112,7 @@ class JavaMigrator private (migrator: Migrator) {
    *        should be searched
    */
   def installAllMigrations(packageName: String,
-                           searchSubPackages: Boolean) {
+                           searchSubPackages: Boolean):Unit ={
     migrator.migrate(InstallAllMigrations, packageName, searchSubPackages)
   }
 
@@ -125,7 +125,7 @@ class JavaMigrator private (migrator: Migrator) {
    *        should be searched
    */
   def removeAllMigrations(packageName: String,
-                          searchSubPackages: Boolean) {
+                          searchSubPackages: Boolean) :Unit={
     migrator.migrate(RemoveAllMigrations, packageName, searchSubPackages)
   }
 
@@ -141,7 +141,7 @@ class JavaMigrator private (migrator: Migrator) {
    */
   def migrateTo(version: Long,
                 packageName: String,
-                searchSubPackages: Boolean) {
+                searchSubPackages: Boolean) :Unit={
     migrator.migrate(MigrateToVersion(version), packageName, searchSubPackages)
   }
 
@@ -157,7 +157,7 @@ class JavaMigrator private (migrator: Migrator) {
    */
   def rollback(count: Int,
                packageName: String,
-               searchSubPackages: Boolean) {
+               searchSubPackages: Boolean) :Unit={
     migrator.migrate(RollbackMigration(count),
       packageName,
       searchSubPackages)

@@ -7,7 +7,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.ganshane.stark</groupId>
-  <artifactId>stark-project_2.12</artifactId>
+  <artifactId>stark-project</artifactId>
   <packaging>pom</packaging>
   <version>2.0.10</version>
   <name>Stark Project</name>
@@ -258,7 +258,7 @@
         <plugin>
           <groupId>net.alchim31.maven</groupId>
           <artifactId>scala-maven-plugin</artifactId>
-          <version>4.4.0</version>
+          <version>4.5.4</version>
           <executions>
             <execution>
               <id>eclipse-add-source</id>
@@ -567,8 +567,8 @@
     <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
     <tapestry-release-version>5.3.8</tapestry-release-version>
     <jetty-release-version>8.1.16.v20140903</jetty-release-version>
-    <scala-release-version>2.12.11</scala-release-version>
-    <scala-binary-version>2.12</scala-binary-version>
+    <scala-release-version>2.13.7</scala-release-version>
+    <scala-binary-version>2.13</scala-binary-version>
     <metrics-release-version>3.1.0</metrics-release-version>
     <hawtio-release-version>1.4.19</hawtio-release-version>
     <lucene-release-version>5.2.1</lucene-release-version>

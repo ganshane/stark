@@ -6,11 +6,11 @@
 
   <parent>
     <groupId>com.ganshane.stark</groupId>
-    <artifactId>stark-project_2.12</artifactId>
+    <artifactId>stark-project</artifactId>
     <version>2.0.10</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>stark-utils_2.12</artifactId>
+  <artifactId>stark-utils_${scala-binary-version}</artifactId>
   <packaging>jar</packaging>
   <name>Stark Utils Support</name>
   <dependencies>

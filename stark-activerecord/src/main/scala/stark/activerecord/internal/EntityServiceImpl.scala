@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import stark.activerecord.services._
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 import scala.collection.immutable.Stream
 import scala.reflect.{ClassTag, classTag}
 
@@ -134,7 +134,8 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     if (queryObj.limit > -1)
       query.setMaxResults(queryObj.limit)
     //convert as scala stream
-    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream
+    query.getResultList.asInstanceOf[java.util.List[T]].asScala.toStream
+//    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream
   }
 
   override def count[T](queryObj: Relation[T]): Long = {

@@ -9,10 +9,10 @@ trait ServiceLifecycle {
   /**
    * 启动服务
    */
-  def start()
+  def start():Unit
 
   /**
    * 服务关闭
    */
-  def shutdown()
+  def shutdown():Unit
 }

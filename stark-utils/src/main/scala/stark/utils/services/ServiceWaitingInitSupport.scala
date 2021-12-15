@@ -24,7 +24,7 @@ trait ServiceWaitingInitSupport {
   /**
    * 等待1分钟，服务初始化
    */
-  protected def awaitServiceInit() {
+  protected def awaitServiceInit() :Unit={
     if (!latch.await(1, TimeUnit.MINUTES)) {
       throw new StarkException("timeout to wating service init", StarkUtilsErrorCode.WAITING_SERVER_INIT_TIMEOUT)
     }
@@ -42,7 +42,7 @@ trait ServiceWaitingInitSupport {
   /**
    * 标记服务已经初始化完毕
    */
-  protected def serviceInitialized() {
+  protected def serviceInitialized() :Unit={
     latch.countDown()
   }
 }

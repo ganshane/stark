@@ -2,12 +2,10 @@
 // site: http://www.ganshane.com
 package stark.utils.services
 
-import java.util.concurrent.{CopyOnWriteArrayList, CopyOnWriteArraySet}
-
-import stark.utils.StarkUtilsConstants
 import org.apache.zookeeper.CreateMode
+import stark.utils.StarkUtilsConstants
 
-import scala.collection.JavaConversions._
+import java.util.concurrent.{CopyOnWriteArrayList, CopyOnWriteArraySet}
 import scala.util.control.NonFatal
 
 /**
@@ -86,7 +84,7 @@ trait ZkEphemeralPathSupport {
 
   protected def recreateEphemeralNodes() {
     //针对临时节点的再次创建
-    ephemeralNodes.foreach(node => createEphemeralPath(node.path, node.data, node.createMode, isPermanent = true))
+    ephemeralNodes.forEach(node => createEphemeralPath(node.path, node.data, node.createMode, isPermanent = true))
   }
 
   private def createEphemeralPath(path: String,

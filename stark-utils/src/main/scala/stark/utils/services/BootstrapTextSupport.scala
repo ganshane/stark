@@ -84,7 +84,7 @@ trait BootstrapTextSupport {
 
   protected[services] def printTextWithNative(logger: Logger,
                                            logo: String,
-                                           values: Any*) {
+                                           values: Any*) :Unit={
     /*
     //val version = readVersionNumber(versionPath)
     var str = """

@@ -152,7 +152,7 @@ abstract class ColumnDefinition {
   /**
    * Called after the above properties have been wired.
    */
-  def initialize() {
+  def initialize() :Unit={
     // Because AutoIncrement adds specific behavior the application
     // depends upon, always check if AutoIncrement is specified and
     // throw an exception if the column does not support it.
@@ -188,7 +188,7 @@ abstract class ColumnDefinition {
    * option list, setting isAutoIncrement if AutoIncrement was found
    * and warning if two or more AutoIncrement case objects are given.
    */
-  private def checkForAutoIncrement() {
+  private def checkForAutoIncrement() :Unit = {
     for (option @ AutoIncrement <- options) {
       options = options filter { _ ne option }
 
@@ -205,7 +205,7 @@ abstract class ColumnDefinition {
    * list, saving the last one and warning if two or more default
    * values are given.
    */
-  private def checkForDefault() {
+  private def checkForDefault() :Unit={
     for (option @ Default(value) <- options) {
       options = options filter { _ ne option }
 
@@ -233,7 +233,7 @@ abstract class ColumnDefinition {
   /**
    * 检查是否配置了注释
    */
-  private def checkForComment() {
+  private def checkForComment() :Unit = {
     for (option @ Comment(comment) <- options) {
       options = options filter { _ ne option }
 
@@ -260,7 +260,7 @@ abstract class ColumnDefinition {
    * Search for and remove all limits specified in the option list,
    * saving the last one and warning if two or more limits are given.
    */
-  private def checkForLimit() {
+  private def checkForLimit() :Unit={
     for (option @ Limit(length) <- options) {
       options = options filter { _ ne option }
 
@@ -330,7 +330,7 @@ abstract class ColumnDefinition {
   /**
    * Look for a Precision column option.
    */
-  private def checkForPrecision() {
+  private def checkForPrecision() :Unit={
     for (option @ Precision(value) <- options) {
       options = options filter { _ ne option }
 
@@ -359,7 +359,7 @@ abstract class ColumnDefinition {
   /**
    * Look for a Scale column option.
    */
-  private def checkForScale() {
+  private def checkForScale() :Unit={
     for (option @ Scale(value) <- options) {
       options = options filter { _ ne option }
 
@@ -421,7 +421,7 @@ abstract class ColumnDefinition {
     if (getAdapter.supportsCheckConstraints) {
       for (option <- options) {
         def appendCheckSql(name: String,
-                           expr: String) {
+                           expr: String) :Unit={
           options = options filter { _ ne option }
 
           sb.append(" CONSTRAINT ")
