@@ -40,7 +40,7 @@ object ThreadPoolCreator {
   class OverflowingRejectionPolicyAdapter(queue: OverflowingSynchronousQueue[Runnable],
                                           adaptedRejectedExecutionHandler: RejectedExecutionHandler)
     extends RejectedExecutionHandler {
-    def rejectedExecution(r: Runnable, executor: ThreadPoolExecutor) {
+    def rejectedExecution(r: Runnable, executor: ThreadPoolExecutor) :Unit={
       if (!queue.offerToOverflowingQueue(r)) {
         adaptedRejectedExecutionHandler.rejectedExecution(r, executor)
       }

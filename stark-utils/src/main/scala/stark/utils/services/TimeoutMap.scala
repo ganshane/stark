@@ -14,9 +14,9 @@ trait TimeoutMap[K, V] {
 
   def get(key: K): Option[V]
 
-  def putHead(key: K, value: V)
+  def putHead(key: K, value: V):Unit
 
-  def put(key: K, value: V)
+  def put(key: K, value: V):Unit
 
   def remove(key: K): Option[V]
 
@@ -24,7 +24,7 @@ trait TimeoutMap[K, V] {
 }
 
 abstract trait ExpiredCallback[K, V] {
-  def expire(key: K, value: V)
+  def expire(key: K, value: V):Unit
 }
 
 /**
@@ -46,7 +46,7 @@ class RotatingMap[K, V] extends TimeoutMap[K, V] {
   private var _buckets: util.Deque[java.util.Map[K, V]] = null
   private var _callback: ExpiredCallback[K, V] = null
 
-  def this(numBuckets: Int, callback: ExpiredCallback[K, V], isSingleThread: Boolean) {
+  def this(numBuckets: Int, callback: ExpiredCallback[K, V], isSingleThread: Boolean)= {
     this()
     if (numBuckets < 2) {
       throw new IllegalArgumentException("numBuckets must be >= 2")
@@ -64,11 +64,11 @@ class RotatingMap[K, V] extends TimeoutMap[K, V] {
     _callback = callback
   }
 
-  def this(callback: ExpiredCallback[K, V]) {
+  def this(callback: ExpiredCallback[K, V])= {
     this(RotatingMap.DEFAULT_NUM_BUCKETS, callback, false)
   }
 
-  def this(numBuckets: Int) {
+  def this(numBuckets: Int)= {
     this(numBuckets, null, false)
   }
 
@@ -112,11 +112,11 @@ class RotatingMap[K, V] extends TimeoutMap[K, V] {
     None
   }
 
-  def putHead(key: K, value: V) {
+  def putHead(key: K, value: V) :Unit={
     _buckets.peekFirst.put(key, value)
   }
 
-  def put(key: K, value: V) {
+  def put(key: K, value: V) :Unit={
     val it = _buckets.iterator
     var bucket = it.next
     bucket.put(key, value)

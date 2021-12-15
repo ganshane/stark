@@ -91,7 +91,7 @@ object XmlLoader {
     }
   }
 
-  private def close(io: Closeable) {
+  private def close(io: Closeable) :Unit={
     try {
       io.close()
     } catch {

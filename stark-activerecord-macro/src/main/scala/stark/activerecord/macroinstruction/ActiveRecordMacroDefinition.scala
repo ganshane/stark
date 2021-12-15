@@ -76,7 +76,7 @@ object ActiveRecordMacroDefinition {
         }
          */
       })
-      .toStream.distinct
+      .to(LazyList).distinct
   }
   /**
    * find method

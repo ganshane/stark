@@ -36,10 +36,10 @@
 package stark.migration
 
 import java.sql.{Connection, PreparedStatement, ResultSet}
-
 import org.slf4j.LoggerFactory
 
 import scala.annotation.tailrec
+import scala.collection.immutable.ArraySeq.unsafeWrapArray
 import scala.language.implicitConversions
 
 /**
@@ -74,14 +74,14 @@ abstract class Migration {
    * Concrete migration classes must define this method to migrate the
    * database up to a new migration.
    */
-  def up()
+  def up():Unit
 
   /**
    * Concrete migration classes must define this method to back out of
    * this migration.  If the migration cannot be reversed, then a
    * IrreversibleMigrationException should be thrown.
    */
-  def down()
+  def down():Unit
 
   /**
    * The raw connection to the database that underlies the logging
@@ -196,7 +196,7 @@ abstract class Migration {
    *
    * @param sql the SQL to execute
    */
-  final def execute(sql: String*) {
+  final def execute(sql: String*) :Unit={
     With.autoClosingStatement(connection.createStatement) { s =>
       sql.foreach(s.execute)
     }
@@ -217,7 +217,7 @@ abstract class Migration {
    * @param f the Function1[PreparedStatement,Unit] that will be given
    *        a new prepared statement
    */
-  final def withPreparedStatement(sql: String)(f: PreparedStatement => Unit) {
+  final def withPreparedStatement(sql: String)(f: PreparedStatement => Unit) :Unit={
     With.autoCommittingConnection(connection,
       CommitUponReturnOrRollbackUponException) { c =>
         With.autoClosingStatement(c.prepareStatement(sql))(f)
@@ -240,7 +240,7 @@ abstract class Migration {
   }
 
   final def createTable(tableName: String,
-                        options: TableOption*)(body: TableDefinition => Unit) {
+                        options: TableOption*)(body: TableDefinition => Unit) :Unit={
     val tableDefinition = new TableDefinition(adapter, tableName,options:_*)
 
     body(tableDefinition)
@@ -254,13 +254,13 @@ abstract class Migration {
       .toString
     execute(sql)
     val commentSql = tableDefinition.toCommentSql
-    execute(commentSql:_*)
+    execute(unsafeWrapArray(commentSql):_*)
   }
 
   final def addColumn(tableName: String,
                       columnName: String,
                       columnType: SqlType,
-                      options: ColumnOption*) {
+                      options: ColumnOption*) :Unit={
     val tableDefinition = new TableDefinition(adapter, tableName)
 
     tableDefinition.column(columnName, columnType, options: _*)
@@ -272,7 +272,7 @@ abstract class Migration {
       .toString
     execute(sql)
     val commentSql = tableDefinition.toCommentSql
-    execute(commentSql:_*)
+    execute(unsafeWrapArray(commentSql):_*)
   }
 
   /**
@@ -339,21 +339,21 @@ abstract class Migration {
   final def alterColumn(tableName: String,
                         columnName: String,
                         columnType: SqlType,
-                        options: ColumnOption*) {
+                        options: ColumnOption*) :Unit={
     val sqls = adapter.alterColumnSql(tableName,
       columnName,
       columnType,
       options: _*)
 
-    execute(sqls:_*)
+    execute(unsafeWrapArray(sqls):_*)
   }
 
   final def removeColumn(tableName: String,
-                         columnName: String) {
+                         columnName: String) :Unit={
     execute(adapter.removeColumnSql(tableName, columnName))
   }
 
-  final def dropTable(tableName: String) {
+  final def dropTable(tableName: String) :Unit={
     val sql = new java.lang.StringBuilder(512)
       .append("DROP TABLE ")
       .append(adapter.quoteTableName(tableName))
@@ -400,7 +400,7 @@ abstract class Migration {
    */
   final def addIndex(tableName: String,
                      columnNames: Array[String],
-                     options: IndexOption*) {
+                     options: IndexOption*) :Unit={
     if (columnNames.isEmpty) {
       throw new IllegalArgumentException("Adding an index requires at " +
         "least one column name.")
@@ -446,7 +446,7 @@ abstract class Migration {
    */
   final def addIndex(tableName: String,
                      columnName: String,
-                     options: IndexOption*) {
+                     options: IndexOption*) :Unit={
     addIndex(tableName, Array(columnName), options: _*)
   }
 
@@ -463,7 +463,7 @@ abstract class Migration {
    */
   final def removeIndex(tableName: String,
                         columnNames: Array[String],
-                        options: Name*) {
+                        options: Name*) :Unit={
     if (columnNames.isEmpty) {
       throw new IllegalArgumentException("Removing an index requires at " +
         "least one column name.")
@@ -488,7 +488,7 @@ abstract class Migration {
    */
   final def removeIndex(tableName: String,
                         columnName: String,
-                        options: Name*) {
+                        options: Name*) :Unit={
     removeIndex(tableName, Array(columnName), options: _*)
   }
 
@@ -546,7 +546,7 @@ abstract class Migration {
    */
   def addForeignKey(on: On,
                     references: References,
-                    options: ForeignKeyOption*) {
+                    options: ForeignKeyOption*) :Unit={
     if (on.columnNames.length == 0) {
       throw new IllegalArgumentException("Adding a foreign key constraint " +
         "requires at least one column name " +
@@ -633,7 +633,7 @@ abstract class Migration {
    */
   def addForeignKey(references: References,
                     on: On,
-                    options: ForeignKeyOption*) {
+                    options: ForeignKeyOption*) :Unit={
     addForeignKey(on, references, options: _*)
   }
 
@@ -650,7 +650,7 @@ abstract class Migration {
    */
   def removeForeignKey(on: On,
                        references: References,
-                       options: Name*) {
+                       options: Name*) :Unit={
     if (on.columnNames.length == 0) {
       throw new IllegalArgumentException("Removing a foreign key constraint " +
         "requires at least one column name " +
@@ -686,7 +686,7 @@ abstract class Migration {
    */
   def removeForeignKey(references: References,
                        on: On,
-                       options: Name*) {
+                       options: Name*) :Unit={
     removeForeignKey(on, references, options: _*)
   }
 
@@ -700,7 +700,7 @@ abstract class Migration {
    */
   final def grant(tableName: String,
                   grantees: Array[User],
-                  privileges: GrantPrivilegeType*) {
+                  privileges: GrantPrivilegeType*) :Unit={
     if (grantees.isEmpty) {
       throw new IllegalArgumentException("Granting privileges requires " +
         "at least one grantee.")
@@ -726,7 +726,7 @@ abstract class Migration {
    */
   final def grant(tableName: String,
                   grantees: Array[String],
-                  privileges: GrantPrivilegeType*) {
+                  privileges: GrantPrivilegeType*) :Unit={
     grant(tableName,
       grantees map { adapter.userFactory.nameToUser(_) },
       privileges: _*)
@@ -742,7 +742,7 @@ abstract class Migration {
    */
   final def grant(tableName: String,
                   grantee: User,
-                  privileges: GrantPrivilegeType*) {
+                  privileges: GrantPrivilegeType*) :Unit={
     grant(tableName, Array(grantee), privileges: _*)
   }
 
@@ -756,7 +756,7 @@ abstract class Migration {
    */
   final def grant(tableName: String,
                   grantee: String,
-                  privileges: GrantPrivilegeType*) {
+                  privileges: GrantPrivilegeType*) :Unit={
     grant(tableName,
       Array[User](adapter.userFactory.nameToUser(grantee)),
       privileges: _*)
@@ -772,7 +772,7 @@ abstract class Migration {
    */
   final def revoke(tableName: String,
                    grantees: Array[User],
-                   privileges: GrantPrivilegeType*) {
+                   privileges: GrantPrivilegeType*) :Unit={
     if (grantees.isEmpty) {
       throw new IllegalArgumentException("Revoking privileges requires " +
         "at least one grantee.")
@@ -798,7 +798,7 @@ abstract class Migration {
    */
   final def revoke(tableName: String,
                    grantees: Array[String],
-                   privileges: GrantPrivilegeType*) {
+                   privileges: GrantPrivilegeType*) :Unit={
     revoke(tableName,
       grantees map { adapter.userFactory.nameToUser(_) },
       privileges: _*)
@@ -814,7 +814,7 @@ abstract class Migration {
    */
   final def revoke(tableName: String,
                    grantee: User,
-                   privileges: GrantPrivilegeType*) {
+                   privileges: GrantPrivilegeType*) :Unit={
     revoke(tableName, Array(grantee), privileges: _*)
   }
 
@@ -828,7 +828,7 @@ abstract class Migration {
    */
   final def revoke(tableName: String,
                    grantee: String,
-                   privileges: GrantPrivilegeType*) {
+                   privileges: GrantPrivilegeType*) :Unit={
     revoke(tableName,
       Array[User](adapter.userFactory.nameToUser(grantee)),
       privileges: _*)
@@ -842,7 +842,7 @@ abstract class Migration {
    *        grantees
    */
   final def grantSchemaPrivilege(grantees: Array[User],
-                                 privileges: SchemaPrivilege*) {
+                                 privileges: SchemaPrivilege*) :Unit={
     if (grantees.isEmpty) {
       throw new IllegalArgumentException("Granting privileges requires " +
         "at least one grantee.")
@@ -866,7 +866,7 @@ abstract class Migration {
    *        grantees
    */
   final def grantSchemaPrivilege(grantees: Array[String],
-                                 privileges: SchemaPrivilege*) {
+                                 privileges: SchemaPrivilege*) :Unit={
     grantSchemaPrivilege(grantees map { adapter.userFactory.nameToUser(_) },
       privileges: _*)
   }
@@ -879,7 +879,7 @@ abstract class Migration {
    *        grantee
    */
   final def grantSchemaPrivilege(grantee: User,
-                                 privileges: SchemaPrivilege*) {
+                                 privileges: SchemaPrivilege*) :Unit={
     grantSchemaPrivilege(Array(grantee), privileges: _*)
   }
 
@@ -891,7 +891,7 @@ abstract class Migration {
    *        grantee
    */
   final def grantSchemaPrivilege(grantee: String,
-                                 privileges: SchemaPrivilege*) {
+                                 privileges: SchemaPrivilege*) :Unit={
     grantSchemaPrivilege(adapter.userFactory.nameToUser(grantee),
       privileges: _*)
   }
@@ -904,7 +904,7 @@ abstract class Migration {
    *        grantees
    */
   final def revokeSchemaPrivilege(grantees: Array[User],
-                                  privileges: SchemaPrivilege*) {
+                                  privileges: SchemaPrivilege*) :Unit={
     if (grantees.isEmpty) {
       throw new IllegalArgumentException("Revoking privileges requires " +
         "at least one grantee.")
@@ -928,7 +928,7 @@ abstract class Migration {
    *        grantees
    */
   final def revokeSchemaPrivilege(grantees: Array[String],
-                                  privileges: SchemaPrivilege*) {
+                                  privileges: SchemaPrivilege*) :Unit={
     revokeSchemaPrivilege(grantees map { adapter.userFactory.nameToUser(_) },
       privileges: _*)
   }
@@ -941,7 +941,7 @@ abstract class Migration {
    *        the grantee
    */
   final def revokeSchemaPrivilege(grantee: User,
-                                  privileges: SchemaPrivilege*) {
+                                  privileges: SchemaPrivilege*) :Unit={
     revokeSchemaPrivilege(Array(grantee), privileges: _*)
   }
 
@@ -953,7 +953,7 @@ abstract class Migration {
    *        the grantee
    */
   final def revokeSchemaPrivilege(grantee: String,
-                                  privileges: SchemaPrivilege*) {
+                                  privileges: SchemaPrivilege*) :Unit={
     revokeSchemaPrivilege(adapter.userFactory.nameToUser(grantee),
       privileges: _*)
   }
@@ -970,7 +970,7 @@ abstract class Migration {
    */
   def addCheck(on: On,
                expr: String,
-               options: CheckOption*) {
+               options: CheckOption*) :Unit={
     if (on.columnNames.isEmpty) {
       throw new IllegalArgumentException("Adding a check constraint " +
         "requires at least one column name " +
@@ -1009,7 +1009,7 @@ abstract class Migration {
    *        customize the removal of the CHECK constraint
    */
   def removeCheck(on: On,
-                  options: Name*) {
+                  options: Name*) :Unit={
     if (on.columnNames.isEmpty) {
       throw new IllegalArgumentException("Removing a check constraint " +
         "requires at least one column " +
@@ -1079,7 +1079,7 @@ abstract class Migration {
     def findTriggerObjectOption[T <: TriggerOption: Manifest](objects:T*):Option[T]={
       objects.foldLeft(Option.empty[T]){ (last,currentObject) =>
         val current = checkOption[T](opts,Option.empty[T])
-        if(current.isDefined && last.nonEmpty) throw new ConflictingTriggerException(current+" conflict "+last)
+        if(current.isDefined && last.nonEmpty) throw new ConflictingTriggerException(s"${current} conflict ${last}")
         if(current.isDefined)  current else last
       }
     }

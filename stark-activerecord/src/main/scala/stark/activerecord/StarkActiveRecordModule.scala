@@ -60,7 +60,9 @@ class StarkActiveRecordModule(beanFactory: AutowireCapableBeanFactory) {
 
     val vendorClassName = properties.getProperty(StarkActiveRecordConstants.JPA_VENDOR_KEY)
     if( vendorClassName != null)
-      entityManagerFactoryBean.setJpaVendorAdapter(Thread.currentThread().getContextClassLoader.loadClass(vendorClassName).newInstance().asInstanceOf[JpaVendorAdapter])
+      entityManagerFactoryBean.setJpaVendorAdapter(Thread.currentThread().getContextClassLoader
+        .loadClass(vendorClassName)
+        .getDeclaredConstructor().newInstance().asInstanceOf[JpaVendorAdapter])
     else
       entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter)
 

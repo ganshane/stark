@@ -4,11 +4,12 @@ import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, JoinQueryContext, QueryContext, UpdateField}
 
 import javax.persistence.criteria._
+import scala.collection.immutable.ArraySeq.unsafeWrapArray
+import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.language.dynamics
 import scala.language.experimental.macros
 import scala.reflect.runtime.universe._
 import scala.reflect.{ClassTag, classTag}
-import scala.collection.JavaConverters._
 
 /**
  * ActiveRecord DSL
@@ -224,7 +225,7 @@ private[activerecord] trait OrderByClause {
     val fieldPaths = field.field.fieldName.split("\\.")
     val finalPath =
       if(fieldPaths.isEmpty) getPath(field.field.fieldName)
-      else getPath(fieldPaths:_*)
+      else getPath(unsafeWrapArray(fieldPaths):_*)
     if(field.isAsc)
       context.query.asInstanceOf[CriteriaQuery[_]].orderBy(context.builder.asc(finalPath))
     else
@@ -254,14 +255,11 @@ private[activerecord] trait Execute[A]{
     ActiveRecord.executeInTransaction{entityManager=>
     val query = context.query match{
       case q:CriteriaUpdate[A] =>
-        val criteriaUpdate = context.query.asInstanceOf[CriteriaUpdate[A]]
-        conditionOpt.foreach(criteriaUpdate.where)
-        entityManager.createQuery(criteriaUpdate)
+        conditionOpt.foreach(q.where)
+        entityManager.createQuery(q)
       case q:CriteriaDelete[A] =>
-        val criteriaDelete = context.query.asInstanceOf[CriteriaDelete[A]]
-        conditionOpt.foreach(criteriaDelete.where)
-        entityManager.createQuery(criteriaDelete)
-
+        conditionOpt.foreach(q.where)
+        entityManager.createQuery(q)
     }
     if(limitNum >0 )
       query.setMaxResults(limitNum)
@@ -275,9 +273,9 @@ private[activerecord] trait Execute[A]{
 private[activerecord] trait Fetch[A] extends Iterable[A]{
   this:LimitClause with ConditionsGetter =>
   val context:QueryContext
-  private lazy val executeQuery:Stream[A]= fetchAsStream
+  private lazy val executeQuery:LazyList[A]= fetchAsStream
   private lazy val totalNum:Long = executeCount
-  private def fetchAsStream: Stream[A]={
+  private def fetchAsStream: LazyList[A]={
     val entityManager = ActiveRecord.entityManager
     val criteriaQuery = context.query.asInstanceOf[CriteriaQuery[A]]
     conditionOpt.foreach(criteriaQuery.where)
@@ -287,10 +285,10 @@ private[activerecord] trait Fetch[A] extends Iterable[A]{
     if(offsetNum > 0)
       query.setFirstResult(offsetNum)
 
-    query.getResultList.asScala.toStream
+    query.getResultList.asScala.to(LazyList)
   }
 
-  override def iterator: Iterator[A] = executeQuery.toIterator
+  override def iterator: Iterator[A] = executeQuery.iterator
 
   /**
     * count all records

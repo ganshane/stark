@@ -21,14 +21,14 @@ trait EntityService {
   def merge[T](entity:T):T
   def refresh[T](entity:T):Unit
   @Transactional
-  def deleteById[T:ClassTag](id:Any)
+  def deleteById[T:ClassTag](id:Any):Unit
   @Transactional
-  def delete[T](entity:T)
+  def delete[T](entity:T):Unit
   @Transactional
   def execute[T](function :EntityManager=>Int):Int
   @Transactional
   def deleteRelation[T](relation: DynamicUpdateSupport[T]):Int
   @Transactional
   def updateRelation[T](relation: DynamicUpdateSupport[T]):Int
-  def find[T](relation:Relation[T]):Stream[T]
+  def find[T](relation:Relation[T]):LazyList[T]
 }

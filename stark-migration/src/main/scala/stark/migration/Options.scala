@@ -147,7 +147,7 @@ case class CharacterSet(name: CharacterSetName,
    * @param collation the name of the collation
    */
   def this(name: CharacterSetName,
-           collation: String) {
+           collation: String)= {
     this(name, Some(collation))
   }
 
@@ -156,7 +156,7 @@ case class CharacterSet(name: CharacterSetName,
    *
    * @param name the name of the character set
    */
-  def this(name: CharacterSetName) {
+  def this(name: CharacterSetName)= {
     this(name, None)
   }
 

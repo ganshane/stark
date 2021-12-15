@@ -14,7 +14,7 @@ import scala.util.control.NonFatal
  * detect system information
  */
 trait SystemEnvDetectorSupport {
-  protected def detectAndPrintSystemEnv(logger: Logger) {
+  protected def detectAndPrintSystemEnv(logger: Logger) :Unit={
     val l = new util.ArrayList[Entry]()
     try {
       put(l, "host.name", InetAddress.getLocalHost.getCanonicalHostName)
@@ -62,7 +62,7 @@ trait SystemEnvDetectorSupport {
     }
   }
 
-  private def put(l: util.ArrayList[Entry], k: String, v: String) {
+  private def put(l: util.ArrayList[Entry], k: String, v: String) :Unit={
     l.add(Entry(k, v))
   }
 

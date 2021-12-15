@@ -1,13 +1,11 @@
 package stark.activerecord.internal
 
-import javax.persistence.{EntityManager, Query}
-
 import org.slf4j.LoggerFactory
 import org.springframework.transaction.annotation.Transactional
 import stark.activerecord.services._
 
-import scala.collection.JavaConverters._
-import scala.collection.immutable.Stream
+import javax.persistence.{EntityManager, Query}
+import scala.jdk.CollectionConverters.ListHasAsScala
 import scala.reflect.{ClassTag, classTag}
 
 /**
@@ -109,7 +107,7 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
    * @tparam T type parameter
    * @return record stream
    */
-  def find[T](queryObj:Relation[T]):Stream[T]={
+  def find[T](queryObj:Relation[T]):LazyList[T]={
     val query = queryObj match {
       case relation: QlRelation[T] =>
         var fullQl = "from %s".format(relation.entityClazz.getSimpleName)
@@ -134,7 +132,7 @@ class EntityServiceImpl(entityManager:EntityManager) extends EntityService {
     if (queryObj.limit > -1)
       query.setMaxResults(queryObj.limit)
     //convert as scala stream
-    query.getResultList.asInstanceOf[java.util.List[T]].asScala.toStream
+    query.getResultList.asInstanceOf[java.util.List[T]].asScala.to(LazyList)
 //    JavaConversions.asScalaBuffer[T](query.getResultList.asInstanceOf[java.util.List[T]]).toStream
   }
 

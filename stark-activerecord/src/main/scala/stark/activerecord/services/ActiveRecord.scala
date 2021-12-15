@@ -6,7 +6,6 @@ import stark.activerecord.services.DSL.DSLSelectionQuery
 
 import javax.persistence.criteria.{Predicate, Selection}
 import javax.persistence.{EntityManager, Id, Transient}
-import scala.collection.immutable.Stream
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
 import scala.reflect.{ClassTag, classTag}
@@ -67,7 +66,7 @@ object ActiveRecord {
    * @tparam T type parameter
    * @return record stream
    */
-  private[services] def find[T](relation:Relation[T]):Stream[T]={
+  private[services] def find[T](relation:Relation[T]):LazyList[T]={
     entityService.find(relation)
   }
   private[services] def count[T](relation:Relation[T]):Long={

@@ -12,8 +12,7 @@ import org.apache.commons.io.input.ClassLoaderObjectInputStream
  * Stark Utils
  */
 object StarkUtils
-  extends LoggerSupport
-  with NetworkUtilsSupport {
+  extends LoggerSupport {
   /**
    * 解析host:port形式的网络地址
    * @param bind 网络地址
@@ -116,7 +115,7 @@ object StarkUtils
    * @param executor Executor service
    * @param executorName executor name
    */
-  def shutdownExecutor(executor: ExecutorService, executorName: String) {
+  def shutdownExecutor(executor: ExecutorService, executorName: String) :Unit={
     if (executor == null)
       return
     //停止新任务提交

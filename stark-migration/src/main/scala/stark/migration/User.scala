@@ -59,7 +59,7 @@ sealed abstract class User {
 class PlainUser(userName: String)
     extends User {
   override def quoted(unquotedNameConverter: UnquotedNameConverter): String = {
-    '"' + unquotedNameConverter(userName) + '"'
+    s"\"${unquotedNameConverter(userName)}\""
   }
 }
 

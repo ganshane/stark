@@ -52,27 +52,6 @@
         <artifactId>stark-utils_${scala-binary-version}</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.apache.tapestry</groupId>
-        <artifactId>tapestry-core</artifactId>
-        <version>${tapestry-release-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tapestry</groupId>
-        <artifactId>tapestry-json</artifactId>
-        <version>${tapestry-release-version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.tapestry</groupId>
-        <artifactId>tapestry-ioc</artifactId>
-        <version>${tapestry-release-version}</version>
-        <exclusions>
-          <exclusion>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-          </exclusion>
-        </exclusions>
-      </dependency>
 
       <!-- scala -->
       <dependency>
@@ -565,8 +544,10 @@
     <encoding>UTF-8</encoding>
     <update-release-info>false</update-release-info>
     <project.build.sourceEncoding>UTF8</project.build.sourceEncoding>
-    <tapestry-release-version>5.3.8</tapestry-release-version>
-    <jetty-release-version>8.1.16.v20140903</jetty-release-version>
+    <spring.boot.version>2.6.1</spring.boot.version>
+    <spring.version>5.3.13</spring.version>
+    <spring.security.version>5.6.0</spring.security.version>
+    <jackson.version>2.11.2</jackson.version>
     <scala-release-version>2.13.7</scala-release-version>
     <scala-binary-version>2.13</scala-binary-version>
     <metrics-release-version>3.1.0</metrics-release-version>

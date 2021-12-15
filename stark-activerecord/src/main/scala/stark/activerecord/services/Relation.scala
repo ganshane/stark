@@ -2,8 +2,8 @@ package stark.activerecord.services
 
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 
-import scala.collection.immutable.Stream
-import scala.collection.{GenTraversableOnce, mutable}
+import scala.collection.immutable.LazyList
+import scala.collection.{IterableOnce, mutable}
 import scala.language.experimental.macros
 import scala.language.{dynamics, postfixOps, reflectiveCalls}
 
@@ -17,8 +17,8 @@ trait Relation[A] {
   private[activerecord] var limit:Int = -1
   private[activerecord] var offset:Int = -1
 
-  private var underlying_result:Stream[A] = _
-  protected def executeQuery: Stream[A] = {
+  private var underlying_result:LazyList[A] = _
+  protected def executeQuery: LazyList[A] = {
     if(underlying_result == null)
       underlying_result = ActiveRecord.find(this)
     underlying_result
@@ -65,8 +65,8 @@ trait Relation[A] {
   @inline final def head = executeQuery.head
   @inline final def headOption = executeQuery.headOption
   @inline final def tail = executeQuery.tail
-  @inline final def map[B, That](f: A => B) = executeQuery.map(f)
-  @inline final def flatMap[B, That](f: A => GenTraversableOnce[B])= executeQuery.flatMap(f)
+  @inline final def map[B](f: A => B) = executeQuery.map(f)
+  @inline final def flatMap[B](f: A => IterableOnce[B]): LazyList[B] = executeQuery.flatMap(f)
 }
 
 trait DynamicUpdateSupport[A] extends Dynamic{
@@ -88,7 +88,7 @@ trait DynamicUpdateSupport[A] extends Dynamic{
  */
 class QlRelation[A](val entityClazz:Class[A],val primaryKey:String) extends Relation[A] with DynamicUpdateSupport[A]{
 
-  def this(entityClazz:Class[A],primaryKey:String,query:String,queryParams:Seq[Any]){
+  def this(entityClazz:Class[A],primaryKey:String,query:String,queryParams:Seq[Any])={
     this(entityClazz,primaryKey)
     if(query != null)
       this.queryClause = Some(query)

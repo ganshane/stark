@@ -50,7 +50,7 @@ import scala.collection.{immutable, mutable}
  */
 private class CreateSchemaMigrationsTableMigration
     extends Migration {
-  override def up() {
+  override def up() :Unit= {
     createTable(Migrator.schemaMigrationsTableName) { t =>
       t.varchar("version", Limit(32), NotNull)
     }
@@ -61,7 +61,7 @@ private class CreateSchemaMigrationsTableMigration
       Name("unique_schema_migrations"))
   }
 
-  override def down() {
+  override def down() :Unit={
     throw new IrreversibleMigrationException
   }
 }
@@ -130,7 +130,7 @@ object Migrator {
     val classNames = new mutable.HashSet[String]
 
     def scan(f: java.io.File,
-             pn: String) {
+             pn: String) :Unit={
       val childFiles = f.listFiles
 
       for (childFile <- childFiles) {
@@ -306,7 +306,7 @@ object Migrator {
                 throw new DuplicateMigrationVersionException(message)
               }
               case None => {
-                seenVersions = seenVersions.insert(version, className)
+                seenVersions = seenVersions.updated(version, className)
               }
             }
 
@@ -351,7 +351,7 @@ object Migrator {
             // Ensure that there is a no-argument constructor.
             c.getConstructor()
             val castedClass = c.asSubclass(classOf[Migration])
-            results = results.insert(version, castedClass)
+            results = results.updated(version, castedClass)
           }
           catch {
             case e: NoSuchMethodException => {
@@ -415,7 +415,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
    *        to handle database specific features
    */
   def this(jdbcUrl: String,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcUrl), adapter)
   }
 
@@ -432,7 +432,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
   def this(jdbcUrl: String,
            jdbcUsername: String,
            jdbcPassword: String,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcUrl, jdbcUsername, jdbcPassword), adapter)
   }
 
@@ -444,7 +444,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
    *        to handle database specific features
    */
   def this(jdbcDatasource: DataSource,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcDatasource), adapter)
   }
 
@@ -462,7 +462,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
   def this(jdbcDatasource: DataSource,
            jdbcUsername: String,
            jdbcPassword: String,
-           adapter: DatabaseAdapter) {
+           adapter: DatabaseAdapter)= {
     this(new ConnectionBuilder(jdbcDatasource, jdbcUsername, jdbcPassword),
       adapter)
   }
@@ -552,7 +552,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
    */
   private def runMigration(migrationClass: Class[_ <: Migration],
                            direction: MigrationDirection,
-                           versionUpdateOpt: Option[(Connection, Long)]) {
+                           versionUpdateOpt: Option[(Connection, Long)]) :Unit={
     logger.info("Migrating {} with '{}'.",
       Array[AnyRef](direction.str, migrationClass.getName))
 
@@ -606,7 +606,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
   /**
    * Creates the schema migrations table if it does not exist.
    */
-  private def initializeSchemaMigrationsTable() {
+  private def initializeSchemaMigrationsTable() :Unit={
     if (!doesSchemaMigrationsTableExist) {
       runMigration(classOf[CreateSchemaMigrationsTableMigration], Up, None)
     }
@@ -676,7 +676,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
    */
   def migrate(operation: MigratorOperation,
               packageName: String,
-              searchSubPackages: Boolean) {
+              searchSubPackages: Boolean) :Unit={
     initializeSchemaMigrationsTable()
 
     // Get a new connection that locks the schema_migrations table.
@@ -841,7 +841,7 @@ class Migrator(connectionBuilder: ConnectionBuilder,
       availableMigrations.get(installedVersion) match {
         case Some(clazz) => {
           installedWithAvailableImplementation =
-            installedWithAvailableImplementation.insert(installedVersion,
+            installedWithAvailableImplementation.updated(installedVersion,
               clazz)
         }
         case None => {

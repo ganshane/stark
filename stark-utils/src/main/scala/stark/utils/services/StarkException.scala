@@ -40,13 +40,13 @@ class StarkException(message: String, cause: Throwable, val errorCode: ErrorCode
 
   def this(cause: Throwable, errorCode: ErrorCode) = this(cause.getMessage, cause, errorCode)
 
-  override def printStackTrace(s: PrintStream) {
+  override def printStackTrace(s: PrintStream) :Unit={
     s.synchronized {
       printStackTrace(new PrintWriter(s))
     }
   }
 
-  override def printStackTrace(s: PrintWriter) {
+  override def printStackTrace(s: PrintWriter) :Unit={
     s.synchronized {
       s.println(this)
       getStackTrace.foreach { trace =>

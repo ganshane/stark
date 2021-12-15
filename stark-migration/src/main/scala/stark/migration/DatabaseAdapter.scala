@@ -218,7 +218,7 @@ abstract class DatabaseAdapter(val schemaNameOpt: Option[String]) {
    * @return a properly quoted schema name
    */
   def quoteSchemaName(schemaName: String): String = {
-    quoteCharacter + unquotedNameConverter(schemaName) + quoteCharacter
+    s"$quoteCharacter${unquotedNameConverter(schemaName)}$quoteCharacter"
   }
 
   /**
@@ -294,7 +294,7 @@ abstract class DatabaseAdapter(val schemaNameOpt: Option[String]) {
    * @return a properly quoted column name
    */
   def quoteColumnName(columnName: String): String = {
-    quoteCharacter + unquotedNameConverter(columnName) + quoteCharacter
+    s"$quoteCharacter${unquotedNameConverter(columnName)}$quoteCharacter"
   }
 
   /**
