@@ -1,7 +1,6 @@
 package stark.activerecord.services
 
 
-import org.joda.time.DateTime
 import stark.activerecord.services.DSL.UpdateField
 
 import javax.persistence.criteria.Selection
@@ -10,113 +9,143 @@ import scala.reflect.runtime.universe._
 
 /**
  * ActiveRecord field
-  *
-  * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
+ *
+ * @author <a href="mailto:jcai@ganshane.com">Jun Tsai</a>
  * @since 2016-03-09
  */
 object Field {
-  def countField= new SelectionField {
+  def countField = new SelectionField {
     override def toSelection[X]: Selection[X] = {
-      val context =DSL.dslContext.value
+      val context = DSL.dslContext.value
       context.builder.count(context.root).asInstanceOf[Selection[X]]
     }
   }
-  implicit def wrapNumericField[T<:Number](field: Field[T]):NumericField[T]= new NumericField(field)
-  implicit def wrapNumericField[T](field: Field[T])(implicit num:Numeric[T]) = new NumericField(field)
-  implicit def wrapStringField(field: Field[String]):StringField = new StringField(field)
-  implicit def wrapDateTimeField(field: Field[DateTime]):DateTimeField= new DateTimeField(field)
-  implicit def wrapEnumerationField[T <: Enumeration#Value](field: Field[T]):EnumerationField[T]= new EnumerationField(field)
+
+  implicit def wrapNumericField[T <: Number](field: Field[T]): NumericField[T] = new NumericField(field)
+
+  implicit def wrapNumericField[T](field: Field[T])(implicit num: Numeric[T]) = new NumericField(field)
+
+  implicit def wrapStringField(field: Field[String]): StringField = new StringField(field)
 }
-trait Field[+A] extends SelectionField{
-  val fieldName:String
-  def === [B >: A ](value:B): Condition
-  def === (value:Field[Any]): Condition
 
-  def < [B >: A](value:B): Condition
-  def <= [B >: A](value:B): Condition
-  def > [B >: A](value:B): Condition
-  def >= [B >: A](value:B): Condition
+trait Field[+A] extends SelectionField {
+  val fieldName: String
 
-  def < (value:Field[Any]): Condition
-  def <= (value:Field[Any]): Condition
-  def > (value:Field[Any]): Condition
-  def >= (value:Field[Any]): Condition
+  def ===[B >: A](value: B): Condition
 
-  def !==[B>:A](value : B)                                 : Condition
-  def !==[B >: A](value : Field[B])                          : Condition
-  def <>[B>:A](value : B)= !==(value)
-  def <>[B>:A](value : Field[B])= !==(value)
+  def ===(value: Field[Any]): Condition
 
-  def isNull:Condition
-  def notNull:Condition
+  def <[B >: A](value: B): Condition
 
-  def desc[B >: A]:SortField[B]
-  def asc[B >:A ]:SortField[B]
-  def count:SelectionField
-  def sum:SelectionField
-  def distinct:SelectionField
-  def max:SelectionField
+  def <=[B >: A](value: B): Condition
+
+  def >[B >: A](value: B): Condition
+
+  def >=[B >: A](value: B): Condition
+
+  def <(value: Field[Any]): Condition
+
+  def <=(value: Field[Any]): Condition
+
+  def >(value: Field[Any]): Condition
+
+  def >=(value: Field[Any]): Condition
+
+  def !==[B >: A](value: B): Condition
+
+  def !==[B >: A](value: Field[B]): Condition
+
+  def <>[B >: A](value: B) = !==(value)
+
+  def <>[B >: A](value: Field[B]) = !==(value)
+
+  def isNull: Condition
+
+  def notNull: Condition
+
+  def desc[B >: A]: SortField[B]
+
+  def asc[B >: A]: SortField[B]
+
+  def count: SelectionField
+
+  def sum: SelectionField
+
+  def distinct: SelectionField
+
+  def max: SelectionField
 
   //用来更新操作
-  def ~=?[B >: A](value:B):UpdateField
-  def ~=[B >: A](value:B):UpdateField
-}
-trait SelectionField{
-  def toSelection[X]:Selection[X]
-}
-trait DistinctSelectionField extends SelectionField{
-}
-case class SortField[T](field: Field[T],isAsc:Boolean=true)
+  def ~=?[B >: A](value: B): UpdateField
 
-private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extends Field[T] {
+  def ~=[B >: A](value: B): UpdateField
+}
+
+trait SelectionField {
+  def toSelection[X]: Selection[X]
+}
+
+trait DistinctSelectionField extends SelectionField {
+}
+
+case class SortField[T](field: Field[T], isAsc: Boolean = true)
+
+private[activerecord] class JPAField[+T: TypeTag](val fieldName: String) extends Field[T] {
   override def ===[B >: T](value: B): Condition = {
-    Condition.eq(this,value)
+    Condition.eq(this, value)
   }
 
   override def ===(value: Field[Any]): Condition = {
-    Condition.eq(this,value)
+    Condition.eq(this, value)
   }
-  override def <[B >: T](value: B): Condition = Condition.lt(this,value)
-  override def <=[B >: T](value: B): Condition = Condition.le(this,value)
-  override def >[B >: T](value: B): Condition = Condition.gt(this,value)
-  override def >=[B >: T](value: B): Condition = Condition.ge(this,value)
 
-  override def <(value: Field[Any]): Condition = Condition.lt(this,value)
-  override def <=(value: Field[Any]): Condition = Condition.le(this,value)
-  override def >(value: Field[Any]): Condition = Condition.gt(this,value)
-  override def >=(value: Field[Any]): Condition = Condition.ge(this,value)
+  override def <[B >: T](value: B): Condition = Condition.lt(this, value)
 
-  override def !==[B >: T](value: B): Condition = Condition.notEq(this,value)
-  override def !==[B >: T](value: Field[B]): Condition = Condition.notEq(this,value)
+  override def <=[B >: T](value: B): Condition = Condition.le(this, value)
+
+  override def >[B >: T](value: B): Condition = Condition.gt(this, value)
+
+  override def >=[B >: T](value: B): Condition = Condition.ge(this, value)
+
+  override def <(value: Field[Any]): Condition = Condition.lt(this, value)
+
+  override def <=(value: Field[Any]): Condition = Condition.le(this, value)
+
+  override def >(value: Field[Any]): Condition = Condition.gt(this, value)
+
+  override def >=(value: Field[Any]): Condition = Condition.ge(this, value)
+
+  override def !==[B >: T](value: B): Condition = Condition.notEq(this, value)
+
+  override def !==[B >: T](value: Field[B]): Condition = Condition.notEq(this, value)
 
   override def isNull: Condition = Condition.isNull(this)
+
   override def notNull: Condition = Condition.notNull(this)
 
-  override def desc[B >: T]: SortField[B] = SortField(this,false)
-  override def asc[B >: T]: SortField[B] = SortField(this,isAsc = true)
+  override def desc[B >: T]: SortField[B] = SortField(this, false)
 
-  override def toSelection[X]: Selection[X]= {
-    DSL.dslContext.value.root.get[X](fieldName)
-  }
-  private def expression[X]={
-    DSL.dslContext.value.root.get[X](fieldName)
-  }
+  override def asc[B >: T]: SortField[B] = SortField(this, isAsc = true)
 
-  override def count: SelectionField ={
+  override def count: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         DSL.dslContext.value.builder.count(expression).asInstanceOf[Selection[X]]
       }
     }
   }
-  override def sum: SelectionField ={
+
+  private def expression[X] = {
+    DSL.dslContext.value.root.get[X](fieldName)
+  }
+
+  override def sum: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         DSL.dslContext.value.builder.sum(expression).asInstanceOf[Selection[X]]
       }
     }
   }
-
 
   override def max: SelectionField = {
     new SelectionField {
@@ -134,21 +163,26 @@ private[activerecord] class JPAField[+T : TypeTag](val fieldName:String)  extend
     }
   }
 
+  override def toSelection[X]: Selection[X] = {
+    DSL.dslContext.value.root.get[X](fieldName)
+  }
+
   override def ~=?[B >: T](value: B): UpdateField = {
-    updater =>{
-      if(value != null) updater.set(this.fieldName,value)
+    updater => {
+      if (value != null) updater.set(this.fieldName, value)
       else updater
     }
   }
 
   override def ~=[B >: T](value: B): UpdateField = {
-    updater =>{
-      updater.set(this.fieldName,value)
+    updater => {
+      updater.set(this.fieldName, value)
     }
   }
 }
-class NumericField[T](field:Field[T]){
-  def avg:SelectionField = {
+
+class NumericField[T](field: Field[T]) {
+  def avg: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
@@ -156,7 +190,8 @@ class NumericField[T](field:Field[T]){
       }
     }
   }
-  def max:SelectionField={
+
+  def max: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
@@ -164,7 +199,8 @@ class NumericField[T](field:Field[T]){
       }
     }
   }
-  def min:SelectionField={
+
+  def min: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
@@ -172,7 +208,8 @@ class NumericField[T](field:Field[T]){
       }
     }
   }
-  def sum:SelectionField={
+
+  def sum: SelectionField = {
     new SelectionField {
       override def toSelection[X]: Selection[X] = {
         val expression = DSL.dslContext.value.root.get[Number](field.fieldName)
@@ -181,33 +218,9 @@ class NumericField[T](field:Field[T]){
     }
   }
 }
-class StringField(field:Field[String]){
-  def like(value: String): Condition = Condition.like(field,value)
-  def notLike(value: String): Condition = Condition.notLike(field,value)
-}
-class DateTimeField(field:Field[DateTime]){
-  /*
-  def >(value:DateTime):Condition={
-    Condition.gt(field,value)
-  }
-  def <(value:DateTime):Condition={
-    Condition.lt(field,value)
-  }
-   */
-}
-class EnumerationField[T<: Enumeration#Value](field:Field[T]){
-  /*
-  def >(value:T):Condition={
-    Condition.gt(field,value)
-  }
-  def >=(value:T):Condition={
-    Condition.ge(field,value)
-  }
-  def <(value:T):Condition={
-    Condition.lt(field,value)
-  }
-  def <= (value:T):Condition={
-    Condition.le(field,value)
-  }
-   */
+
+class StringField(field: Field[String]) {
+  def like(value: String): Condition = Condition.like(field, value)
+
+  def notLike(value: String): Condition = Condition.notLike(field, value)
 }

@@ -18,6 +18,7 @@ import stark.activerecord.config.{ActiveRecordConfigSupport, JpaProperty}
 import stark.activerecord.services.{ActiveRecord, ActiveRecordInstance}
 
 import java.io.File
+import java.time.ZonedDateTime
 import javax.persistence._
 import javax.sql.DataSource
 import scala.reflect.{ClassTag, classTag}
@@ -77,6 +78,7 @@ class ModelA extends ActiveRecord with BaseModeA{
   @Column(name = "CASE_OCCUR_DATE", length = 23)
   var date:java.util.Date = _
   var i:java.lang.Integer = _
+  var zonedDateTime:ZonedDateTime = _
 }
 @MappedSuperclass
 trait BaseModeA{

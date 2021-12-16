@@ -5,6 +5,7 @@ import stark.activerecord.services.DSL._
 import stark.activerecord.services.Field.wrapNumericField
 import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
 
+import java.time.ZonedDateTime
 import javax.persistence.EntityManager
 import javax.persistence.criteria.{Expression, Predicate, Selection}
 import scala.language.postfixOps
@@ -16,6 +17,17 @@ import scala.language.postfixOps
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
+  @Test //测试引用字段
+  def test_zonedDateTime:Unit={
+    val modelA = new ModelA
+    modelA.zonedDateTime = ZonedDateTime.now()
+    modelA.save()
+
+    val result = ModelA.where(ModelA.zonedDateTime <= ZonedDateTime.now()).toList
+    Assert.assertTrue(result.nonEmpty)
+    println(result.head.zonedDateTime)
+
+  }
   @Test //测试引用字段
   def test_fieldRef:Unit={
     ModelA.where(ModelA.seq === ModelA.l).toList
