@@ -1,6 +1,6 @@
 package stark.activerecord.services
 
-import javax.persistence.criteria.{Path, Predicate}
+import javax.persistence.criteria.{CriteriaBuilder, Expression, Path, Predicate}
 import stark.activerecord.services.Condition._
 
 import scala.language.implicitConversions
@@ -15,7 +15,9 @@ object Condition{
   implicit def conditionToPredicate(condition:Condition):Predicate = condition.toPredicate
   implicit def predicateToCondition(predicate: Predicate):Condition= new PredicateCondition(predicate)
 
-  private def findFieldPath[T](name:String):Path[T]={
+  type ExpressionBuilder[T] = (CriteriaBuilder) =>Expression[T]
+
+  private[activerecord] def findFieldPath[T](name:String):Path[T]={
     if(DSL.joinContext.value != null){
       DSL.joinContext.value.join.get(name)
     }else{
@@ -33,13 +35,25 @@ object Condition{
       path.asInstanceOf[Path[T]]
     }
   }
+  def plus[T](fields:Field[T]*):ExpressionBuilder[java.lang.Number]={
+    (builder:CriteriaBuilder)=>{
+      fields.toList match{
+        case head::rest=>
+          rest.foldLeft[Expression[java.lang.Number]](head.getExpression(DSL.dslContext.value.builder).asInstanceOf[Expression[java.lang.Number]]){ (result, field)=>
+            builder.sum(result,field.getExpression(DSL.dslContext.value.builder).asInstanceOf[Expression[java.lang.Number]])
+          }
+        case _ =>
+          throw new IllegalArgumentException("fields is empty")
+      }
+    }
+  }
   def eq[T](field:Field[T],value:T): Condition ={
     new PredicateCondition(
       value match{
         case v:Field[_] =>
-          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName), findFieldPath(v.fieldName))
+          DSL.dslContext.value.builder.equal(field.getExpression(DSL.dslContext.value.builder), v.getExpression(DSL.dslContext.value.builder))
         case _ =>
-          DSL.dslContext.value.builder.equal(findFieldPath(field.fieldName),value)
+          DSL.dslContext.value.builder.equal(field.getExpression(DSL.dslContext.value.builder),value)
       }
     )
   }
@@ -47,9 +61,9 @@ object Condition{
     new PredicateCondition(
       value match{
         case v:Field[_]=>
-          DSL.dslContext.value.builder.notEqual( findFieldPath(field.fieldName), findFieldPath(v.fieldName))
+          DSL.dslContext.value.builder.notEqual( field.getExpression(DSL.dslContext.value.builder), v.getExpression(DSL.dslContext.value.builder))
         case _ =>
-          DSL.dslContext.value.builder.notEqual(findFieldPath(field.fieldName),value)
+          DSL.dslContext.value.builder.notEqual(field.getExpression(DSL.dslContext.value.builder),value)
       }
     )
   }
@@ -57,11 +71,11 @@ object Condition{
     new PredicateCondition(
       value match{
         case v:Field[_] =>
-          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
+          DSL.dslContext.value.builder.gt(field.getExpression(DSL.dslContext.value.builder),v.getExpression(DSL.dslContext.value.builder))
         case v:Number =>
-          DSL.dslContext.value.builder.gt(findFieldPath(field.fieldName),v)
+          DSL.dslContext.value.builder.gt(field.getExpression(DSL.dslContext.value.builder),v)
         case other:Comparable[Any] =>
-          DSL.dslContext.value.builder.greaterThan(findFieldPath(field.fieldName),other)
+          DSL.dslContext.value.builder.greaterThan(field.getExpression(DSL.dslContext.value.builder),other)
       }
     )
   }
@@ -69,11 +83,11 @@ object Condition{
     new PredicateCondition(
       value match{
         case v:Field[_] =>
-          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
+          DSL.dslContext.value.builder.ge(field.getExpression(DSL.dslContext.value.builder),v.getExpression(DSL.dslContext.value.builder))
         case v:Number =>
-          DSL.dslContext.value.builder.ge(findFieldPath(field.fieldName),v)
+          DSL.dslContext.value.builder.ge(field.getExpression(DSL.dslContext.value.builder),v)
         case other:Comparable[Any] =>
-          val expression:Path[Comparable[Any]] = findFieldPath(field.fieldName) //.as(classOf[T])
+          val expression:Path[Comparable[Any]] = field.getExpression(DSL.dslContext.value.builder).asInstanceOf[Path[Comparable[Any]]]
           DSL.dslContext.value.builder.greaterThanOrEqualTo(expression,other)
       }
     )
@@ -82,11 +96,11 @@ object Condition{
     new PredicateCondition(
       value match {
         case v:Field[_]=>
-          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
+          DSL.dslContext.value.builder.lt(field.getExpression(DSL.dslContext.value.builder),v.getExpression(DSL.dslContext.value.builder))
         case v:Number =>
-          DSL.dslContext.value.builder.lt(findFieldPath(field.fieldName),v)
+          DSL.dslContext.value.builder.lt(field.getExpression(DSL.dslContext.value.builder),v)
         case other:Comparable[Any] =>
-          DSL.dslContext.value.builder.lessThan(findFieldPath(field.fieldName),other)
+          DSL.dslContext.value.builder.lessThan(field.getExpression(DSL.dslContext.value.builder),other)
       }
     )
   }
@@ -94,22 +108,22 @@ object Condition{
   def le[T](field:Field[T],value:T): Condition={
     new PredicateCondition(
       value match {
-        case v:Field[_]=> DSL.dslContext.value.builder.le(findFieldPath(field.fieldName),findFieldPath(v.fieldName))
+        case v:Field[_]=> DSL.dslContext.value.builder.le(field.getExpression(DSL.dslContext.value.builder),v.getExpression(DSL.dslContext.value.builder))
         case v: Number =>
-          DSL.dslContext.value.builder.le(findFieldPath(field.fieldName), v)
+          DSL.dslContext.value.builder.le(field.getExpression(DSL.dslContext.value.builder), v)
         case other: Comparable[Any] =>
-          DSL.dslContext.value.builder.lessThanOrEqualTo(findFieldPath(field.fieldName), other)
+          DSL.dslContext.value.builder.lessThanOrEqualTo(field.getExpression(DSL.dslContext.value.builder), other)
       }
     )
   }
   def notNull[T](field:Field[T]):Condition={
     new PredicateCondition(
-      DSL.dslContext.value.builder.isNotNull(findFieldPath(field.fieldName))
+      DSL.dslContext.value.builder.isNotNull(field.getExpression(DSL.dslContext.value.builder))
     )
   }
   def isNull[T](field:Field[T]):Condition={
     new PredicateCondition(
-      DSL.dslContext.value.builder.isNull(findFieldPath(field.fieldName))
+      DSL.dslContext.value.builder.isNull(field.getExpression(DSL.dslContext.value.builder))
     )
   }
   def between[T<:Comparable[T]](field:Field[T],v1:T,v2:T):Condition={

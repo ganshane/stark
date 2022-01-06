@@ -5,7 +5,8 @@ import stark.activerecord.services.DSL._
 import stark.activerecord.services.Field.wrapNumericField
 import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
 
-import java.time.ZonedDateTime
+import java.time.{LocalTime, ZonedDateTime}
+import java.time.temporal.TemporalAdjusters
 import javax.persistence.EntityManager
 import javax.persistence.criteria.{Expression, Predicate, Selection}
 import scala.language.postfixOps
@@ -17,15 +18,41 @@ import scala.language.postfixOps
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
+  @Test
+  def test_sum_expression: Unit ={
+    Range(0,5).foreach(i=>{
+      val modelA = new ModelA
+      modelA.i = 12
+      modelA.l = 1
+      modelA.save()
+    })
+
+    val result  = ModelA.where(ModelA.i + ModelA.l === 13 ).toList
+    Assert.assertEquals(5,result.size)
+    val result2  = ModelA.where(ModelA.i + ModelA.l + ModelA.l === 14 ).toList
+    Assert.assertEquals(5,result2.size)
+    val result3  = ModelA.where(ModelA.i + ModelA.l + ModelA.l > ModelA.i).toList
+    Assert.assertEquals(5,result3.size)
+    val result4  = ModelA.where(ModelA.i + ModelA.l + ModelA.l < ModelA.i).toList
+    Assert.assertEquals(0,result4.size)
+  }
   @Test //测试引用字段
   def test_zonedDateTime:Unit={
     val modelA = new ModelA
     modelA.zonedDateTime = ZonedDateTime.now()
     modelA.save()
 
-    val result = ModelA.where(ModelA.zonedDateTime <= ZonedDateTime.now()).toList
+    val max = LocalTime.MAX
+    val beginTime = ZonedDateTime.now().minusDays(1).withHour(max.getHour).withMinute(max.getMinute).withSecond(max.getSecond).withNano(max.getNano)
+    val min = LocalTime.MIN
+    val endTime = ZonedDateTime.now().plusDays(1).withHour(min.getHour).withMinute(min.getMinute).withSecond(min.getSecond).withNano(min.getNano)
+
+    val result:Iterable[ModelA]  = ModelA.where(ModelA.zonedDateTime > beginTime and ModelA.zonedDateTime < endTime)
+    Assert.assertEquals(1,result.size)
     Assert.assertTrue(result.nonEmpty)
-    println(result.head.zonedDateTime)
+    val result2:Iterable[ModelA] = select[ModelA].where(ModelA.zonedDateTime > modelA.zonedDateTime.minusDays(1) and ModelA.zonedDateTime < ZonedDateTime.now())
+    Assert.assertEquals(1,result2.size)
+    Assert.assertTrue(result2.nonEmpty)
 
   }
   @Test //测试引用字段

@@ -1,6 +1,7 @@
 package stark.activerecord.services
 
 
+import stark.activerecord.services.Condition.ExpressionBuilder
 import stark.activerecord.services.DSL.UpdateField
 
 import javax.persistence.criteria.Selection
@@ -35,7 +36,11 @@ trait Field[+A] extends SelectionField {
 
   def ===(value: Field[Any]): Condition
 
-  def <[B >: A](value: B): Condition
+  def +(value: Field[Any]): CompositeField[java.lang.Number]
+
+  private [activerecord] def getExpression[T]:ExpressionBuilder[T]
+
+    def <[B >: A](value: B): Condition
 
   def <=[B >: A](value: B): Condition
 
@@ -90,6 +95,9 @@ trait DistinctSelectionField extends SelectionField {
 
 case class SortField[T](field: Field[T], isAsc: Boolean = true)
 
+private[activerecord] class CompositeField[A](expressionBuilder: ExpressionBuilder[A]) extends JPAField(null) {
+  override private[activerecord] def getExpression[T] = expressionBuilder.asInstanceOf[ExpressionBuilder[T]]
+}
 private[activerecord] class JPAField[+T: TypeTag](val fieldName: String) extends Field[T] {
   override def ===[B >: T](value: B): Condition = {
     Condition.eq(this, value)
@@ -97,6 +105,15 @@ private[activerecord] class JPAField[+T: TypeTag](val fieldName: String) extends
 
   override def ===(value: Field[Any]): Condition = {
     Condition.eq(this, value)
+  }
+
+
+  override private[activerecord] def getExpression[A]:ExpressionBuilder[A] = {
+    builder => Condition.findFieldPath(fieldName)
+  }
+
+  override def +(value: Field[Any]): CompositeField[java.lang.Number] = {
+    new CompositeField(Condition.plus(this, value))
   }
 
   override def <[B >: T](value: B): Condition = Condition.lt(this, value)
