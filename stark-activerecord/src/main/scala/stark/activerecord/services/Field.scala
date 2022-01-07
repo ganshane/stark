@@ -37,6 +37,7 @@ trait Field[+A] extends SelectionField {
   def ===(value: Field[Any]): Condition
 
   def +(value: Field[Any]): CompositeField[java.lang.Number]
+  def -(value: Field[Any]): CompositeField[java.lang.Number]
 
   private [activerecord] def getExpression[T]:ExpressionBuilder[T]
 
@@ -114,6 +115,11 @@ private[activerecord] class JPAField[+T: TypeTag](val fieldName: String) extends
 
   override def +(value: Field[Any]): CompositeField[java.lang.Number] = {
     new CompositeField(Condition.plus(this, value))
+  }
+
+
+  override def -(value: Field[Any]): CompositeField[Number] = {
+    new CompositeField(Condition.minus(this, value))
   }
 
   override def <[B >: T](value: B): Condition = Condition.lt(this, value)

@@ -35,6 +35,18 @@ object Condition{
       path.asInstanceOf[Path[T]]
     }
   }
+  def minus[T](fields:Field[T]*):ExpressionBuilder[java.lang.Number]={
+    (builder:CriteriaBuilder)=>{
+      fields.toList match{
+        case head::rest=>
+          rest.foldLeft[Expression[java.lang.Number]](head.getExpression(DSL.dslContext.value.builder).asInstanceOf[Expression[java.lang.Number]]){ (result, field)=>
+            builder.diff(result,field.getExpression(DSL.dslContext.value.builder).asInstanceOf[Expression[java.lang.Number]])
+          }
+        case _ =>
+          throw new IllegalArgumentException("fields is empty")
+      }
+    }
+  }
   def plus[T](fields:Field[T]*):ExpressionBuilder[java.lang.Number]={
     (builder:CriteriaBuilder)=>{
       fields.toList match{

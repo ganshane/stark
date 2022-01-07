@@ -35,6 +35,9 @@ class DSLTest extends BaseActiveRecordTestCase{
     Assert.assertEquals(5,result3.size)
     val result4  = ModelA.where(ModelA.i + ModelA.l + ModelA.l < ModelA.i).toList
     Assert.assertEquals(0,result4.size)
+
+    val result5  = ModelA.where(ModelA.i - ModelA.l + ModelA.l === ModelA.i).toList
+    Assert.assertEquals(5,result5.size)
   }
   @Test //测试引用字段
   def test_zonedDateTime:Unit={
