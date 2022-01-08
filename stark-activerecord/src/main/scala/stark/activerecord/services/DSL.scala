@@ -3,6 +3,7 @@ package stark.activerecord.services
 import stark.activerecord.macroinstruction.ActiveRecordMacroDefinition
 import stark.activerecord.services.DSL.{DSLExecuteQuery, DSLSelectionQuery, JoinQueryContext, QueryContext, UpdateField}
 
+import javax.persistence.Tuple
 import javax.persistence.criteria._
 import scala.collection.immutable.ArraySeq.unsafeWrapArray
 import scala.jdk.CollectionConverters.ListHasAsScala
@@ -46,6 +47,16 @@ object DSL {
     implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
 
     new SelectStep[T,T](clazz)
+  }
+  def multiSelect[T:ClassTag](selection:Class[_]*):SelectStep[T,Tuple]={
+    lazy val clazz = classTag[T].runtimeClass.asInstanceOf[Class[T]]
+    lazy val queryBuilder = ActiveRecord.entityManager.getCriteriaBuilder
+    lazy val query  = queryBuilder.createTupleQuery
+    query.multiselect(selection.map(x=>query.from(x)):_*)
+    lazy val root = query.from(clazz)
+    implicit lazy val queryContext = QueryContext(queryBuilder,query,root)
+
+    new SelectStep[T,Tuple](clazz)
   }
 
   /**

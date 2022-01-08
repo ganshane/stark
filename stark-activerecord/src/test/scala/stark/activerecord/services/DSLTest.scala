@@ -8,7 +8,7 @@ import stark.activerecord.{BaseActiveRecordTestCase, ModelA, ModelB}
 import java.time.{LocalTime, ZonedDateTime}
 import java.time.temporal.TemporalAdjusters
 import javax.persistence.EntityManager
-import javax.persistence.criteria.{Expression, Predicate, Selection}
+import javax.persistence.criteria.{CriteriaQuery, Expression, Predicate, Root, Selection}
 import scala.language.postfixOps
 
 /**
@@ -18,6 +18,31 @@ import scala.language.postfixOps
  * @since 2016-03-09
  */
 class DSLTest extends BaseActiveRecordTestCase{
+  @Test
+  def test_join: Unit ={
+    Range(0,5).foreach(i=>{
+      val modelA = new ModelA
+      modelA.i = 12
+      modelA.l = 1
+      modelA.save()
+      val modelb = new ModelB
+      modelb.id = modelA.id
+      modelb.testId = modelA.id
+      modelb.save()
+    })
+
+    val coll = DSL.multiSelect[ModelA](classOf[ModelA],classOf[ModelB]).where(ModelA.i + ModelA.l === 13 )
+    coll.and(ModelA.buildCondition(context=>{
+      val cb = context.builder
+      val root = context.root
+      val query = context.query.asInstanceOf[CriteriaQuery[ModelA]]
+      val userFollowRoot = query.from(classOf[ModelB])
+      cb.equal(root.get("id"),userFollowRoot.get("testId"))
+    }))
+
+    val list = coll.toList
+    println(list.size)
+  }
   @Test
   def test_sum_expression: Unit ={
     Range(0,5).foreach(i=>{
