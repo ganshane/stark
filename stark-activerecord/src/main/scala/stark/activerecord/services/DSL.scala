@@ -221,6 +221,10 @@ private[activerecord] trait OrderByClause {
     orderBy(field.asc)
     this
   }
+  def orderBy(orderBuilder:QueryContext=>Order):this.type={
+    context.query.asInstanceOf[CriteriaQuery[_]].orderBy(orderBuilder(context))
+    this
+  }
   def orderBy[T](field: SortField[T]): this.type ={
     val fieldPaths = field.field.fieldName.split("\\.")
     val finalPath =

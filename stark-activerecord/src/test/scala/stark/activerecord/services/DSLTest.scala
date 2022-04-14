@@ -39,6 +39,22 @@ class DSLTest extends BaseActiveRecordTestCase{
     val result5  = ModelA.where(ModelA.i - ModelA.l + ModelA.l === ModelA.i).toList
     Assert.assertEquals(5,result5.size)
   }
+  @Test
+  def test_orderByBuilder: Unit ={
+    val modelA = new ModelA
+    modelA.zonedDateTime = ZonedDateTime.now()
+    modelA.l = 1L
+    modelA.i = 2
+    modelA.save()
+
+    val coll = ModelA.where.orderBy(context=>{
+      val cb = context.builder
+      val r = context.root
+      cb.asc(cb.prod(r.get("l"), r.get("i")))
+    })
+
+    Assert.assertEquals(1,coll.size)
+  }
   @Test //测试引用字段
   def test_zonedDateTime:Unit={
     val modelA = new ModelA
