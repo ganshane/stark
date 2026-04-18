@@ -340,6 +340,72 @@ object PostgresqlTestDatabase
     new PostgresqlDatabaseAdapter(Some(getSchemaName))
   }
 }
+
+/**
+ * Dameng test database implementation. Enabled when the Java
+ * "scala-migrations.db.vendor" property is set to "dameng".
+ *
+ * Assumes the following setup:
+ *
+ * 1) A user named "SYSDBA" with password "SYSDBA" exists.
+ * 2) The target schema/user to test against already exists.
+ * 3) The unit tests are performed in the configured schema.
+ *
+ * To override the defaults, set any of the following Java properties:
+ *
+ *   "scala-migrations.db.db": database/service name ("DAMENG")
+ *   "scala-migrations.db.schema": schema name to test with ("SYSDBA")
+ *   "scala-migrations.db.admin.name": admin user username ("SYSDBA")
+ *   "scala-migrations.db.admin.passwd": admin user password ("SYSDBA")
+ *   "scala-migrations.db.user.name": plain user username ("SYSDBA")
+ *   "scala-migrations.db.user.passwd": plain user password ("SYSDBA")
+ */
+object DamengTestDatabase
+    extends TestDatabase {
+  private val adminUsername = {
+    System.getProperty(TestDatabase.adminUserNameProperty, "SYSDBA")
+  }
+
+  override def getAdminAccountName = adminUsername
+
+  private val adminPassword = {
+    System.getProperty(TestDatabase.adminUserPasswordProperty, "SYSDBA")
+  }
+
+  private val userUsername = {
+    System.getProperty(TestDatabase.userUserNameProperty, adminUsername)
+  }
+
+  override def getUserAccountName = userUsername
+
+  private val userPassword = {
+    System.getProperty(TestDatabase.userUserPasswordProperty, adminPassword)
+  }
+
+  override def getSchemaName: String = {
+    System.getProperty(TestDatabase.schemaNameProperty, adminUsername)
+  }
+
+  private val url = {
+    "jdbc:dm://localhost:5236/" +
+      System.getProperty(TestDatabase.databaseNameProperty, "DAMENG")
+  }
+
+  Class.forName("dm.jdbc.driver.DmDriver")
+
+  override def getAdminConnectionBuilder: ConnectionBuilder = {
+    new ConnectionBuilder(url, adminUsername, adminPassword)
+  }
+
+  override def getUserConnectionBuilder: ConnectionBuilder = {
+    new ConnectionBuilder(url, userUsername, userPassword)
+  }
+
+  override def getDatabaseAdapter: DatabaseAdapter = {
+    new DamengDatabaseAdapter(Some(getSchemaName))
+  }
+}
+
 object H2TestDatabase
   extends TestDatabase {
   // Username of the admin account, which will be the owner of the
@@ -425,6 +491,8 @@ object TestDatabase
         DerbyTestDatabase
       case "mysql" =>
         MysqlTestDatabase
+      case "dameng" =>
+        DamengTestDatabase
       case "postgresql" =>
         PostgresqlTestDatabase
       case "h2" =>

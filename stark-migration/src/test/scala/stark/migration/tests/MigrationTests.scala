@@ -368,6 +368,7 @@ class MigrationTests {
           case Derby => false
           case Mysql => true
           case Oracle => false
+          case Dameng => false
           case Postgresql => false
           case H2 => true
         }

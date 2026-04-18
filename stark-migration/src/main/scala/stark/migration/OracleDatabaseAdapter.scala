@@ -155,7 +155,7 @@ class OracleVarcharColumnDefinition(useNcharType: Boolean)
 
 class OracleDatabaseAdapter(override val schemaNameOpt: Option[String])
     extends DatabaseAdapter(schemaNameOpt) {
-  override val vendor = Oracle
+  override val vendor: Vendor = Oracle
 
   override val quoteCharacter = '"'
 
@@ -373,4 +373,3 @@ class OracleDatabaseAdapter(override val schemaNameOpt: Option[String])
     sb.toString()
   }
 }
-

@@ -61,6 +61,9 @@ object DatabaseAdapter {
       case Oracle =>
         new OracleDatabaseAdapter(schemaNameOpt)
 
+      case Dameng =>
+        new DamengDatabaseAdapter(schemaNameOpt)
+
       case Postgresql =>
         new PostgresqlDatabaseAdapter(schemaNameOpt)
 

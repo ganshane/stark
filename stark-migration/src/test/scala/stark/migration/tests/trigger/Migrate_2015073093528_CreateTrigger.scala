@@ -26,6 +26,10 @@ class Migrate_2015073093528_CreateTrigger
         addTrigger(tableName,"test_trigger",Before,Update,When("NEW.User_ID is NULL")){
           "NULL"
         }
+      case Dameng =>
+        addTrigger(tableName,"test_trigger",Before,Update,When("NEW.User_ID is NULL")){
+          "NULL"
+        }
       case H2 =>
         addTrigger(tableName,"test_trigger",Before,Update,ForEachRow){
           "CALL \"%s\" ".format(classOf[MyTrigger].getName)
@@ -38,6 +42,8 @@ class Migrate_2015073093528_CreateTrigger
   def down(): Unit = {
     databaseVendor match{
       case Oracle =>
+        dropTrigger("test_trigger")
+      case Dameng =>
         dropTrigger("test_trigger")
       case other=>
     }

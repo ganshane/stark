@@ -44,6 +44,7 @@ class Migrate_20121104011043_CheckVendor
       case Derby =>
       case Mysql =>
       case Oracle =>
+      case Dameng =>
       case Postgresql =>
       case H2 =>
       case v => throw new AssertionError("Database vendor '" +

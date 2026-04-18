@@ -16,7 +16,8 @@ package stark.migration
  */
 object SchemaDumper {
   def main(args:Array[String]): Unit ={
-    val driver = "oracle.jdbc.driver.OracleDriver"
+    val driver = System.getProperty("dump.jdbc.driver",
+      "oracle.jdbc.driver.OracleDriver")
     val url = System.getProperty("dump.jdbc.url")
     val user = System.getProperty("dump.jdbc.user")
     val pass = System.getProperty("dump.jdbc.pass")

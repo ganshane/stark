@@ -51,6 +51,9 @@ class DatabaseAdapterTests {
     assertEquals(classOf[OracleDatabaseAdapter],
       DatabaseAdapter.forVendor(Oracle, None).getClass)
 
+    assertEquals(classOf[DamengDatabaseAdapter],
+      DatabaseAdapter.forVendor(Dameng, None).getClass)
+
     assertEquals(classOf[PostgresqlDatabaseAdapter],
       DatabaseAdapter.forVendor(Postgresql, None).getClass)
 
@@ -65,7 +68,7 @@ class DatabaseAdapterTests {
 
   @Test
   def roundTrip() {
-    for (vendor <- List(Derby, Mysql, Postgresql, Oracle)) {
+    for (vendor <- List(Derby, Mysql, Postgresql, Oracle, Dameng)) {
       val adapter = DatabaseAdapter.forVendor(vendor, None)
       assertSame(vendor, adapter.vendor)
     }

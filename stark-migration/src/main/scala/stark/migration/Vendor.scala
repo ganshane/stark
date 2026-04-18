@@ -47,6 +47,8 @@ case object Mysql
   extends Vendor
 case object Oracle
   extends Vendor
+case object Dameng
+  extends Vendor
 case object Postgresql
   extends Vendor
 case object H2
@@ -72,6 +74,9 @@ object Vendor {
 
       case "oracle.jdbc.OracleDriver" =>
         Oracle
+
+      case "dm.jdbc.driver.DmDriver" =>
+        Dameng
 
       case "org.apache.derby.jdbc.EmbeddedDriver" =>
         Derby

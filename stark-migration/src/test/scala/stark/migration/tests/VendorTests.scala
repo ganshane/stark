@@ -55,6 +55,9 @@ class VendorTests {
     assertSame(Oracle,
       Vendor.forDriver("oracle.jdbc.OracleDriver"))
 
+    assertSame(Dameng,
+      Vendor.forDriver("dm.jdbc.driver.DmDriver"))
+
     assertSame(Postgresql,
       Vendor.forDriver("org.postgresql.Driver"))
 
